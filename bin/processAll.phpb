@@ -1,0 +1,355 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012 Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+require('../etc/config.php');
+require($diary_config["path"].'/lib/xml.php');
+require($diary_config["path"].'/lib/utils.php');
+
+error_reporting(E_ALL ^ E_DEPRECATED);
+
+safetyCheck();
+
+declare(ticks = 1);
+
+pcntl_signal(SIGALRM, "alarm", false);
+
+$ns['event']	= 'http://purl.org/NET/c4dm/event.owl#';
+$ns['rdfs']	= 'http://www.w3.org/2000/01/rdf-schema#';
+$ns['rdf']	= 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+$ns['tl']	= 'http://purl.org/NET/c4dm/timeline.owl#';
+$ns['geo']	= 'http://www.w3.org/2003/01/geo/wgs84_pos#';
+$ns['foaf']	= 'http://xmlns.com/foaf/0.1/';
+$ns['dcterms']	= 'http://purl.org/dc/terms/';
+$ns['diary']	= 'http://id.southampton.ac.uk/ns/diary/';
+$ns['deri']	= 'http://vocab.deri.ie/rooms#';
+
+if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
+	$c = array_flip(fgetcsv($handle, 1000, ","));
+
+	while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+		$options = array();
+		foreach($c as $key => $id)
+		{
+			if($key != 'Script')
+			{
+				$options[preg_replace('/[^A-Za-z]/', '', $key)] = @$data[$id];
+			}
+		}
+		processFeed($data[$c['Script']], $options);
+	}
+	fclose($handle);
+}
+
+function processFeed($script, $options)
+{
+	$id = $options['FeedID'];
+	printInfo();
+	if($script == "")
+	{
+		printInfo("Unable to process $id.  No script set.");
+		return;
+	}
+	printInfo("Processing $id");
+	printInfo("Script: $script");
+	if($script == "Nuffield")
+	{
+		$limit = 180;
+	}
+	else
+	{
+		$limit = 30;
+	}
+
+	if(preg_match('/^[A-Za-z0-9]+$/', $script))
+	{
+		$pid = pcntl_fork();
+		safetyCheck();
+		if ($pid == -1) {
+			printInfo("Could not fork", true);
+			die();
+		} else if ($pid) {
+			// we are the parent
+			runParent($pid, $limit, $options);
+		} else {
+			// we are the child
+			$code = runChild($script, $options);
+			// exit, to ensure that this child goes no further
+			exit($code);
+		}
+	}
+}
+
+function runParent($pid, $limit = 30, $options) {
+	global $gpid;
+	global $gfeedid;
+	// we are the parent
+	// store the PID of the child
+	$gpid = $pid;
+	$gfeedid = $options['FeedID'];
+	// set an alarm, to limit the execution time
+	pcntl_alarm($limit);
+	// wait for the child to return
+	$cid = pcntl_waitpid($pid, $status);
+	// check whether the child returned correctly
+	if($cid > 0) {
+		if(pcntl_wifexited($status) && pcntl_wexitstatus($status) > 0)
+		{
+			printInfo("Script for $gfeedid exited with status ".pcntl_wexitstatus($status), true);
+		}
+		if(pcntl_wifsignaled($status))
+		{
+			printInfo("Script for $gfeedid signalled with signal ".pcntl_wtermsig($status), true);
+		}
+		if(pcntl_wifstopped($status))
+		{
+			printInfo("Script for $gfeedid stopped with signal ".pcntl_wstopsig($status), true);
+		}
+	}
+}
+
+function runChild($script, $options) {
+	global $fh;
+	global $diary_config;
+
+	$optionsxml = generate_xml_from_array($options, 'options');
+	$optionsxml = '<options>'.$optionsxml.'</options>';
+	$cmd = $diary_config["path"].'/bin/scripts/'.$script.' -o '.escapeshellarg($optionsxml);
+	printInfo($cmd);
+	exec($cmd, $output);
+	$xml = simplexml_load_string(implode("\n", $output));
+	if($xml == null)
+	{
+		printInfo("Bad response from ".$options['FeedID']." script: ".implode("", $output), true);
+		logError("Bad response from script: ".implode("", $output), $options['FeedID']);
+		return 1;
+	}
+	$eventcount = count($xml->event);
+	if($eventcount == 0)
+	{
+		printInfo("No events found while processing ".$options['FeedID']);
+		logError(strtoupper("No events found"), $options['FeedID']);
+	}
+	else if($eventcount == 1)
+	{
+		printInfo("1 event found while processing ".$options['FeedID']);
+	}
+	else
+	{
+		printInfo("$eventcount events found while processing ".$options['FeedID']);
+	}
+	if($xml->event != null)
+	{
+		$safeid = preg_replace('/[^A-Za-z0-9]/', '', $options['FeedID']);
+		$fh = fopen($diary_config["path"].'/var/output/'.$safeid, 'w');
+		foreach($xml->event as $event)
+		{
+			processEvent($event, $options['FeedID']);
+		}
+		fclose($fh);
+	}
+	return 0;
+}
+
+function printInfo($str="", $force=false) {
+	if($force || getopt('v')) {
+		echo $str."\n";
+	}
+}
+
+function alarm($signo) {
+	global $gpid;
+	global $gfeedid;
+	if($gpid > 0)
+	{
+		printInfo("Going to terminate script for $gfeedid", true);
+		if(posix_kill($gpid, SIGKILL))
+		{
+			printInfo("Script for $gfeedid killed successfully", true);
+		}
+		else
+		{
+			printInfo("Failed to kill script for $gfeedid", true);
+			die();
+		}
+	}
+}
+
+// This script ensures that no new threads can be created after the script has run for 10 minutes.
+// (Assumes that the script is 'touch'ed before being run.)
+function safetyCheck() {
+	global $diary_config;
+	$scriptage = time() - filemtime($diary_config["path"].'/bin/processAll.phpb');
+	if($scriptage > 60*10)
+	{
+		printInfo("script is too old (age=$scriptage seconds), exiting for safety", true);
+		die();
+	}
+}
+
+function writeToFile($string) {
+	global $fh;
+	fwrite($fh, $string."\n");
+}
+
+function tripleU($s, $p, $o) {
+	writeToFile("<$s> <$p> <$o> .");
+}
+
+function tripleL($s, $p, $o) {
+/*
+	$o = preg_replace('/\xc3\xa4/', '&auml;', $o);
+	$o = preg_replace('/\xc3\xa9/', '&eacute;', $o);
+	$o = preg_replace('/\xc3\xbc/', '&uuml;', $o);
+	$o = preg_replace('/\xc2\xa3/', '&pound;', $o);
+	$o = preg_replace('/\xe2\x80\x93/', '-', $o);
+	$o = preg_replace('/\xe2\x80\x94/', '-', $o);
+	$o = preg_replace('/\xe2\x80\x98/', '\'', $o);
+	$o = preg_replace('/\xe2\x80\x99/', '\'', $o);
+	$o = preg_replace('/\xe2\x80\x9c/', '"', $o);
+	$o = preg_replace('/\xe2\x80\x9d/', '"', $o);
+*/
+	//$o = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\xFF]/u', '', $o);
+	writeToFile("<$s> <$p> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($o, " "))."\" .");
+}
+
+function tripleA($s, $o) {
+	tripleU($s, ns("rdf", "type"), $o);
+}
+
+function ns($prefix, $e) {
+	global $ns;
+	if(isset($ns[$prefix]))
+	{
+		return $ns[$prefix].$e;
+	}
+	else
+	{
+		return $prefix.":".$e;
+	}
+}
+
+function processEvent($event, $feedid)
+{
+	if(trim($event->link) == "")
+	{
+		printInfo("Event with name ".str_replace("\n", "", $event->title)." has no link.");
+		logError("Event with name ".str_replace("\n", "", $event->title)." has no link.", $feedid);
+		return;
+	}
+	$uri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
+
+	// Process basic info
+	tripleA($uri, ns("event", "Event"));
+	tripleA($uri, ns("diary", "Event"));
+	tripleL($uri, ns("rdfs", "label"), str_replace("\n", "", $event->title));
+	tripleL($uri, ns("dcterms", "description"), $event->desc);
+	tripleU($uri, ns("event", "homepage"), $event->link);
+
+	// Process event type
+	if(isset($event->type))
+	{
+		tripleU($uri, ns("diary", "event-type"), ns("diary", $event->type));
+	}
+
+	// Process host
+	if(isset($event->host) && $event->host != "")
+	{
+		tripleU($uri, ns("event", "agent"), $event->host);
+	}
+
+	// Process tags
+	if(isset($event->tags))
+	{
+		foreach($event->tags->event as $tag)
+		{
+			tripleU($uri, ns("diary", "tag"), ns("diary", $tag));
+		}
+	}
+
+	// Process dates
+	$i = 0;
+	foreach($event->date->event as $d)
+	{
+		$i++;
+		// The event has a 'from' datetime
+		if(isset($d->from))
+		{
+			tripleU($uri, ns("event", "time"), "$uri#time-$i");
+			tripleA("$uri#time-$i", ns("tl", "Interval"));
+			tripleL("$uri#time-$i", ns("tl", "start"), $d->from);
+			// The event also has a 'to' datetime
+			if(isset($d->to))
+			{
+				tripleL("$uri#time-$i", ns("tl", "end"), $d->to);
+				//tripleL("$uri#time-$i", ns("rdfs", "label"), $d->from." - ".$d->to);
+			}
+			//else
+			//{
+			//	tripleL("$uri#time-$i", ns("rdfs", "label"), $d->from);
+			//}
+		}
+		// The event has a simple 'date' (with no time)
+		elseif(isset($d->date))
+		{
+			tripleU($uri, ns("event", "time"), "$uri#time-$i");
+			tripleA("$uri#time-$i", ns("tl", "Interval"));
+			//tripleL("$uri#time-$i", ns("tl", "start"), $d->date);
+			//tripleL("$uri#time-$i", ns("tl", "end"), str_replace("00:00:00", "23:59:59", $d->date));
+			tripleL("$uri#time-$i", ns("tl", "at"), substr($d->date, 0, 10));
+		}
+	}
+
+	// Process venue
+	if(isset($event->venuelink))
+	{
+		tripleU($uri, ns("event", "place"), $event->venuelink);
+		if(substr($event->venuelink, 0, 33) == "http://id.southampton.ac.uk/room/")
+		{
+			$roomid = substr($event->venuelink, 33);
+			$roomid = explode('-', $roomid);
+			tripleA($event->venuelink, ns("deri", "Room"));
+			tripleL($event->venuelink, ns("rdfs", "label"), implode(" / ", $roomid));
+			tripleU($event->venuelink, "http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within", "http://id.southampton.ac.uk/building/".$roomid[0]);
+		}
+	}
+	// TODO: Currently, venues with a defined URI (which may be at the campus level) also have a separate
+	//       'SpatialThing' entity created.  This is in order to make the full venue details available.
+	//	 If this behaviour is undesired, change this 'if' to an 'else if'.
+	if(isset($event->venue))
+	{
+		tripleU($uri, ns("event", "place"), "$uri#place");
+		tripleA("$uri#place", ns("geo", "SpatialThing"));
+		tripleL("$uri#place", ns("rdfs", "label"), $event->venue);
+	}
+
+	// Process speaker
+	if(isset($event->speaker))
+	{
+		tripleU($uri, ns("event", "agent"), "$uri#speaker");
+		tripleA("$uri#speaker", ns("foaf", "Person"));
+		tripleL("$uri#speaker", ns("foaf", "name"), $event->speaker);
+		if(isset($event->speakerlink))
+		{
+			tripleU("$uri#speaker", ns("foaf", "homepage"), $event->speakerlink);
+		}
+	}
+}
+
+?>

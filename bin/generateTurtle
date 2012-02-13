@@ -1,0 +1,24 @@
+#!/bin/bash
+# Copyright (c) 2012 Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+cd ~diary/bin/
+touch processAll.phpb
+php processAll.phpb $1
+
+cat ../var/output/* | /usr/local/bin/rapper -q -i ntriples - -I null | sort -u > ../diary.soton.ac.uk/htdocs/diary.nt
+
+php createFrozenGraph.phpb > ../diary.soton.ac.uk/htdocs/data.php
+

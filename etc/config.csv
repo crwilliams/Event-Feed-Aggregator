@@ -1,0 +1,80 @@
+Feed ID,Site,Feed Name,Feed URL,Faculty/Unit/Group,Script,Type,Notes,Tags
+ageing-events,Ageing,Events from Ageing/Gerontology,http://www.soton.ac.uk/ageing/news/feeds/gerontology_events.page,http://id.southampton.ac.uk/org/F8CC060000,RSS,Event
+ageing-seminars,Ageing,Seminars from Ageing/Gerontology,http://www.soton.ac.uk/ageing/news/feeds/gerontology_seminars.page,http://id.southampton.ac.uk/org/F8CC060000,RSS,Seminar
+archaeology-events,Archaeology,Archaeology events,http://www.soton.ac.uk/archaeology/news/feeds/archaeology_events.page,http://id.southampton.ac.uk/org/MH,RSS,Event
+archaeology-seminars,Archaeology,Archaeology seminars,http://www.soton.ac.uk/archaeology/news/feeds/archaeology_seminars.page,http://id.southampton.ac.uk/org/MH,RSS,Seminar
+biosci-events,Biosci,Events in Biological Sciences,http://www.soton.ac.uk/biosci/news/feeds/biosci_events.page,http://id.southampton.ac.uk/org/BJ,RSS,Event
+biosci-seminars,Biosci,"BioSciences seminars, Seminars in the School of Biological Sciences",http://www.soton.ac.uk/biosci/news/feeds/biosci_seminars.page,http://id.southampton.ac.uk/org/BJ,RSS,Seminar
+chemistry-events,Chemistry,Events at the School of Chemistry,http://www.soton.ac.uk/chemistry/news/feeds/events.page,http://id.southampton.ac.uk/org/EB,RSS,Event
+computational-systems-events,Chemistry,Computational Systems Seminars from the School of Chemistry,http://www.soton.ac.uk/chemistry/news/feeds/computational_systems_seminars.page,http://id.southampton.ac.uk/org/F6EB080000,RSS,Seminar
+electrochemistry-events,Chemistry,Electrochemistry Seminars in the School of Chemistry,http://www.soton.ac.uk/chemistry/news/feeds/electrochemistry_seminars.page,http://id.southampton.ac.uk/org/F6EB090000,RSS,Seminar
+chemistry-seminars,Chemistry,Chemistry seminars,http://www.soton.ac.uk/chemistry/news/feeds/seminars.page,http://id.southampton.ac.uk/org/EB,RSS,Seminar
+demography-events,Demography,lt,http://www.soton.ac.uk/demography/news/feeds/demography_events.page,http://id.southampton.ac.uk/org/F8CC010000,RSS,Event
+demography-seminars,Demography,Seminars from Social Statistics & Demography,http://www.soton.ac.uk/demography/news/feeds/demography_seminars.page,http://id.southampton.ac.uk/org/F8CC010000,RSS,Seminar
+economics-events,Economics,Events from Economics,http://www.soton.ac.uk/economics/news/feeds/events_economics.page,http://id.southampton.ac.uk/org/F8CC030000,RSS,Event
+economics-seminars,Economics,Seminars from Economics,http://www.soton.ac.uk/economics/news/feeds/seminars_economics.page,http://id.southampton.ac.uk/org/F8CC030000,RSS,Seminar
+education-events,Education,Events in Education,http://www.soton.ac.uk/education/news/feeds/education_events_main_feed.page,http://id.southampton.ac.uk/org/CJ,RSS,Event
+education-seminars,Education,School of Education Seminars,http://www.soton.ac.uk/education/news/feeds/education_seminars_main_feed.page,http://id.southampton.ac.uk/org/CJ,RSS,Seminar
+engineering-events,Engineering,Latest events,http://www.soton.ac.uk/engineering/news/feeds/ses_events.page,http://id.southampton.ac.uk/org/F2,RSS,Event
+engineering-afm-seminars,Engineering,AFM seminar series,http://www.soton.ac.uk/engineering/news/feeds/seminar_feed_afm.page,http://id.southampton.ac.uk/org/F2AK010000,RSS,Seminar
+engineering-coastal-seminars,Engineering,Coastal Seminar Series,http://www.soton.ac.uk/engineering/news/feeds/coastal_seminars.page,http://id.southampton.ac.uk/org/F2,RSS,Seminar
+engineering-habc-seminars,Engineering,HABC seminars,http://www.soton.ac.uk/engineering/news/feeds/habc_seminars.page,http://id.southampton.ac.uk/org/KR,RSS,Seminar,HABC is part of ISVR
+engineering-seminars,Engineering,Seminars from Engineering and the Environment,http://www.soton.ac.uk/engineering/news/feeds/general_engineering_seminars.page,http://id.southampton.ac.uk/org/F2,RSS,Seminar
+english-events,English,English events,http://www.soton.ac.uk/english/news/feeds/english_events.page,http://id.southampton.ac.uk/org/PL,RSS,Event
+english-seminars,English,English seminars,http://www.soton.ac.uk/english/news/feeds/english_seminars.page,http://id.southampton.ac.uk/org/PL,RSS,Seminar
+film-conferences,Film,Film conferences,http://www.soton.ac.uk/film/news/feeds/film_conferences.page,http://id.southampton.ac.uk/org/LT,RSS,Conference
+film-events,Film,Film events,http://www.soton.ac.uk/film/news/feeds/film_events.page,http://id.southampton.ac.uk/org/LT,RSS,Event
+film-seminars,Film,Film seminars,http://www.soton.ac.uk/film/news/feeds/film_seminars.page,http://id.southampton.ac.uk/org/LT,RSS,Seminar
+geography-events,Geography,Geography events,http://www.soton.ac.uk/geography/news/feeds/events_feed.page,http://id.southampton.ac.uk/org/WR,RSS,Event
+geography-seminars,Geography,Geography seminars,http://www.soton.ac.uk/geography/news/feeds/seminar_feed.page,http://id.southampton.ac.uk/org/WR,RSS,Seminar
+health-sciences-events,Health Sciences,Health Sciences Events Feed,http://www.soton.ac.uk/healthsciences/news/feeds/health_sciences_events.page,http://id.southampton.ac.uk/org/F3,RSS,Event
+history-events,History,History events,http://www.soton.ac.uk/history/news/feeds/history_events.page,http://id.southampton.ac.uk/org/RG,RSS,Event
+history-seminars,History,History seminars,http://www.soton.ac.uk/history/news/feeds/history_seminars.page,http://id.southampton.ac.uk/org/RG,RSS,Seminar
+humanities-pg-opendays,Humanities,Humanities Postgraduate open days,http://www.soton.ac.uk/humanities/news/feeds/humanities_pg_open_day.page,http://id.southampton.ac.uk/org/F4,RSS,OpenDay
+humanities-conferences,Humanities,Humanities conferences,http://www.soton.ac.uk/humanities/news/feeds/humanities_conferences.page,http://id.southampton.ac.uk/org/F4,RSS,Conference
+humanities-events,Humanities,Humanities events,http://www.soton.ac.uk/humanities/news/feeds/humanities_events.page,http://id.southampton.ac.uk/org/F4,RSS,Event
+humanities-seminars,Humanities,Humanities seminars,http://www.soton.ac.uk/humanities/news/feeds/humanities_seminars.page,http://id.southampton.ac.uk/org/F4,RSS,Seminar
+law-events,Law,Event,http://www.soton.ac.uk/law/news/feeds/events_feed.page,http://id.southampton.ac.uk/org/JJ,RSS,Event
+law-cleg-seminars,Law,"Centre for Law, Ethics and Globalisation seminars",http://www.soton.ac.uk/law/news/feeds/cleg_seminar_feed.page,http://id.southampton.ac.uk/org/JJ,RSS,Seminar
+law-seminars,Law,Seminar,http://www.soton.ac.uk/law/news/feeds/seminars_feed.page,http://id.southampton.ac.uk/org/JJ,RSS,Seminar
+management-events,Management,Events at Southampton Management School,http://www.soton.ac.uk/management/news/feeds/events_feed.page,http://id.southampton.ac.uk/org/TR,RSS,Event
+maths-events,Maths,Events in Mathematics,http://www.soton.ac.uk/maths/news/feeds/events.page,http://id.southampton.ac.uk/org/PJ,RSS,Event
+maths-seminars,Maths,Seminars in the School of Mathematics,http://www.soton.ac.uk/maths/news/feeds/seminars.page,http://id.southampton.ac.uk/org/PJ,RSS,Seminar
+medicine-events,Medicine,Medicine Events Feed,http://www.soton.ac.uk/medicine/news/feeds/medicine_eventsfeed.page,http://id.southampton.ac.uk/org/F5,RSS,Event
+medicine-cancer-seminars,Medicine,Cancer sciences seminars,http://www.soton.ac.uk/medicine/news/feeds/medicine_cancersciencesfeed.page,http://id.southampton.ac.uk/org/CM,RSS,Seminar
+medicine-seminars,Medicine,Medicine seminar feed,http://www.soton.ac.uk/medicine/news/feeds/medicine_seminarfeed.page,http://id.southampton.ac.uk/org/F5,RSS,Seminar
+ml-events,ML (Modern languages),Modern Languages events,http://www.soton.ac.uk/ml/news/feeds/ml_events.page,http://id.southampton.ac.uk/org/GC,RSS,Event
+ml-seminars,ML (Modern languages),Modern languages seminars,http://www.soton.ac.uk/ml/news/feeds/ml_seminars.page,http://id.southampton.ac.uk/org/GC,RSS,Seminar
+music-concerts,Music,Music concerts,http://www.soton.ac.uk/music/news/feeds/music_concerts.page,http://id.southampton.ac.uk/org/NC,RSS,Concert
+music-events,Music,Music events,http://www.soton.ac.uk/music/news/feeds/music_events.page,http://id.southampton.ac.uk/org/NC,RSS,Event
+music-seminars,Music,Music seminars,http://www.soton.ac.uk/music/news/feeds/music_seminars.page,http://id.southampton.ac.uk/org/NC,RSS,Seminar
+philosophy-events,Philosophy,Philosophy events,http://www.soton.ac.uk/philosophy/news/feeds/philosophy_events.page,http://id.southampton.ac.uk/org/FJ,RSS,Event
+philosophy-seminars,Philosophy,Philosophy seminars,http://www.soton.ac.uk/philosophy/news/feeds/philosophy_seminars.page,http://id.southampton.ac.uk/org/FJ,RSS,Seminar
+politics-events,Politics,Events from Politics & International Relations,http://www.soton.ac.uk/politics/news/feeds/events_politics.page,http://id.southampton.ac.uk/org/F8CC040000,RSS,Event
+politics-seminars,Politics,Seminars from Politics & International Relations,http://www.soton.ac.uk/politics/news/feeds/seminar_politics.page,http://id.southampton.ac.uk/org/F8CC040000,RSS,Seminar
+psychology-seminars,Psychology,Psychology Seminars (general),http://www.soton.ac.uk/psychology/news/feeds/psy_seminars_general.page,http://id.southampton.ac.uk/org/JW,RSS,Seminar
+psychology-seminars-3095,Psychology,Psychology seminars (room 3095),http://www.soton.ac.uk/psychology/news/feeds/psy_3095_seminars.page,http://id.southampton.ac.uk/org/JW,RSS,Seminar
+social-work-events,Social work,Events from Social Work,http://www.soton.ac.uk/socialwork/news/feeds/events_social_work.page,http://id.southampton.ac.uk/org/F8CC020000,RSS,Event
+social-work-seminars,Social work,Seminars from Social Work,http://www.soton.ac.uk/socialwork/news/feeds/seminars_social_work.page,http://id.southampton.ac.uk/org/F8CC020000,RSS,Seminar
+sociology-events,Sociology,Events from Sociology & Social Policy,http://www.soton.ac.uk/sociology/news/feeds/sociology_events.page,http://id.southampton.ac.uk/org/F8CC050000,RSS,Event
+sociology-seminars,Sociology,Seminars from Sociology & Social Policy,http://www.soton.ac.uk/sociology/news/feeds/sociology_seminars.page,http://id.southampton.ac.uk/org/F8CC050000,RSS,Seminar
+socsci-events,Socsci,Events from Social Sciences,http://www.soton.ac.uk/socsci/news/feeds/socsci_events.page,http://id.southampton.ac.uk/org/CC,RSS,Event
+socsci-seminars,Socsci,Seminars from Social Sciences,http://www.soton.ac.uk/socsci/news/feeds/seminars_social_sciences.page,http://id.southampton.ac.uk/org/CC,RSS,Seminar
+soes-events,SOES,Ocean and Earth Science events,http://www.soton.ac.uk/soes/news/feeds/soes_events.page,http://id.southampton.ac.uk/org/HN,RSS,Event
+soes-seminars,SOES,Ocean and Earth Science Public Seminars,http://www.soton.ac.uk/soes/news/feeds/soes_public_seminars.page,http://id.southampton.ac.uk/org/HN,RSS,Seminar
+soes-palaeo-seminars,SOES,Palaeo Seminar series,http://www.soton.ac.uk/soes/news/feeds/palaeo_seminar_series.page,http://id.southampton.ac.uk/org/F6HN070000,RSS,Seminar
+wsa-events,WSA,wsa - Events feed,http://www.soton.ac.uk/wsa/news/feeds/events_feed.page,http://id.southampton.ac.uk/org/FH,RSS,Event
+wsa-seminars,WSA,wsa - Seminars feed,http://www.soton.ac.uk/wsa/news/feeds/seminars_feed.page,http://id.southampton.ac.uk/org/FH,RSS,Seminar
+careers,Careers,,http://www.student.careers.soton.ac.uk/eventcalendar/,,,,Possibly CRM booking system in use
+international,International events,,http://www.soton.ac.uk/international/join_us/meetus.html,http://id.southampton.ac.uk/org/NP,,,Static web page in TeamSite
+alumni,Alumni,,http://www.soton.ac.uk/alumni/alumnievents/forthcomingevents.html,http://id.southampton.ac.uk/org/PKCD080000,,,Static web page in TeamSite
+outreach,"Outreach, Schools & Colleges talks",,http://www.soton.ac.uk/schoolsandcolleges/index.html,http://id.southampton.ac.uk/org/PKGX050100,,,Information is posted across the site and incomplete
+ucas,UCAS and Higher Education Fairs,,http://www.soton.ac.uk/study/visitsopendays/ucas_he_fairs.html,http://id.southampton.ac.uk/org/PKGX050300,UCAS,,Static web page in TeamSite,UCASEvent
+opendays,Open days,,http://www.soton.ac.uk/study/visitsopendays/ug_open_days.shtml,http://id.southampton.ac.uk/org/PKGX050300,,,Static web page in TeamSite / Check if school specific open day on AU site
+corporate,Corporate events,,http://www.events.soton.ac.uk/highlights/,,,,"Currently in Events calendar, but will have no 'home' when calendar replaced"
+ris,RIS events,,,http://id.southampton.ac.uk/org/TW,,,Not found online
+john-hansard-gallery,John Hansard Gallery,,http://www.hansardgallery.org.uk/,http://id.southampton.ac.uk/org/P2GR030000,,,Dreamweaver site
+turner-sims,Turner Sims,,http://www.turnersims.co.uk/,http://id.southampton.ac.uk/org/P2GR020000,,,CMS hosted externally to Uni
+nuffield-theatre,Nuffield Theatre,,http://www.nuffieldtheatre.co.uk/events/category/C84/,,Nuffield,,Externally hosted,TheatreEvent
+multidisciplinary-events,,,http://www.multidisciplinary.soton.ac.uk/events/,,,,Have an iCal feed: http://usrg.devel.mauveinternet.co.uk/events/upcoming-events.ics
+ecs-seminars,ECS,ECS Seminars,http://www.ecs.soton.ac.uk/feeds/seminars_rss.php,http://id.southampton.ac.uk/org/FP,RSSECS,Seminar

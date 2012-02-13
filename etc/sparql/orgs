@@ -1,0 +1,17 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+CONSTRUCT {
+    ?s rdfs:label ?o .
+    ?s a <http://www.w3.org/ns/org#Organization> .
+    ?s <http://www.w3.org/ns/org#hasSubOrganization> ?suborg .
+    ?s foaf:homepage ?homepage .
+}
+WHERE {
+  GRAPH <http://id.southampton.ac.uk/dataset/org/latest> {
+    ?s rdfs:label ?o .
+    ?s a <http://www.w3.org/ns/org#Organization> .
+    OPTIONAL { ?s <http://www.w3.org/ns/org#hasSubOrganization> ?suborg . }
+    OPTIONAL { ?s foaf:homepage ?homepage }
+  }
+}

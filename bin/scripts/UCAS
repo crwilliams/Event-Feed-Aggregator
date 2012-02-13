@@ -1,0 +1,68 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012 Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+
+require '../etc/config.php';
+include $diary_config["path"].'/lib/utils.php';
+include $diary_config["path"].'/lib/options.php';
+
+$dom = getHTML($options->FeedURL);
+
+$data = array();
+if($dom->find('table/tbody/tr') != null)
+{
+	foreach($dom->find('table/tbody/tr') as $item)
+	{
+		$data[] = process($item, $options);
+	}
+}
+echo generateEventXML($data);
+
+function process($item, $options)
+{
+	$area = html_entity_decode((string)$item->find('td', 0)->plaintext);
+	if($area == 'UCAS') { return array(); } // This is the header row, ignore it.
+	$location = html_entity_decode((string)$item->find('td', 1)->plaintext);
+	$date = html_entity_decode((string)$item->find('td', 3)->plaintext);
+	$title = $area.' UCAS Fair';
+	$link = $options->FeedURL.'#'.str_replace(array(' ', '&'), '', $area);
+	$desc = $area.' UCAS Fair, at '.$location;
+
+	$pdate = array();
+	if(preg_match('/^([1-3]?[0-9])(st|nd|rd|th) ([A-Z][a-z][a-z])[a-z]+$/', trim($date), $matches))
+	{
+		$pdate[] = array('date' => date('c', strtotime($matches[1].' '.$matches[3])));
+	}
+	else if(preg_match('/^([1-3]?[0-9])(st|nd|rd|th) & ([1-3]?[0-9])(st|nd|rd|th) ([A-Z][a-z][a-z])[a-z]+$/', trim($date), $matches))
+	{
+		$pdate[] = array('date' => date('c', strtotime($matches[1].' '.$matches[5])));
+		$pdate[] = array('date' => date('c', strtotime($matches[3].' '.$matches[5])));
+	}
+
+	return array(
+		'title'		=> $title,
+		'link'		=> $link,
+		'date'		=> $pdate,
+		'desc'		=> $desc,
+		'venue'		=> $location,
+		'feedName'	=> (string)$options->FeedName,
+		'type'		=> (string)$options->Type,
+		'feedID'	=> (string)$options->FeedID,
+		'host'		=> (string)$options->FacultyUnitGroup,
+		'tags'		=> explode(" ", $options->Tags),
+	);
+}
+
+?>

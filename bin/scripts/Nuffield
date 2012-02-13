@@ -1,0 +1,102 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012 Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+
+require '../etc/config.php';
+include $diary_config["path"].'/lib/utils.php';
+include $diary_config["path"].'/lib/options.php';
+
+$data = array();
+
+$url = $options->FeedURL;
+
+while(true)
+{
+	$dom = getHTML($url);
+	if($dom == null || $dom->find('div#main_content/div.listing') == null) { break; }
+	
+	foreach($dom->find('div#main_content/div.listing') as $item)
+	{
+		$data[] = process($item, $options);
+	}
+	$hasnext = false;
+	$paginate = $dom->find('p.paginate_links', 0);
+	if($paginate != null)
+	{
+		foreach($paginate->find('a') as $link)
+		{
+			if($link->plaintext == "Next Page")
+			{
+				$url = $link->href;
+				$hasnext = true;
+				break;
+			}
+		}
+	}
+	if(!$hasnext) { break; }
+}
+echo generateEventXML($data);
+
+function process($item, $options)
+{
+	$location = "http://id.southampton.ac.uk/building/6";
+	$date = html_entity_decode((string)$item->find('p.date', 0)->plaintext);
+	$title = html_entity_decode((string)$item->find('h2', 0)->plaintext);
+	$link = html_entity_decode((string)$item->find('a', 0)->href);
+	$desc = "";
+
+	$pdate = array();
+
+	$dom2 = getHTML($link);
+	if($dom2->find('div#secondary_content/ul.perdates/li') != null)
+	{
+		foreach($dom2->find('div#secondary_content/ul.perdates/li') as $perdate)
+		{
+			$perdate = preg_replace('/[^A-Za-z0-9 ,.]/', '', $perdate->find('text', 0));
+			$pdate[] = array('from' => date('c', strtotime($perdate)));
+		}
+	}
+
+	if($dom2->find('div#main_content', 0) != null)
+	{
+		foreach($dom2->find('div#main_content', 0)->children() as $p)
+		{
+			if($p->tag != "p")
+			{
+				continue;
+			}
+			if($desc != "")
+			{
+				$desc .= "\n\n";
+			}
+			$desc .= $p->plaintext;
+		}
+	}
+	
+	return array(
+		'title'		=> $title,
+		'link'		=> $link,
+		'date'		=> $pdate,
+		'desc'		=> $desc,
+		'venuelink'	=> $location,
+		'feedName'	=> (string)$options->FeedName,
+		'type'		=> (string)$options->Type,
+		'feedID'	=> (string)$options->FeedID,
+		'host'		=> (string)$options->FacultyUnitGroup,
+		'tags'		=> explode(" ", $options->Tags),
+	);
+}
+
+?>

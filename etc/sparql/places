@@ -1,0 +1,13 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+    ?s rdfs:label ?o .
+    ?s a ?type .
+}
+WHERE {
+  GRAPH <http://id.southampton.ac.uk/dataset/places/latest> {
+    ?s rdfs:label ?o .
+    ?s a ?type .
+    FILTER ( ?type = <http://vocab.deri.ie/rooms#Building> || ?type = <http://www.w3.org/ns/org#Site> )
+  }
+}

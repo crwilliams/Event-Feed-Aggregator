@@ -1,0 +1,105 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012 Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+
+require '../etc/config.php';
+include $diary_config["path"].'/lib/utils.php';
+include $diary_config["path"].'/lib/options.php';
+require_once( "/var/wwwsites/phplib/arc/ARC2.php" );
+require_once( "/var/wwwsites/phplib/Graphite.php" );
+
+$rss = getRSS($options->FeedURL);
+
+$data = array();
+if($rss->item != null)
+{
+	foreach($rss->item as $item)
+	{
+		$data[] = process($item, $options);
+	}
+}
+echo generateEventXML($data);
+
+function process($item, $options)
+{
+	$link = trim($item->link);
+	$rdflink = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://rdf.ecs.soton.ac.uk/presentation/', $link);
+	$id = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://id.ecs.soton.ac.uk/presentation/', $link);
+	$graph = new Graphite();
+	$graph->cacheDir("/home/diary/diary.soton.ac.uk/cache");
+	$graph->load($rdflink);
+	$graph->ns("ecs", "http://rdf.ecs.soton.ac.uk/ontology/ecs#");
+	$p = $graph->resource($id);
+	$title = (string)$p->get("ecs:hasName");
+	$desc = (string)$p->get("ecs:hasDescription");
+	$group = processGroup((string)$p->get("ecs:from-group"));
+
+	$venuelink = "";
+	foreach($p->all("http://purl.org/NET/c4dm/event.owl#place") as $place)
+	{
+		if($place->isType("http://vocab.deri.ie/rooms#Room"))
+		{
+			$venuelink = (string)$place;
+		}
+	}
+
+	$speakers = $p->get("ecs:hasPresenters");
+	$s = 1;
+	foreach($p->all("ecs:hasPresenters") as $pres)
+	{
+		$speakerlink = (string)$pres->get("http://www.w3.org/1999/02/22-rdf-syntax-ns#_".$s);
+		if($speakerlink != "")
+		{
+			$graph->load($speakerlink);
+		}
+		$speaker = (string)$graph->resource($speakerlink)->get("foaf:name");
+	}
+
+	$from = (string)$p->get("http://www.isi.edu/~pan/damltime/time-entry.owl#begins")->get("http://www.isi.edu/~pan/damltime/time-entry.owl#inCalendarClockDataType");
+	$to = (string)$p->get("http://www.isi.edu/~pan/damltime/time-entry.owl#ends")->get("http://www.isi.edu/~pan/damltime/time-entry.owl#inCalendarClockDataType");
+	$pdate = array(array('from' => $from, 'to' => $to));
+	$res = array(
+		'title'		=> $title,
+		'link'		=> $link,
+		'date'		=> $pdate,
+		'desc'		=> mb_convert_encoding($desc, 'ASCII'),
+		'feedName'	=> (string)$options->FeedName,
+		'type'		=> (string)$options->Type,
+		'feedID'	=> (string)$options->FeedID,
+		'host'		=> $group,
+		'tags'		=> explode(" ", $options->Tags),
+		'venuelink'	=> $venuelink,
+		'speakerlink'	=> $speakerlink,
+		'speaker'	=> $speaker,
+	);
+	return $res;
+}
+
+function processGroup($groupid)
+{
+	switch($groupid) {
+		case "http://rdf.ecs.soton.ac.uk/presentation/grouphvlab":
+			return "http://id.southampton.ac.uk/org/F7FP050000";
+		case "http://rdf.ecs.soton.ac.uk/presentation/groupess":
+			return "http://id.southampton.ac.uk/org/F7FP070000";
+		case "http://rdf.ecs.soton.ac.uk/presentation/groupaic":
+			return "http://id.southampton.ac.uk/org/F7FP080000";
+		case "http://rdf.ecs.soton.ac.uk/presentation/groupwais":
+			return "http://id.southampton.ac.uk/org/F7FP090000";
+		default:
+			return "http://id.southampton.ac.uk/org/FP";
+	}
+}
+

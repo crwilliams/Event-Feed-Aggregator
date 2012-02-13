@@ -1,0 +1,42 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012 Christopher Gutteridge / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+require_once( "../etc/config.php" );
+
+$graph = new Graphite();
+
+$endpoint ="http://sparql.data.southampton.ac.uk/";
+$queries = array( 'orgs','places','rooms','within' );
+
+foreach( $queries as $query )
+{
+	$fn = $diary_config["path"]."/etc/sparql/$query";
+	$sparql = join(file($fn));
+	$n=$graph->loadSPARQL("http://sparql.data.southampton.ac.uk/", $sparql );
+}
+
+$graph->load( $diary_config["path"]."/diary.soton.ac.uk/htdocs/diary.nt" );
+
+$frozen_fn = $diary_config["path"]."/var/data.php";
+$graph->freeze( "$frozen_fn.new" );
+# don't leave a half written file lying around or a few web hits will fail while updateing!
+rename( "$frozen_fn.new","$frozen_fn" );
+
+exit;

@@ -1,0 +1,11 @@
+CONSTRUCT {
+  ?a <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within> ?b .
+  ?a a ?type .
+}
+WHERE {
+  ?a <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within> ?b .
+  ?a a ?type .
+  FILTER ( ?type = <http://vocab.deri.ie/rooms#Room> ||
+           ?type = <http://vocab.deri.ie/rooms#Building> || 
+           ?type = <http://www.w3.org/ns/org#Site> )
+}
