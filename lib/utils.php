@@ -30,8 +30,8 @@ function getVenueLink(&$venue)
 	$rdef = $rdef.'|\('.$rdef.'\)';
 
 	$v = strtoupper($venue);
-	if(preg_match('/(ROOM|LECTURE THEATRE) ('.$rdef.')/', strtoupper($venue), $roommatches) &&
-		preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', strtoupper($venue), $buildingmatches))
+	if(preg_match('/(ROOM|LECTURE THEATRE) ('.$rdef.')/', $v, $roommatches) &&
+		preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', $v, $buildingmatches))
 	{
 		$v = preg_replace('/(ROOM|LECTURE THEATRE) ('.$rdef.')/', '', $v);
 		$v = preg_replace('/(BUILDING|BLDG) ('.$bdef.')+/', '', $v);
@@ -39,45 +39,45 @@ function getVenueLink(&$venue)
 		if($v == "") $venue = "";
 		return 'http://id.southampton.ac.uk/room/'.tidyNumber($buildingmatches[2]).'-'.tidyNumber($roommatches[2]);
 	}
-	if(preg_match('/('.$bdef.')[:\/]('.$rdef.')/', strtoupper($venue), $matches))
+	if(preg_match('/('.$bdef.')[:\/]('.$rdef.')/', $v, $matches))
 	{
 		$v = preg_replace('/('.$bdef.')[:\/]('.$rdef.')/', '', $v);
 		$v = finalStrip($v);
 		if($v == "") $venue = "";
 		return 'http://id.southampton.ac.uk/room/'.tidyNumber($matches[1]).'-'.tidyNumber($matches[2]);
 	}
-	if(preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', strtoupper($venue), $buildingmatches))
+	if(preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', $v, $buildingmatches))
 	{
 		$v = preg_replace('/(BUILDING|BLDG) ('.$bdef.')+/', '', $v);
 		$v = finalStrip($v);
 		if($v == "") $venue = "";
 		return 'http://id.southampton.ac.uk/building/'.tidyNumber($buildingmatches[2]);
 	}
-	if(preg_match('/TURNER SIMS/', strtoupper($venue)))
+	if(preg_match('/TURNER SIMS/', $v))
 	{
 		$v = finalStrip($v);
 		if($v == "") $venue = "";
 		return 'http://id.southampton.ac.uk/building/52';
 	}
-	if(preg_match('/AVENUE CAMPUS/', strtoupper($venue)))
+	if(preg_match('/AVENUE CAMPUS/', $v))
 	{
 		$v = finalStrip($v);
 		if($v == "") $venue = "";
 		return 'http://id.southampton.ac.uk/site/3';
 	}
-	if(preg_match('/HIGHFIELD CAMPUS/', strtoupper($venue)))
+	if(preg_match('/HIGHFIELD CAMPUS/', $v))
 	{
 		$v = finalStrip($v);
 		if($v == "") $venue = "";
 		return 'http://id.southampton.ac.uk/site/1';
 	}
-	if(preg_match('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', strtoupper($venue)))
+	if(preg_match('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', $v))
 	{
 		$v = finalStrip($v);
 		if($v == "") $venue = "";
 		return 'http://id.southampton.ac.uk/site/6';
 	}
-	if(preg_match('/(WINCHESTER SCHOOL OF ART|WSA)/', strtoupper($venue)))
+	if(preg_match('/(WINCHESTER SCHOOL OF ART|WSA)/', $v))
 	{
 		$v = finalStrip($v);
 		if($v == "") $venue = "";
