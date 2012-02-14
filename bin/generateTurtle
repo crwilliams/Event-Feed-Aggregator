@@ -20,5 +20,5 @@ php processAll.phpb $1
 
 cat ../var/output/* | /usr/local/bin/rapper -q -i ntriples - -I null | sort -u > ../diary.soton.ac.uk/htdocs/diary.nt
 
-php createFrozenGraph.phpb > ../diary.soton.ac.uk/htdocs/data.php
+php createFrozenGraph.phpb
 
