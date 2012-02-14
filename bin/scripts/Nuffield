@@ -59,19 +59,19 @@ function process($item, $options)
 
 	$pdate = array();
 
-	$dom2 = getHTML($link);
-	if($dom2->find('div#secondary_content/ul.perdates/li') != null)
+	$dom = getHTML($link);
+	if($dom->find('div#secondary_content/ul.perdates/li') != null)
 	{
-		foreach($dom2->find('div#secondary_content/ul.perdates/li') as $perdate)
+		foreach($dom->find('div#secondary_content/ul.perdates/li') as $perdate)
 		{
 			$perdate = preg_replace('/[^A-Za-z0-9 ,.]/', '', $perdate->find('text', 0));
 			$pdate[] = array('from' => date('c', strtotime($perdate)));
 		}
 	}
 
-	if($dom2->find('div#main_content', 0) != null)
+	if($dom->find('div#main_content', 0) != null)
 	{
-		foreach($dom2->find('div#main_content', 0)->children() as $p)
+		foreach($dom->find('div#main_content', 0)->children() as $p)
 		{
 			if($p->tag != "p")
 			{
