@@ -213,19 +213,6 @@ function tripleU($s, $p, $o) {
 }
 
 function tripleL($s, $p, $o) {
-/*
-	$o = preg_replace('/\xc3\xa4/', '&auml;', $o);
-	$o = preg_replace('/\xc3\xa9/', '&eacute;', $o);
-	$o = preg_replace('/\xc3\xbc/', '&uuml;', $o);
-	$o = preg_replace('/\xc2\xa3/', '&pound;', $o);
-	$o = preg_replace('/\xe2\x80\x93/', '-', $o);
-	$o = preg_replace('/\xe2\x80\x94/', '-', $o);
-	$o = preg_replace('/\xe2\x80\x98/', '\'', $o);
-	$o = preg_replace('/\xe2\x80\x99/', '\'', $o);
-	$o = preg_replace('/\xe2\x80\x9c/', '"', $o);
-	$o = preg_replace('/\xe2\x80\x9d/', '"', $o);
-*/
-	//$o = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\xFF]/u', '', $o);
 	writeToFile("<$s> <$p> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($o, " "))."\" .");
 }
 
