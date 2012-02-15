@@ -14,11 +14,17 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-cd ~diary/bin/
-touch processAll.phpb
-php processAll.phpb $1
+# Arguments:
+#	The first argument is passed to runAllScrapers.phpb.
 
+cd ~diary/bin/
+
+# Run all of the scrapers.
+php runAllScrapers.phpb $1
+
+# Combine all of the output into a single file (after passing it through rapper).
 cat ../var/output/* | /usr/local/bin/rapper -q -i ntriples - -I null | sort -u > ../diary.soton.ac.uk/htdocs/diary.nt
 
+# Freeze the graph.
 php createFrozenGraph.phpb
 
