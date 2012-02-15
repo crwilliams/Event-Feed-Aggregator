@@ -6,29 +6,38 @@ It was developed for use on http://soton-diary.ecs.soton.ac.uk/ .
 The file structure is as follows:
 
 bin/
-	scripts/		Contains various feed importer scripts, designed for a variety of source documents.
-
-	createFrozenGraph.phpb	Captures any additional metadata that should be stored, and along with the imported data, store this in a form that can be read efficiently.
-	Event-Feed-Aggregator	This is the main script that should be executed (preferably on a regular basis using cron).
-	getConfig		Gets the latest config from the Google Spreadsheet where it is hosted.
-	runAllScrapers.phpb	Responsible for invoking the various feed importer scripts, and controlling their execution times.
+	scripts/		Contains various feed importer scripts, designed
+				for a variety of source documents.
+	createFrozenGraph.phpb	Captures any additional metadata that should be
+				stored, and along with the imported data, store
+				this in a form that can be read efficiently.
+	Event-Feed-Aggregator	This is the main script that should be executed
+				(preferably on a regular basis using cron).
+	getConfig		Gets the latest config from the Google
+				Spreadsheet where it is hosted.
+	runAllScrapers.phpb	Responsible for invoking the various feed
+				importer scripts, and controlling their
+				execution times.
 
 diary.soton.ac.uk/
-
-	htdocs/			These are the documents that are intended to be served by the web server.
-
+	htdocs/			These are the documents that are intended to be
+				served by the web server.
 		view.php	A simple web page to display all future events.
 
 etc/
-	sparql/			Set of SPARQL queries that are performed as part of createFrozenGraph.phpb .
-
-	config.csv		Feed configuration.  Lists all feeds and the feed importer scripts which they use.
+	sparql/			Set of SPARQL queries that are performed as part
+				of createFrozenGraph.phpb .
+	config.csv		Feed configuration.  Lists all feeds and the
+				feed importer scripts which they use.
 	config.php		
 
 lib/
-	options.php		Loads the command line options to the feed importers.
-	simple_html_dom.php	Simple HTML parsing functions.  (http://simplehtmldom.sourceforge.net/)
-	utils.php		Various utility functions used by the feed importers.
+	options.php		Loads the command line options to the feed
+				importers.
+	simple_html_dom.php	Simple HTML parsing functions.
+				(from http://simplehtmldom.sourceforge.net/)
+	utils.php		Various utility functions used by the feed
+				importers.
 	xml.php			XML output functions.
 
 LICENCE				GPL Licence.
