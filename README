@@ -1,6 +1,16 @@
-Event-Feed-Aggregator is a tool for aggragating event feeds from multiple sources into a single data set, which can then be presented consistently.
+Event-Feed-Aggregator is a tool for aggregating event feeds from multiple sources into a single data set, which can then be presented consistently.
 
 It was developed for use on http://soton-diary.ecs.soton.ac.uk/ .
+
+To run the tool, firstly execute bin/getConfig, then execute bin/Event-Feed-Aggregator .
+
+Dependencies:
+	Graphite		PHP RDF Library
+				(https://github.com/cgutteridge/Graphite)
+	ARC2			ARC RDF Classes for PHP
+				(https://github.com/semsol/arc2)
+	Rapper			Raptor RDF parsing and serializing utility
+				(http://librdf.org/raptor/rapper.html)
 
 
 The file structure is as follows:
@@ -29,7 +39,8 @@ etc/
 				of createFrozenGraph.phpb .
 	config.csv		Feed configuration.  Lists all feeds and the
 				feed importer scripts which they use.
-	config.php		
+	config.php		Configuration of path to files (and
+				dependencies).
 
 lib/
 	options.php		Loads the command line options to the feed
