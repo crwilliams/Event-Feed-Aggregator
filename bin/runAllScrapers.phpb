@@ -235,7 +235,7 @@ function processEvent($event, $feedid)
 	tripleU($uri, ns("event", "homepage"), $event->link);
 
 	// Process event type
-	if(isset($event->type))
+	if(isset($event->type) && $event->type != "")
 	{
 		tripleU($uri, ns("diary", "event-type"), ns("diary", $event->type));
 	}
