@@ -22,12 +22,15 @@ require('../etc/config.php');
 require($diary_config["path"].'/lib/xml.php');
 require($diary_config["path"].'/lib/utils.php');
 
+// Disable reporting of deprecated features.
 error_reporting(E_ALL ^ E_DEPRECATED);
 
 declare(ticks = 1);
 
+// Setup alarm function that is called when SIGALRM is raised.
 pcntl_signal(SIGALRM, "alarm", false);
 
+// Setup namespace prefixes.
 $ns['event']	= 'http://purl.org/NET/c4dm/event.owl#';
 $ns['rdfs']	= 'http://www.w3.org/2000/01/rdf-schema#';
 $ns['rdf']	= 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
@@ -38,10 +41,14 @@ $ns['dcterms']	= 'http://purl.org/dc/terms/';
 $ns['diary']	= 'http://id.southampton.ac.uk/ns/diary/';
 $ns['deri']	= 'http://vocab.deri.ie/rooms#';
 
+// Try opening the config file.
 if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
+	// Get column names from the first line of the CSV file.
 	$c = array_flip(fgetcsv($handle, 1000, ","));
 
+	// For each remaining line...
 	while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+		// Generate the options array.
 		$options = array();
 		foreach($c as $key => $id)
 		{
@@ -50,15 +57,26 @@ if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
 				$options[preg_replace('/[^A-Za-z]/', '', $key)] = @$data[$id];
 			}
 		}
+
+		// Process a single feed.
 		processFeed($data[$c['Script']], $options);
 	}
+	// Close the config file.
 	fclose($handle);
 }
 
+/**
+ * Process a single feed.
+ * 
+ * @param	string	$script		The name of the script to use to process the feed.
+ * @param	array	$options	The options that should be passed to the script.
+ */
 function processFeed($script, $options)
 {
 	$id = $options['FeedID'];
 	printInfo();
+
+	// Check that the script parameter is set.
 	if($script == "")
 	{
 		printInfo("Unable to process $id.  No script set.");
@@ -66,6 +84,7 @@ function processFeed($script, $options)
 	}
 	printInfo("Processing $id");
 	printInfo("Script: $script");
+
 	if($script == "Nuffield")
 	{
 		$limit = 180;
@@ -77,34 +96,42 @@ function processFeed($script, $options)
 
 	if(preg_match('/^[A-Za-z0-9]+$/', $script))
 	{
+		// Fork the process into parent and child.
 		$pid = pcntl_fork();
 		if ($pid == -1) {
 			printInfo("Could not fork", true);
 			die();
 		} else if ($pid) {
-			// we are the parent
+			// This is the parent process.
 			runParent($pid, $limit, $options);
 		} else {
-			// we are the child
+			// This is the child process.
 			$code = runChild($script, $options);
-			// exit, to ensure that this child goes no further
+			// Exit, to ensure that this child goes no further
 			exit($code);
 		}
 	}
 }
 
+/**
+ * Run the parent process.
+ *
+ * @param	int	$pid		The process ID of the child process.
+ * @param	int	$limit		The time limit (in seconds) that the child process should be allowed to run for.
+ * @param	array	$options	The options that were passed to the child process.
+ */
 function runParent($pid, $limit = 30, $options) {
 	global $gpid;
 	global $gfeedid;
-	// we are the parent
-	// store the PID of the child
+	// Store the PID of the child.
 	$gpid = $pid;
+	// Store the FeedID of the child.
 	$gfeedid = $options['FeedID'];
-	// set an alarm, to limit the execution time
+	// set an alarm, to limit the execution time.
 	pcntl_alarm($limit);
-	// wait for the child to return
+	// Wait for the child to return.
 	$cid = pcntl_waitpid($pid, $status);
-	// check whether the child returned correctly
+	// Check whether the child returned correctly.
 	if($cid > 0) {
 		if(pcntl_wifexited($status) && pcntl_wexitstatus($status) > 0)
 		{
@@ -121,22 +148,39 @@ function runParent($pid, $limit = 30, $options) {
 	}
 }
 
+/**
+ * Run the child process.
+ *
+ * @param	string	$script		The script to run.
+ * @param	array	$options	The options to pass to the script.
+ */
 function runChild($script, $options) {
 	global $fh;
 	global $diary_config;
 
+	// Convert the options array into XML form.
 	$optionsxml = generate_xml_from_array($options, 'options');
 	$optionsxml = '<options>'.$optionsxml.'</options>';
+
+	// Generate the command, with the options XML as a command line argument.
 	$cmd = $diary_config["path"].'/bin/scripts/'.$script.' -o '.escapeshellarg($optionsxml);
 	printInfo($cmd);
+
+	// Execute the command.
 	exec($cmd, $output);
+
+	// Convert the response XML into an object.
 	$xml = simplexml_load_string(implode("\n", $output));
+
+	// Check that the response is valid.
 	if($xml == null)
 	{
 		printInfo("Bad response from ".$options['FeedID']." script: ".implode("", $output), true);
 		logError("Bad response from script: ".implode("", $output), $options['FeedID']);
 		return 1;
 	}
+
+	// Check the number of events.
 	$eventcount = count($xml->event);
 	if($eventcount == 0)
 	{
@@ -151,25 +195,43 @@ function runChild($script, $options) {
 	{
 		printInfo("$eventcount events found while processing ".$options['FeedID']);
 	}
+
+	// If the XML has events...
 	if($xml->event != null)
 	{
 		$safeid = preg_replace('/[^A-Za-z0-9]/', '', $options['FeedID']);
+		// Open a file to write the output (as RDF triples) to.
 		$fh = fopen($diary_config["path"].'/var/output/'.$safeid, 'w');
+
 		foreach($xml->event as $event)
 		{
+			// Process the event.
 			processEvent($event, $options['FeedID']);
 		}
+
+		// Close the file.
 		fclose($fh);
 	}
 	return 0;
 }
 
-function printInfo($str="", $force=false) {
+/**
+ * Print an information message (possibly only if in verbose mode).
+ *
+ * @param	string	$string	The string to print.
+ * @param	bool	$force	True if the string should be printed even when not in verbose mode.
+ */
+function printInfo($string="", $force=false) {
 	if($force || getopt('v')) {
-		echo $str."\n";
+		echo $string."\n";
 	}
 }
 
+/**
+ * Alarm function.
+ *
+ * @param	int	$signo	The signal that caused the alarm to be raised.
+ */
 function alarm($signo) {
 	global $gpid;
 	global $gfeedid;
@@ -188,35 +250,69 @@ function alarm($signo) {
 	}
 }
 
+/**
+ * Write a line to the output file.
+ *
+ * @param	string	$string	The string to write to the file.
+ */
 function writeToFile($string) {
 	global $fh;
 	fwrite($fh, $string."\n");
 }
 
-function tripleU($s, $p, $o) {
-	writeToFile("<$s> <$p> <$o> .");
+/**
+ * Output an RDF triple with a URI object.
+ *
+ * @param	string	$subject	The URI of the subject.
+ * @param	string	$predicate	The URI of the predicate.
+ * @param	string	$object		The URI of the object.
+ */
+function tripleU($subject, $predicate, $object) {
+	writeToFile("<$subject> <$predicate> <$object> .");
 }
 
-function tripleL($s, $p, $o) {
-	writeToFile("<$s> <$p> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($o, " "))."\" .");
+/**
+ * Output an RDF triple with a literal object.
+ *
+ * @param	string	$subject	The URI of the subject.
+ * @param	string	$predicate	The URI of the predicate.
+ * @param	string	$object		The literal value of the object.
+ */
+function tripleL($subject, $predicate, $object) {
+	writeToFile("<$subject> <$predicate> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($object, " "))."\" .");
 }
 
-function tripleA($s, $o) {
-	tripleU($s, ns("rdf", "type"), $o);
+/**
+ * Output an RDF triple defining the type of an entity.
+ *
+ * @param	string	$subject	The URI of the subject.
+ * @param	string	$type		The type of the subject.
+ */
+function tripleA($subject, $type) {
+	tripleU($subject, ns("rdf", "type"), $type);
 }
 
+/**
+ * Expand a URI given using a prefix.
+ *
+ * @param	string	$prefix		The prefix identifier.
+ * @param	string	$e		The entity name.
+ */
 function ns($prefix, $e) {
 	global $ns;
-	if(isset($ns[$prefix]))
-	{
+	if(isset($ns[$prefix])) {
 		return $ns[$prefix].$e;
-	}
-	else
-	{
+	} else {
 		return $prefix.":".$e;
 	}
 }
 
+/**
+ * Process a single event, outputting RDF triples to the relevant file.
+ * 
+ * @param	object	$event	The event to process.
+ * @param	string	$feedid	The ID of the feed.
+ */
 function processEvent($event, $feedid)
 {
 	if(trim($event->link) == "")
@@ -227,26 +323,26 @@ function processEvent($event, $feedid)
 	}
 	$uri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
 
-	// Process basic info
+	// Process basic info.
 	tripleA($uri, ns("event", "Event"));
 	tripleA($uri, ns("diary", "Event"));
 	tripleL($uri, ns("rdfs", "label"), str_replace("\n", "", $event->title));
 	tripleL($uri, ns("dcterms", "description"), $event->desc);
 	tripleU($uri, ns("event", "homepage"), $event->link);
 
-	// Process event type
+	// Process event type.
 	if(isset($event->type) && $event->type != "")
 	{
 		tripleU($uri, ns("diary", "event-type"), ns("diary", $event->type));
 	}
 
-	// Process host
+	// Process host.
 	if(isset($event->host) && $event->host != "")
 	{
 		tripleU($uri, ns("event", "agent"), $event->host);
 	}
 
-	// Process tags
+	// Process tags.
 	if(isset($event->tags))
 	{
 		foreach($event->tags->event as $tag)
@@ -255,40 +351,33 @@ function processEvent($event, $feedid)
 		}
 	}
 
-	// Process dates
+	// Process dates.
 	$i = 0;
 	foreach($event->date->event as $d)
 	{
 		$i++;
-		// The event has a 'from' datetime
+		// The event has a 'from' datetime.
 		if(isset($d->from))
 		{
 			tripleU($uri, ns("event", "time"), "$uri#time-$i");
 			tripleA("$uri#time-$i", ns("tl", "Interval"));
 			tripleL("$uri#time-$i", ns("tl", "start"), $d->from);
-			// The event also has a 'to' datetime
+			// The event also has a 'to' datetime.
 			if(isset($d->to))
 			{
 				tripleL("$uri#time-$i", ns("tl", "end"), $d->to);
-				//tripleL("$uri#time-$i", ns("rdfs", "label"), $d->from." - ".$d->to);
 			}
-			//else
-			//{
-			//	tripleL("$uri#time-$i", ns("rdfs", "label"), $d->from);
-			//}
 		}
-		// The event has a simple 'date' (with no time)
+		// The event has a simple 'date' (with no time).
 		elseif(isset($d->date))
 		{
 			tripleU($uri, ns("event", "time"), "$uri#time-$i");
 			tripleA("$uri#time-$i", ns("tl", "Interval"));
-			//tripleL("$uri#time-$i", ns("tl", "start"), $d->date);
-			//tripleL("$uri#time-$i", ns("tl", "end"), str_replace("00:00:00", "23:59:59", $d->date));
 			tripleL("$uri#time-$i", ns("tl", "at"), substr($d->date, 0, 10));
 		}
 	}
 
-	// Process venue
+	// Process venue.
 	if(isset($event->venuelink))
 	{
 		tripleU($uri, ns("event", "place"), $event->venuelink);
@@ -301,6 +390,7 @@ function processEvent($event, $feedid)
 			tripleU($event->venuelink, "http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within", "http://id.southampton.ac.uk/building/".$roomid[0]);
 		}
 	}
+
 	// TODO: Currently, venues with a defined URI (which may be at the campus level) also have a separate
 	//       'SpatialThing' entity created.  This is in order to make the full venue details available.
 	//	 If this behaviour is undesired, change this 'if' to an 'else if'.
@@ -311,7 +401,7 @@ function processEvent($event, $feedid)
 		tripleL("$uri#place", ns("rdfs", "label"), $event->venue);
 	}
 
-	// Process speaker
+	// Process speaker.
 	if(isset($event->speaker))
 	{
 		tripleU($uri, ns("event", "agent"), "$uri#speaker");
