@@ -44,11 +44,12 @@ echo generateEventXML($data);
  */
 function process($item, $options)
 {
+	global $diary_config;
 	$link = trim($item->link);
 	$rdflink = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://rdf.ecs.soton.ac.uk/presentation/', $link);
 	$id = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://id.ecs.soton.ac.uk/presentation/', $link);
 	$graph = new Graphite();
-	$graph->cacheDir("/home/diary/diary.soton.ac.uk/cache");
+	$graph->cacheDir($diary_config["path"]."/diary.soton.ac.uk/cache");
 	$graph->load($rdflink);
 	$graph->ns("ecs", "http://rdf.ecs.soton.ac.uk/ontology/ecs#");
 	$p = $graph->resource($id);
