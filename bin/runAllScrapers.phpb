@@ -40,6 +40,7 @@ $ns['foaf']	= 'http://xmlns.com/foaf/0.1/';
 $ns['dcterms']	= 'http://purl.org/dc/terms/';
 $ns['diary']	= 'http://id.southampton.ac.uk/ns/diary/';
 $ns['deri']	= 'http://vocab.deri.ie/rooms#';
+$ns['prog']	= 'http://purl.org/prog/';
 
 // Try opening the config file.
 if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
@@ -200,10 +201,18 @@ function runChild($script, $options) {
 		// Open a file to write the output (as RDF triples) to.
 		$fh = fopen($diary_config["path"].'/var/output/'.$safeid, 'w');
 
+		tripleA('http://id.southampton.ac.uk/diary/', ns('prog', 'Programme'));
+		
+		$feeduri = 'http://id.southampton.ac.uk/diary/'.$safeid;
+		tripleA($feeduri, ns('prog', 'Programme'));
+
 		foreach($xml->event as $event)
 		{
 			// Process the event.
 			processEvent($event, $options['FeedID']);
+			$eventuri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
+			tripleU($feeduri, ns('prog', 'has_event'), $eventuri);
+			tripleU('http://id.southampton.ac.uk/diary/', ns('prog', 'has_event'), $eventuri);
 		}
 
 		// Close the file.
