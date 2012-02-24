@@ -116,11 +116,15 @@ foreach($events as $date => $dayevents)
 	echo "</div>\n";
 }
 
-printSelects($organisers, 'org', 'Show entire university', 'printChildrenOptions');
-printSelects($places, 'place', 'Show all locations');
-printSelects($types, 'type', 'Show all types');
+printDropDowns($organisers, 'org', 'Show entire university', 'printOrganisationTreeOptions');
+printDropDowns($places, 'place', 'Show all locations');
+printDropDowns($types, 'type', 'Show all types');
 
-function printSelects($values, $id, $showAllString, $processOptions) {
+/**
+ * Print a drop-down box to select from a set of values.
+ *
+ */
+function printDropDowns($values, $id, $showAllString, $processOptions) {
 	asort($values);
 	print "<select id='$id' onchange='showCats()'>\n";
 	print "\t<option value='event'>($showAllString)</option>\n";
@@ -134,7 +138,11 @@ function printSelects($values, $id, $showAllString, $processOptions) {
 	print "</select>\n";
 }
 
-function printChildrenOptions($values, $node = null, $depth = 0) {
+/**
+ * Print a set of options representing the organisational structure.
+ *
+ */
+function printOrganisationTreeOptions($values, $node = null, $depth = 0) {
 	global $graph;
 	if($node == null) {
 		$orgtree = getOrganisationTree($graph->resource("http://id.southampton.ac.uk/"), array_keys($values));
@@ -153,6 +161,10 @@ function printChildrenOptions($values, $node = null, $depth = 0) {
 	}
 }
 
+/**
+ * Format a single event.
+ *
+ */
 function formatEvent($time, $date)
 {
 	$event = $time->get("-event:time");
@@ -213,6 +225,10 @@ function formatEvent($time, $date)
 	print "</div>\n";
 }
 
+/**
+ * Format a time.
+ *
+ */
 function formatTime($time, $date) {
 	if(substr($time, 0, 10) != $date)
 	{
@@ -221,6 +237,10 @@ function formatTime($time, $date) {
 	return substr($time, 11, 5);
 }
 
+/**
+ * Output all places associated with an event.
+ *
+ */
 function outputPlaces($event, $filter=null)
 {
 	if( $event->has( "event:place" ) )
