@@ -85,12 +85,9 @@ function processFeed($script, $options)
 	printInfo("Processing $id");
 	printInfo("Script: $script");
 
-	if($script == "Nuffield")
-	{
-		$limit = 180;
-	}
-	else
-	{
+	if($options['TimeLimit'] != "") {
+		$limit = $options['TimeLimit'];
+	} else {
 		$limit = 30;
 	}
 
@@ -381,9 +378,10 @@ function processEvent($event, $feedid)
 	if(isset($event->venuelink))
 	{
 		tripleU($uri, ns("event", "place"), $event->venuelink);
-		if(substr($event->venuelink, 0, 33) == "http://id.southampton.ac.uk/room/")
+		$roomprefix = "http://id.southampton.ac.uk/room/";
+		if(substr($event->venuelink, 0, strlen($roomprefix)) == $roomprefix)
 		{
-			$roomid = substr($event->venuelink, 33);
+			$roomid = substr($event->venuelink, strlen($roomprefix));
 			$roomid = explode('-', $roomid);
 			tripleA($event->venuelink, ns("deri", "Room"));
 			tripleL($event->venuelink, ns("rdfs", "label"), implode(" / ", $roomid));
