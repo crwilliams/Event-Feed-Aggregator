@@ -15,68 +15,23 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ?>
 <html>
-<head>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-<script type="text/javascript">
-var showCats = function()
-{
-	$('div.day').show();
-	$('div.event').hide();
-	$('div.event').each(function(index, value) {
-		if($(this).hasClass($('#org').val()) && $(this).hasClass($('#type').val()) && $(this).hasClass($('#place').val()))
-		{
-			$(this).show();
-		}
-	});
-	$('div.day').each(function(index, value) {
-		if($(this).children().filter(':visible').size() == 1)
-		{
-			$(this).hide();
-		}
-	});
-}
-</script>
-<style>
-h3 {
-	float:left;
-	font-size:1.5em;
-	margin:0px;
-}
-div.speakers {
-}
-div.description {
-	font-size:1.2em;
-	text-align:justify;
-}
-div.event {
-	position: relative;
-	border: solid 3px navy;
-	padding: 5px;
-	margin: 5px;
-}
-div.event-info {
-	position: relative;
-	float: right;
-	width: 30%;
-	height: 100%;
-	margin: 10px;
-	padding: 10px;
-	margin-top: 0px;
-	margin-right: 0px;
-}
-</style>
-<title>University of Southampton | Diary</title>
-<meta charset="utf-8" />
-</head>
-<body>
+	<head>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="js/filtering.js"></script>
+		<link rel="stylesheet" href="css/style.css" />
+		<title>University of Southampton | Diary</title>
+		<meta charset="utf-8" />
+	</head>
+	<body>
 <?php
 require_once( "/var/wwwsites/phplib/arc/ARC2.php" );
 require_once( "/var/wwwsites/phplib/Graphite.php" );
 
-$basetime=microtime(true);
-$graph = Graphite::thaw( "/home/diary/var/data.php" );
-print "<!-- LOAD diary: ".(microtime(true)-$basetime)." -->";
-$basetime=microtime(true);
+if(isset($_GET['ox'])) {
+	$graph = Graphite::thaw( "/home/diary/var/data-ox.php" );
+} else {
+	$graph = Graphite::thaw( "/home/diary/var/data.php" );
+}
 
 $graph->cacheDir("/home/diary/diary.soton.ac.uk/cache");
 
@@ -86,7 +41,7 @@ $graph->ns( "tl", "http://purl.org/NET/c4dm/timeline.owl#" );
 function getPlaceLabel($place)
 {
 	$str = "";
-	// Try to get a rdfs:label which is not simply the building/room number
+	// Try to get a rdfs:label which is not simply the building/room number.
 	foreach($place->all("rdfs:label") as $label)
 	{
 		if(!preg_match('/^[0-9]+[A-Z] \/ [0-9]+$/', $label))
@@ -97,7 +52,7 @@ function getPlaceLabel($place)
 				$str = "<a href='".$place."'>" . $label . "</a>";
 		}
 	}
-	// If that fails, use any label
+	// If that fails, use any label.
 	if($str == "")
 	{
 		if(substr($place, 0, 34) == 'http://id.southampton.ac.uk/event/')
@@ -145,8 +100,8 @@ foreach($events as $date => $dayevents)
 {
 	if($date < date('Y-m-d'))
 		continue;
-	echo "<div class='day'>";
-	echo "<h2>".date('l jS F Y', strtotime($date))."</h2>";
+	echo "<div class='day'>\n";
+	echo "\t<h2>".date('l jS F Y', strtotime($date))."</h2>\n";
 	ksort($dayevents);
 	foreach($dayevents as $time => $timeevents)
 	{
@@ -158,45 +113,43 @@ foreach($events as $date => $dayevents)
 			getPlaces($places, $eventtime->get("-event:time"));
 		}
 	}
-	echo "</div>";
+	echo "</div>\n";
 }
 
-$orgtree = getOrganisationTree($graph->resource("http://id.southampton.ac.uk/"), array_keys($organisers));
+printSelects($organisers, 'org', 'Show entire university', 'printChildrenOptions');
+printSelects($places, 'place', 'Show all locations');
+printSelects($types, 'type', 'Show all types');
 
-asort($organisers);
-print "<select id='org' onchange='showCats()' style='position:fixed; top:5px; right:5px;'>";
-print "<option value='event'>(Show entire university)</option>";
-printChildrenOptions($orgtree[md5('http://id.southampton.ac.uk/')]);
-print "</select>";
-
-asort($places);
-print "<select id='place' onchange='showCats()' style='position:fixed; top:25px; right:5px;'>";
-print "<option value='event'>(Show all locations)</option>";
-foreach($places as $key => $name)
-{
-	print "<option value='$key'>$name</option>";
+function printSelects($values, $id, $showAllString, $processOptions) {
+	asort($values);
+	print "<select id='$id' onchange='showCats()'>\n";
+	print "\t<option value='event'>($showAllString)</option>\n";
+	if($processOptions == null) {
+		foreach($values as $key => $name) {
+			print "\t<option value='$key'>$name</option>\n";
+		}
+	} else {
+		$processOptions($values);
+	}
+	print "</select>\n";
 }
-print "</select>";
 
-asort($types);
-print "<select id='type' onchange='showCats()' style='position:fixed; top:45px; right:5px;'>";
-print "<option value='event'>(Show all types)</option>";
-foreach($types as $key => $name)
-{
-	print "<option value='$key'>$name</option>";
-}
-print "</select>";
-
-function printChildrenOptions($node, $depth = 0) {
-	if(!isset($node['children']))
+function printChildrenOptions($values, $node = null, $depth = 0) {
+	global $graph;
+	if($node == null) {
+		$orgtree = getOrganisationTree($graph->resource("http://id.southampton.ac.uk/"), array_keys($values));
+		printChildrenOptions($values, $orgtree[md5('http://id.southampton.ac.uk/')]);
+	}
+	if(!isset($node['children'])) {
 		return;
-	foreach($node['children'] as $key => $d)
-	{
-		print "<option value='$key'>";
-		for($i = 0; $i < $depth; $i++)
+	}
+	foreach($node['children'] as $key => $d) {
+		print "\t<option value='$key'>";
+		for($i = 0; $i < $depth; $i++) {
 			print "- ";
-		print $d['name']."</option>";
-		printChildrenOptions($d, $depth + 1);
+		}
+		print $d['name']."</option>\n";
+		printChildrenOptions($values, $d, $depth + 1);
 	}
 }
 
@@ -210,22 +163,22 @@ function formatEvent($time, $date)
 	$places = array();
 	getPlaces($places, $event);
 
-	print "<div class='event ".implode(" ", array_keys($organisers))." ".implode(" ", array_keys($types))." ".implode(" ", array_keys($places))."'>";
-	print "<h3>".$event->label()."</h3>";
-	print "<div class='event-info'>";
+	print "<div class='event ".implode(" ", array_keys($organisers))." ".implode(" ", array_keys($types))." ".implode(" ", array_keys($places))."'>\n";
+	print "\t<h3>".$event->label()."</h3>\n";
+	print "\t<div class='event-info'>\n";
 	if( $event->has( "event:homepage" ) )
 	{
-		print "<a href='".$event->get( "event:homepage" )."'>Visit event homepage</a>";
+		print "\t\t<a href='".$event->get( "event:homepage" )."'>Visit event homepage</a>\n";
 	}
 	if( $time->has( "tl:start" ) && substr($time->getString("tl:start"), 0, 10) == $date )
 	{
-		print "<div>";
+		print "\t\t<div>";
 		print formatTime($time->getString( "tl:start" ), $date);
 		if( $time->has( "tl:end" ) )
 		{
 			print " - ".formatTime($time->getString( "tl:end" ), $date);
 		}
-		print "</div>";
+		print "</div>\n";
 	}
 	outputPlaces($event, "Place");
 	outputPlaces($event, "Additional Place Info");
@@ -233,31 +186,31 @@ function formatEvent($time, $date)
 	if(count($organisers) > 0)
 	{
 		sort($organisers);
-		print "<div class='organisers'>Organised by: ";
+		print "\t\t<div class='organisers'>Organised by: ";
 		foreach($organisers as $organiser)
 		{
 			print $organiser." ";
 		}
-		print "</div>";
+		print "</div>\n";
 	}
-	print "</div>";
-	print "<div style='clear:left'></div>";
+	print "\t</div>\n";
+	print "\t<div style='clear:left'></div>\n";
 	$speakers = getAgents($event, "Speaker");
 	if(count($speakers) > 0)
 	{
-		print "<div class='speakers'>Speaker".((count($speakers) > 1) ? "s" : "").": ";
+		print "\t<div class='speakers'>Speaker".((count($speakers) > 1) ? "s" : "").": ";
 		foreach(getAgents($event, "Speaker") as $speaker)
 		{
 			print $speaker." ";
 		}
-		print "</div>";
+		print "</div>\n";
 	}
 	if( $event->has( "dct:description" ) )
 	{
-		print "<div class='description'>".$event->getString( "dct:description" )."</div>";
+		print "\t<div class='description'>".$event->getString( "dct:description" )."</div>\n";
 	}
-	print "<div style='clear:both'></div>";
-	print "</div>";
+	print "\t<div style='clear:both'></div>\n";
+	print "</div>\n";
 }
 
 function formatTime($time, $date) {
@@ -291,16 +244,20 @@ function outputPlaces($event, $filter=null)
 			}
 			if($place->label() == '[NULL]')
 			{
-				print "<div>$typel".$place->link()."</div>";
+				print "\t\t<div>$typel".$place->link()."</div>\n";
 			}
 			else
 			{
-				print "<div>$typel".getPlaceLabel($place)."</div>";
+				print "\t\t<div>$typel".getPlaceLabel($place)."</div>\n";
 			}
 		}
 	}
 }
 
+/**
+ * Get the types of an event.
+ *
+ */
 function getTypes(&$types, $event)
 {
 	foreach( $event->all("http://id.southampton.ac.uk/ns/diary/event-type") as $type )
@@ -312,6 +269,10 @@ function getTypes(&$types, $event)
 	return $types;
 }
 
+/**
+ * Get the organisation tree, rooted at the given node, filtered according to the filter.
+ *
+ */
 function getOrganisationTree($node, $filter)
 {
 	$tree = array();
@@ -334,11 +295,19 @@ function getOrganisationTree($node, $filter)
 	return $tree;
 }
 
+/**
+ * Compare elements in the organisation tree.
+ *
+ */
 function sortOrgTree($a, $b) {
 	if($a['name'] == $b['name']) return 0;
 	return ($a['name'] < $b['name']) ? -1 : 1;
 }
 
+/**
+ * Get the organisers of an event.
+ *
+ */
 function getOrganisers(&$organisers, $event)
 {
 	if( $event->has( "event:agent" ) )
@@ -359,6 +328,10 @@ function getOrganisers(&$organisers, $event)
 	}
 }
 
+/**
+ * Get the location of an event.
+ *
+ */
 function getPlaces(&$places, $event)
 {
 	if( $event->has( "event:place" ) )
@@ -374,6 +347,10 @@ function getPlaces(&$places, $event)
 	}
 }
 
+/**
+ * Get the site that a place belongs to.
+ *
+ */
 function getSite($place)
 {
 	if($place->isType("http://www.w3.org/ns/org#Site"))
@@ -390,6 +367,10 @@ function getSite($place)
 	}
 }
 
+/**
+ * Get the agents related to an event.
+ *
+ */
 function getAgents($event, $filter=null)
 {
 	$agents = array();
@@ -427,8 +408,6 @@ function getAgents($event, $filter=null)
 	return $agents;
 }
 
-print "<!-- ";
-print "OTHER: ".(microtime(true)-$basetime)." -->";
 ?>
 </body>
 </html>
