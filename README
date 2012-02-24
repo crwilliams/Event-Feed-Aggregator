@@ -1,4 +1,4 @@
-Event-Feed-Aggregator is a tool for aggregating event feeds from multiple sources into a single data set, which can then be presented consistently.
+Event-Feed-Aggregator is a tool for aggregating event feeds from multiple sources into a single data set (in N-triples RDF format), which can then be presented consistently.
 
 It was developed for use on http://soton-diary.ecs.soton.ac.uk/ .
 
