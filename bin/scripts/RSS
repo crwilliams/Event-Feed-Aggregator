@@ -18,6 +18,7 @@ require '../etc/config.php';
 include $diary_config["path"].'/lib/utils.php';
 include $diary_config["path"].'/lib/options.php';
 
+// Get the RSS data from the Feed URL.
 $rss = getRSS($options->FeedURL);
 
 $data = array();
@@ -25,11 +26,20 @@ if($rss != null && $rss->channel != null && $rss->channel->item != null)
 {
 	foreach($rss->channel->item as $item)
 	{
+		// Process the event.
 		$data[] = process($item, $options);
 	}
 }
+
+// Output the data as XML.
 echo generateEventXML($data);
 
+/**
+ * Process a single event.
+ *
+ * @param	object	$item		The item to process.
+ * @param	array	$options	The options passed to this script.
+ */
 function process($item, $options)
 {
 	$title = trim($item->title);
@@ -60,84 +70,78 @@ function process($item, $options)
 	return $res;
 }
 
+/**
+ * Try to extract the dates from a description of the event.
+ *
+ * @param	string	$desc	The description of the event.
+ */
 function getDates(&$desc)
 {
 	$pdate = array();
 	if(count($desc) > 0)
 	{
+		// Remove any unexpected characters from the string before doing the comparisons.
 		$compstr = preg_replace('/[^A-Za-z0-9 ,:\[\]-]+/', ' ', trim($desc[0]));
-		//12:00, 26 June 2011
-		//12:00 - 13:00, 26 June 2011
+
+		// If the string if of one of the forms:
+		// 'd mmm yyyy' (ie a single date)
+		// 'hh:mm, d mmm yyyy' (ie a time and date)
+		// 'hh:mm - hh:mm, d mmm yyyy' (ie a time range and a date)
+		// ...
 		if(preg_match('/^\[(([0-2]?[0-9]:[0-5][0-9])( - ([0-2]?[0-9]:[0-5][0-9]))?, )?(([1-3]?[0-9]) ([A-Z][a-z][a-z])[a-z]* (20[0-9][0-9]))\]$/', $compstr, $matches))
 		{
 			if($matches[2] == "" && $matches[4] == "")
 			{
+				// No times specified.
 				$date['date'] = date('c', strtotime($matches[6].' '.$matches[7].' '.$matches[8]));
 				$pdate[] = $date;
 			}
 			else
 			{
-				$tmpfrom = strtotime($matches[2].' '.$matches[6].' '.$matches[7].' '.$matches[8]);
-				$date['from'] = date('c', $tmpfrom);
+				$date['from'] = date('c', strtotime($matches[2].' '.$matches[6].' '.$matches[7].' '.$matches[8]));
 				if($matches[4] != "")
 				{
-					$tmpto = strtotime($matches[4].' '.$matches[6].' '.$matches[7].' '.$matches[8]);
-					$date['to'] = date('c', $tmpto);
+					// There is an end time to the event.
+					$date['to'] = date('c', strtotime($matches[4].' '.$matches[6].' '.$matches[7].' '.$matches[8]));
 				}
 				$pdate[] = $date;
 			}
+			// Remove the line from the description.
 			array_shift($desc);
 		}
-		//12:00, 26 June 2011 - 12:30, 1 July 2011
+		// If the string is of the form 'hh:mm, d mmm yyyy - hh:mm, d mmm yyyy' (ie a time and date range)...
 		else if(preg_match('/^\[([0-2]?[0-9]:[0-5][0-9]), (([1-3]?[0-9]) ([A-Z][a-z][a-z])[a-z]* (20[0-9][0-9])) - ([0-2]?[0-9]:[0-5][0-9]), (([1-3]?[0-9]) ([A-Z][a-z][a-z])[a-z]* (20[0-9][0-9]))\]$/', $compstr, $matches))
 		{
-			$tmpfrom = strtotime($matches[1].' '.$matches[3].' '.$matches[4].' '.$matches[5]);
-			$date['from'] = date('c', $tmpfrom);
-			$tmpto = strtotime($matches[6].' '.$matches[8].' '.$matches[9].' '.$matches[10]);
-			$date['to'] = date('c', $tmpto);
+			// This event is assumed to take place from the specified time on the start day until the specified time on the end day.
+			$date['from'] = date('c', strtotime($matches[1].' '.$matches[3].' '.$matches[4].' '.$matches[5]));
+			$date['to'] = date('c', strtotime($matches[6].' '.$matches[8].' '.$matches[9].' '.$matches[10]));
 			$pdate[] = $date;
+			// Remove the line from the description.
 			array_shift($desc);
 		}
-		//09:00 - 18:00, 8 - 10 April 2011
+		// If the string is of the form 'hh:mm - hh:mm, d - d mmm yyyy' (ie a time range and a date range in a single month)...
 		else if(preg_match('/^\[([0-2]?[0-9]:[0-5][0-9]) - ([0-2]?[0-9]:[0-5][0-9]), ([1-3]?[0-9]) - ([1-3]?[0-9]) ([A-Z][a-z][a-z])[a-z]* (20[0-9][0-9])\]$/', $compstr, $matches))
 		{
-			$datefrom = new DateTime($matches[3].' '.$matches[5].' '.$matches[6]);
-			$dateto = new DateTime($matches[4].' '.$matches[5].' '.$matches[6]);
-			while($datefrom <= $dateto)
-			{
-				$tmpfrom = strtotime($matches[1].' '.date_format($datefrom, 'Y/m/d'));
-				$tmpto = strtotime($matches[2].' '.date_format($datefrom, 'Y/m/d'));
-				$date['from'] = date('c', $tmpfrom);
-				$date['to'] = date('c', $tmpto);
-				$pdate[] = $date;
-				date_add($datefrom, new DateInterval('P1D'));
-			}
+			// This event is assumed to take place during the specified time range on each day in the day range.
+			$pdate = makeDateArray(new DateTime($matches[3].' '.$matches[5].' '.$matches[6]), new DateTime($matches[4].' '.$matches[5].' '.$matches[6]),
+					$matches[1], $matches[2]);
+			// Remove the line from the description.
 			array_shift($desc);
 		}
-		//5 February 2012 - 1 April 2012
+		// If the string is of the form 'd mmm yyyy - d mmm yyyy' (ie a date range)...
 		else if(preg_match('/^\[([1-3]?[0-9]) ([A-Z][a-z][a-z])[a-z]* (20[0-9][0-9]) - ([1-3]?[0-9]) ([A-Z][a-z][a-z])[a-z]* (20[0-9][0-9])\]$/', $compstr, $matches))
 		{
-			$datefrom = new DateTime($matches[1].' '.$matches[2].' '.$matches[3]);
-			$dateto = new DateTime($matches[4].' '.$matches[5].' '.$matches[6]);
-			while($datefrom <= $dateto)
-			{
-				$date['date'] = date_format($datefrom, 'c');
-				$pdate[] = $date;
-				date_add($datefrom, new DateInterval('P1D'));
-			}
+			// This event is assumed to take place on each day in the day range (time unspecified).
+			$pdate = makeDateArray(new DateTime($matches[1].' '.$matches[2].' '.$matches[3]), new DateTime($matches[4].' '.$matches[5].' '.$matches[6]));
+			// Remove the line from the description.
 			array_shift($desc);
 		}
-		//8 - 9 July 2011
+		// If the string is of the form 'd - d mmm yyyy' (ie a date range in a single month)...
 		else if(preg_match('/^\[([1-3]?[0-9]) - ([1-3]?[0-9]) ([A-Z][a-z][a-z])[a-z]* (20[0-9][0-9])\]$/', $compstr, $matches))
 		{
-			$datefrom = new DateTime($matches[1].' '.$matches[3].' '.$matches[4]);
-			$dateto = new DateTime($matches[2].' '.$matches[3].' '.$matches[4]);
-			while($datefrom <= $dateto)
-			{
-				$date['date'] = date_format($datefrom, 'c');
-				$pdate[] = $date;
-				date_add($datefrom, new DateInterval('P1D'));
-			}
+			// This event is assumed to take place on each day in the day range (time unspecified).
+			$pdate = makeDateArray(new DateTime($matches[1].' '.$matches[3].' '.$matches[4]), new DateTime($matches[2].' '.$matches[3].' '.$matches[4]));
+			// Remove the line from the description.
 			array_shift($desc);
 		}
 	}
@@ -148,6 +152,36 @@ function getDates(&$desc)
 	return $pdate;
 }
 
+/**
+ * Make an array of dates between the specified date range (inclusive).
+ *
+ * @param	DateTime	$datefrom	The start date.
+ * @param	DateTime	$dateto		The end date.
+ * @param	string		$timefrom	The start time (optional).
+ * @param	string		$timeto		The end time (optional).
+ */
+function makeDateArray($datefrom, $dateto, $timefrom = null, $timeto = null) {
+	$pdate = array();
+	while($datefrom <= $dateto) {
+		if($timefrom != null && $timeto != null) {
+			$tmpfrom = strtotime($timefrom.' '.date_format($datefrom, 'Y/m/d'));
+			$tmpto = strtotime($timeto.' '.date_format($datefrom, 'Y/m/d'));
+			$date['from'] = date('c', $tmpfrom);
+			$date['to'] = date('c', $tmpto);
+		} else {
+			$date['date'] = date_format($datefrom, 'c');
+		}
+		$pdate[] = $date;
+		date_add($datefrom, new DateInterval('P1D'));
+	}
+	return $pdate;
+}
+
+/**
+ * Try to get additional information regarding the event.
+ *
+ * @param	string	$link	The page which provides details about the event.
+ */
 function getExtraInfo(&$link)
 {
 	$l = $link;
@@ -199,12 +233,17 @@ function getExtraInfo(&$link)
 		'venuelink' => str_replace(array("\n", "\r"), " ", $venuelink),
 		'speaker' => str_replace(array("\n", "\r"), " ", $speaker),
 		'speakerlink' => str_replace(array("\n", "\r"), " ", $speakerlink),
-		//'link' => (string)$link,
 	);
 }
 
+/**
+ * Tidy a speaker's name.
+ *
+ * @param	string	$text	The text to tidy.
+ */
 function tidySpeaker($text)
 {
+	// Remove everything beyond the first comma then space or double space.
 	return preg_replace('/[, ] .*/', '', trim($text));
 }
 

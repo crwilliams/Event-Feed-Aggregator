@@ -20,6 +20,7 @@ include $diary_config["path"].'/lib/options.php';
 require_once( "/var/wwwsites/phplib/arc/ARC2.php" );
 require_once( "/var/wwwsites/phplib/Graphite.php" );
 
+// Get the RSS data from the Feed URL.
 $rss = getRSS($options->FeedURL);
 
 $data = array();
@@ -27,11 +28,20 @@ if($rss->item != null)
 {
 	foreach($rss->item as $item)
 	{
+		// Process the event.
 		$data[] = process($item, $options);
 	}
 }
+
+// Output the data as XML.
 echo generateEventXML($data);
 
+/**
+ * Process a single event.
+ *
+ * @param	object	$item		The item to process.
+ * @param	array	$options	The options passed to this script.
+ */
 function process($item, $options)
 {
 	$link = trim($item->link);
@@ -44,7 +54,7 @@ function process($item, $options)
 	$p = $graph->resource($id);
 	$title = (string)$p->get("ecs:hasName");
 	$desc = (string)$p->get("ecs:hasDescription");
-	$group = processGroup((string)$p->get("ecs:from-group"));
+	$group = getGroupURI((string)$p->get("ecs:from-group"));
 
 	$venuelink = "";
 	foreach($p->all("http://purl.org/NET/c4dm/event.owl#place") as $place)
@@ -87,9 +97,14 @@ function process($item, $options)
 	return $res;
 }
 
-function processGroup($groupid)
+/**
+ * Get the University of Southampton group URI from the ECS presentation series URI.
+ *
+ * @param	string	$seriesURI	The URI of the presentation series.
+ */
+function getGroupURI($seriesURI)
 {
-	switch($groupid) {
+	switch($seriesURI) {
 		case "http://rdf.ecs.soton.ac.uk/presentation/grouphvlab":
 			return "http://id.southampton.ac.uk/org/F7FP050000";
 		case "http://rdf.ecs.soton.ac.uk/presentation/groupess":

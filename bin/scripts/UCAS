@@ -18,6 +18,7 @@ require '../etc/config.php';
 include $diary_config["path"].'/lib/utils.php';
 include $diary_config["path"].'/lib/options.php';
 
+// Get the HTML from the Feed URL.
 $dom = getHTML($options->FeedURL);
 
 $data = array();
@@ -25,11 +26,19 @@ if($dom->find('table/tbody/tr') != null)
 {
 	foreach($dom->find('table/tbody/tr') as $item)
 	{
+		// Process the event.
 		$data[] = process($item, $options);
 	}
 }
+// Output the data as XML.
 echo generateEventXML($data);
 
+/**
+ * Process a single event.
+ *
+ * @param	object	$item		The item to process.
+ * @param	array	$options	The options passed to this script.
+ */
 function process($item, $options)
 {
 	$area = html_entity_decode((string)$item->find('td', 0)->plaintext);
@@ -43,10 +52,12 @@ function process($item, $options)
 	$pdate = array();
 	if(preg_match('/^([1-3]?[0-9])(st|nd|rd|th) ([A-Z][a-z][a-z])[a-z]+$/', trim($date), $matches))
 	{
+		// This is a one-day event.
 		$pdate[] = array('date' => date('c', strtotime($matches[1].' '.$matches[3])));
 	}
 	else if(preg_match('/^([1-3]?[0-9])(st|nd|rd|th) & ([1-3]?[0-9])(st|nd|rd|th) ([A-Z][a-z][a-z])[a-z]+$/', trim($date), $matches))
 	{
+		// This is a two-day event.
 		$pdate[] = array('date' => date('c', strtotime($matches[1].' '.$matches[5])));
 		$pdate[] = array('date' => date('c', strtotime($matches[3].' '.$matches[5])));
 	}
