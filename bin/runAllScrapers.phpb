@@ -284,7 +284,10 @@ function tripleU($subject, $predicate, $object) {
  * @param	string	$predicate	The URI of the predicate.
  * @param	string	$object		The literal value of the object.
  */
-function tripleL($subject, $predicate, $object) {
+function tripleL($subject, $predicate, $object, $object_type = null ) {
+	if( isset( $object_type ) ) { 
+		writeToFile("<$subject> <$predicate> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($object, " "))."\"^^<$object_type> .");
+	}
 	writeToFile("<$subject> <$predicate> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($object, " "))."\" .");
 }
 
@@ -367,11 +370,11 @@ function processEvent($event, $feedid)
 		{
 			tripleU($uri, ns("event", "time"), "$uri#time-$i");
 			tripleA("$uri#time-$i", ns("tl", "Interval"));
-			tripleL("$uri#time-$i", ns("tl", "start"), $d->from);
+			tripleL("$uri#time-$i", ns("tl", "start"), $d->from, "http://www.w3.org/2001/XMLSchema#dateTime" );
 			// The event also has a 'to' datetime.
 			if(isset($d->to))
 			{
-				tripleL("$uri#time-$i", ns("tl", "end"), $d->to);
+				tripleL("$uri#time-$i", ns("tl", "end"), $d->to, "http://www.w3.org/2001/XMLSchema#dateTime");
 			}
 		}
 		// The event has a simple 'date' (with no time).
@@ -379,7 +382,7 @@ function processEvent($event, $feedid)
 		{
 			tripleU($uri, ns("event", "time"), "$uri#time-$i");
 			tripleA("$uri#time-$i", ns("tl", "Interval"));
-			tripleL("$uri#time-$i", ns("tl", "at"), substr($d->date, 0, 10));
+			tripleL("$uri#time-$i", ns("tl", "at"), substr($d->date, 0, 10), "http://www.w3.org/2001/XMLSchema#date");
 		}
 	}
 
