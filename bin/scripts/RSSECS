@@ -98,7 +98,7 @@ function process($item, $options)
 		'venuelink'	=> $venuelink,
 		'speakerlink'	=> $speakerlink,
 		'speaker'	=> $speaker,
-		'sourceDocuments' => array($rdflink);
+		'sourceDocuments' => array($rdflink),
 	);
 	return $res;
 }
