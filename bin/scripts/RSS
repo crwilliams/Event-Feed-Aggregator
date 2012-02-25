@@ -237,6 +237,7 @@ function getExtraInfo(&$link)
 		'venuelink' => str_replace(array("\n", "\r"), " ", $venuelink),
 		'speaker' => str_replace(array("\n", "\r"), " ", $speaker),
 		'speakerlink' => str_replace(array("\n", "\r"), " ", $speakerlink),
+		'sourceDocuments' => array($link),
 	);
 }
 

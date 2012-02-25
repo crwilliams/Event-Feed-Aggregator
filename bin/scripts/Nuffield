@@ -117,6 +117,7 @@ function process($item, $options)
 		'feedID'	=> (string)$options->FeedID,
 		'host'		=> (string)$options->FacultyUnitGroup,
 		'tags'		=> explode(" ", $options->Tags),
+		'sourceDocuments' => array($link),
 	);
 }
 
