@@ -193,7 +193,7 @@ function getExtraInfo(&$link)
 	if($div == null) { return array(); }
 	$div = $div->find('div.iw_component', 0);
 	if($div == null) { return array(); }
-	$div->find('div', 0);
+	$div = $div->find('div', 0);
 	if($div == null) { return array(); }
 	$venue = "";
 	$venuelink = "";
