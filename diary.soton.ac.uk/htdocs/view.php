@@ -146,7 +146,7 @@ function printOrganisationTreeOptions($values, $node = null, $depth = 0) {
 	global $graph;
 	if($node == null) {
 		$orgtree = getOrganisationTree($graph->resource("http://id.southampton.ac.uk/"), array_keys($values));
-		printChildrenOptions($values, $orgtree[md5('http://id.southampton.ac.uk/')]);
+		printOrganisationTreeOptions($values, $orgtree[md5('http://id.southampton.ac.uk/')]);
 	}
 	if(!isset($node['children'])) {
 		return;
@@ -157,7 +157,7 @@ function printOrganisationTreeOptions($values, $node = null, $depth = 0) {
 			print "- ";
 		}
 		print $d['name']."</option>\n";
-		printChildrenOptions($values, $d, $depth + 1);
+		printOrganisationTreeOptions($values, $d, $depth + 1);
 	}
 }
 
