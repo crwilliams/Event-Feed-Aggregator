@@ -17,11 +17,21 @@ date_default_timezone_set('Europe/London');
 require_once $diary_config["path"].'/lib/xml.php';
 require_once $diary_config["path"].'/lib/simple_html_dom.php';
 
+/**
+ * Tidy a number.
+ *
+ * @param	string	$text	The text to tidy.
+ */
 function tidyNumber($text)
 {
 	return str_replace(array('(', ')'), '', $text);
 }
 
+/**
+ * Try to get a venue link from the venue details.
+ *
+ * @param	string	$venue	The venue details.
+ */
 function getVenueLink(&$venue)
 {
 	$bdef = '[0-9]+[A-Z]?';
@@ -88,6 +98,11 @@ function getVenueLink(&$venue)
 	return "";
 }
 
+/**
+ * Remove unneccessary additional information from the venue details.
+ *
+ * @param	string	$v	The venue details.
+ */
 function finalStrip($v)
 {
 	$v = preg_replace('/TURNER SIMS( CONCERT HALL)?/', '', $v);
@@ -103,6 +118,12 @@ function finalStrip($v)
 	return $v;
 }
 
+/**
+ * Log an error.
+ *
+ * @param	string	$error	The error string.
+ * @param	string	$feedid	The ID of the feed that the error relates to.
+ */
 function logError($error, $feedid=null)
 {
 	if($feedid == null)
@@ -115,16 +136,36 @@ function logError($error, $feedid=null)
 	fclose($file);
 }
 
+/**
+ * Get an RSS feed.
+ *
+ * @param	string	$url	The URL of the RSS feed.
+ * @param	int		$timeout	The cache timeout in hours.
+ */	
 function getRSS(&$url, $timeout=1)
 {
 	return getFromURL($url, $timeout, 'simplexml_load_file', 'simplexml_load_string');
 }
 
+/**
+ * Get an HTML page.
+ *
+ * @param	string	$url		The URL of the HTML page.
+ * @param	int		$timeout	The cache timeout in hours.
+ */
 function getHTML(&$url, $timeout=1)
 {
 	return getFromURL($url, $timeout, 'file_get_html', 'str_get_html');
 }
 
+/**
+ * Get an HTML page.
+ *
+ * @param	string		$url			The URL of the document.
+ * @param	int			$timeout		The cache timeout in hours.
+ * @param	function	$getfromfile	Function to call to load the data from a file.
+ * @param	function	$getfromstring	Function to call to load the data from a string.
+ */
 function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 {
 	$cacheid = md5($url);
@@ -177,11 +218,21 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 	}
 }
 
+/**
+ * Get the response code from a HTTP response header.
+ *
+ * @param	array	$http_response_header	The HTTP response header.
+ */
 function getResponseCode($http_response_header) {
 	$statusline = explode(' ', $http_response_header[0], 3);
 	return $statusline[1];
 }
 
+/**
+ * Get the character set from a HTTP response header.
+ *
+ * @param	array	$http_response_header	The HTTP response header.
+ */
 function getCharacterSet($http_response_header) {
 	$contenttype = "";
 	foreach($http_response_header as $headerline)
