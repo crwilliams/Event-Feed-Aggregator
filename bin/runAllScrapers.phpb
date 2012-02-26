@@ -41,6 +41,8 @@ $ns['dcterms']	= 'http://purl.org/dc/terms/';
 $ns['diary']	= 'http://id.southampton.ac.uk/ns/diary/';
 $ns['deri']	= 'http://vocab.deri.ie/rooms#';
 $ns['prog']	= 'http://purl.org/prog/';
+$ns['prov']	= 'http://purl.org/void/provenance/ns/';
+$ns['to']	= 'http://www.w3.org/2006/time#';
 
 // Try opening the config file.
 if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
@@ -156,6 +158,8 @@ function runChild($script, $options) {
 	global $fh;
 	global $diary_config;
 
+	$procstarttime = time();
+
 	// Convert the options array into XML form.
 	$optionsxml = generate_xml_from_array($options, 'options');
 	$optionsxml = '<options>'.$optionsxml.'</options>';
@@ -194,18 +198,29 @@ function runChild($script, $options) {
 		printInfo("$eventcount events found while processing ".$options['FeedID']);
 	}
 
+	$safeid = preg_replace('/[^A-Za-z0-9]/', '', $options['FeedID']);
+	// Open a file to write the output (as RDF triples) to.
+	$fh = fopen($diary_config["path"].'/var/output/'.$safeid, 'w');
+
+	tripleA('http://id.southampton.ac.uk/diary/', ns('prog', 'Programme'));
+		
+	$feeduri = 'http://id.southampton.ac.uk/diary/'.$safeid;
+	tripleA($feeduri, ns('prog', 'Programme'));
+
+	// Output provenance information.
+	$feedprovuri = $feeduri.'#provenance-'.date('U', $procstarttime);
+	tripleA($feedprovuri, ns('prov', 'ProvenanceEvent'));
+
+	tripleU($feedprovuri, ns('to', 'hasBeginning'), date('c', $procstarttime), "http://www.w3.org/2001/XMLSchema#dateTime");
+
+	tripleU($feedprovuri, ns('prov', 'processType'), $feeduri.'#process');
+
+	tripleU($feedprovuri, ns('prov', 'sourceDataset'), $options['FeedURL']);
+	tripleU($feedprovuri, ns('prov', 'resultingDataset'), $feeduri);
+
 	// If the XML has events...
 	if($xml->event != null)
 	{
-		$safeid = preg_replace('/[^A-Za-z0-9]/', '', $options['FeedID']);
-		// Open a file to write the output (as RDF triples) to.
-		$fh = fopen($diary_config["path"].'/var/output/'.$safeid, 'w');
-
-		tripleA('http://id.southampton.ac.uk/diary/', ns('prog', 'Programme'));
-		
-		$feeduri = 'http://id.southampton.ac.uk/diary/'.$safeid;
-		tripleA($feeduri, ns('prog', 'Programme'));
-
 		foreach($xml->event as $event)
 		{
 			// Process the event.
@@ -213,11 +228,27 @@ function runChild($script, $options) {
 			$eventuri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
 			tripleU($feeduri, ns('prog', 'has_event'), $eventuri);
 			tripleU('http://id.southampton.ac.uk/diary/', ns('prog', 'has_event'), $eventuri);
-		}
 
-		// Close the file.
-		fclose($fh);
+			$eventprovuri = $eventuri.'#provenance-'.date('U', $procstarttime);
+			tripleA($eventprovuri, ns('prov', 'ProvenanceEvent'));
+
+			//tripleU($eventprovuri, ns('to', 'hasBeginning'), date('c', $procstarttime), "http://www.w3.org/2001/XMLSchema#dateTime");
+
+			tripleU($eventprovuri, ns('prov', 'processType'), $eventuri.'#process');
+
+			if(!is_null($event->sourceDocuments) && !is_null($event->sourceDocuments->event)) {
+				foreach($event->sourceDocuments->event as $sds) {
+					tripleU($eventprovuri, ns('prov', 'sourceDataset'), $sds);
+				}
+			}
+			tripleU($eventprovuri, ns('prov', 'sourceDataset'), $options['FeedURL']);
+			tripleU($eventprovuri, ns('prov', 'resultingDataset'), $eventuri);
+		}
 	}
+	tripleU($feedprovuri, ns('to', 'hasEnd'), date('c'), "http://www.w3.org/2001/XMLSchema#dateTime");
+
+	// Close the file.
+	fclose($fh);
 	return 0;
 }
 
