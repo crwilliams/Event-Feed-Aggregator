@@ -207,16 +207,6 @@ function runChild($script, $options) {
 	$feeduri = 'http://id.southampton.ac.uk/diary/'.$safeid;
 	tripleA($feeduri, ns('prog', 'Programme'));
 
-	// Output provenance information.
-	$feedprovuri = $feeduri.'#provenance-'.date('U', $procstarttime);
-	tripleA($feedprovuri, ns('prov', 'ProvenanceEvent'));
-
-	tripleU($feedprovuri, ns('to', 'hasBeginning'), date('c', $procstarttime), "http://www.w3.org/2001/XMLSchema#dateTime");
-
-	tripleU($feedprovuri, ns('prov', 'processType'), $feeduri.'#process');
-
-	tripleU($feedprovuri, ns('prov', 'sourceDataset'), $options['FeedURL']);
-	tripleU($feedprovuri, ns('prov', 'resultingDataset'), $feeduri);
 
 	// If the XML has events...
 	if($xml->event != null)
@@ -229,27 +219,60 @@ function runChild($script, $options) {
 			tripleU($feeduri, ns('prog', 'has_event'), $eventuri);
 			tripleU('http://id.southampton.ac.uk/diary/', ns('prog', 'has_event'), $eventuri);
 
-			$eventprovuri = $eventuri.'#provenance-'.date('U', $procstarttime);
-			tripleA($eventprovuri, ns('prov', 'ProvenanceEvent'));
-
-			//tripleU($eventprovuri, ns('to', 'hasBeginning'), date('c', $procstarttime), "http://www.w3.org/2001/XMLSchema#dateTime");
-
-			tripleU($eventprovuri, ns('prov', 'processType'), $eventuri.'#process');
-
+			// Determine source datasets.
+			$sourceDatasets = array($options['FeedURL']);
 			if(!is_null($event->sourceDocuments) && !is_null($event->sourceDocuments->event)) {
 				foreach($event->sourceDocuments->event as $sds) {
-					tripleU($eventprovuri, ns('prov', 'sourceDataset'), $sds);
+					$sourceDatasets[] = $sds;
 				}
 			}
-			tripleU($eventprovuri, ns('prov', 'sourceDataset'), $options['FeedURL']);
-			tripleU($eventprovuri, ns('prov', 'resultingDataset'), $eventuri);
+
+			// Output provenance information.
+			provenanceEvent($eventuri, array($options['FeedURL']));
 		}
 	}
-	tripleU($feedprovuri, ns('to', 'hasEnd'), date('c'), "http://www.w3.org/2001/XMLSchema#dateTime");
-
+	
+	// Output provenance information.
+	provenanceEvent($feeduri, array($options['FeedURL']), $procstarttime, time());
+	
 	// Close the file.
 	fclose($fh);
 	return 0;
+}
+
+/**
+ * Output the provenance information relating to an entity.
+ *
+ * @param	string		$uri		The URI of the entity that the provenance information relates to.
+ * @param	array		$sources	The set of data sources that were used to generate the entity.
+ * @param	DateTime	$startTime	The start time of the process.
+ * @param	DateTime	$endTime	The end time of the process.
+ */
+function provenanceEvent($uri, $sources, $startTime = null, $endTime = null) {
+	if(is_null($startTime)) {
+		$provtime = time();
+	} else {
+		$provtime = $startTime;
+	}
+	$provuri = $uri.'#provenance-'.date('U', $provtime);
+	
+	tripleA($provuri, ns('prov', 'ProvenanceEvent'));
+
+	tripleU($provuri, ns('prov', 'processType'), $uri.'#process');
+
+	foreach($sources as $source) {
+		tripleU($provuri, ns('prov', 'sourceDataset'), $source);
+	}
+	
+	tripleU($provuri, ns('prov', 'resultingDataset'), $uri);
+	
+	if(!is_null($startTime)) {
+		tripleU($provuri, ns('to', 'hasBeginning'), date('c', $startTime), "http://www.w3.org/2001/XMLSchema#dateTime");
+	}
+	
+	if(!is_null($endTime)) {
+		tripleU($provuri, ns('to', 'hasEnd'), date('c', $endTime), "http://www.w3.org/2001/XMLSchema#dateTime");
+	}
 }
 
 /**
