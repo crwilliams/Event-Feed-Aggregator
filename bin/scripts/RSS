@@ -68,7 +68,7 @@ function process($item, $options)
 	);
 	foreach($extrainfo as $k => $v)
 	{
-		if(trim($v) != "")
+		if(is_array($v) || trim($v) != "")
 			$res[$k] = $v;
 	}
 	return $res;
