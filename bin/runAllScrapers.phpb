@@ -334,10 +334,9 @@ function processEvent($event, $feedid)
 
 	// Process basic info.
 	tripleA($uri, ns("event", "Event"));
-	tripleA($uri, ns("diary", "Event"));
 	tripleL($uri, ns("rdfs", "label"), str_replace("\n", "", $event->title));
 	tripleL($uri, ns("dcterms", "description"), $event->desc);
-	tripleU($uri, ns("event", "homepage"), $event->link);
+	tripleU($uri, ns("foaf", "homepage"), $event->link);
 
 	// Process event type.
 	if(isset($event->type) && $event->type != "")
