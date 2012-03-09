@@ -341,8 +341,9 @@ function tripleU($subject, $predicate, $object) {
 function tripleL($subject, $predicate, $object, $object_type = null ) {
 	if( isset( $object_type ) ) { 
 		writeToFile("<$subject> <$predicate> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($object, " "))."\"^^<$object_type> .");
+	} else {
+		writeToFile("<$subject> <$predicate> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($object, " "))."\" .");
 	}
-	writeToFile("<$subject> <$predicate> \"".str_replace(array("\n", "\"", "\\"), array('\n', '\"', '\\'), trim($object, " "))."\" .");
 }
 
 /**
