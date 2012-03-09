@@ -435,7 +435,7 @@ function processEvent($event, $feedid)
 		elseif(isset($d->date))
 		{
 			tripleU($uri, ns("event", "time"), "$uri#time-$i");
-			tripleA("$uri#time-$i", ns("tl", "Interval"));
+			tripleA("$uri#time-$i", ns("tl", "Instant"));
 			tripleL("$uri#time-$i", ns("tl", "at"), substr($d->date, 0, 10), "http://www.w3.org/2001/XMLSchema#date");
 		}
 	}
