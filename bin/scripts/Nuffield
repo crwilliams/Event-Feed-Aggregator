@@ -86,7 +86,10 @@ function process($item, $options)
 		foreach($dom->find('div#secondary_content/ul.perdates/li') as $perdate)
 		{
 			$perdate = preg_replace('/[^A-Za-z0-9 ,.]/', '', $perdate->find('text', 0));
-			$pdate[] = array('from' => date('c', strtotime($perdate)));
+			if(trim($perdate) != '')
+			{
+				$pdate[] = array('from' => date('c', strtotime($perdate)));
+			}
 		}
 	}
 
