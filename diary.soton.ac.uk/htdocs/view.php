@@ -179,9 +179,9 @@ function formatEvent($time, $date)
 	print "<div class='event ".implode(" ", array_keys($organisers))." ".implode(" ", array_keys($types))." ".implode(" ", array_keys($places))."'>\n";
 	print "\t<h3>".$event->label()."</h3>\n";
 	print "\t<div class='event-info'>\n";
-	if( $event->has( "event:homepage" ) )
+	if( $event->has( "foaf:homepage" ) )
 	{
-		print "\t\t<a href='".$event->get( "event:homepage" )."'>Visit event homepage</a>\n";
+		print "\t\t<a href='".$event->get( "foaf:homepage" )."'>Visit event homepage</a>\n";
 	}
 	if( $time->has( "tl:start" ) && substr($time->getString("tl:start"), 0, 10) == $date )
 	{
