@@ -111,7 +111,7 @@ function finalStrip($v)
 {
 	$v = preg_replace('/TURNER SIMS( CONCERT HALL)?/', '', $v);
 	$v = preg_replace('/AVENUE CAMPUS/', '', $v);
-	$v = preg_replace('/HIGHFIELD CAMPUS/', '', $v);
+	$v = preg_replace('/HIGHFIELD( CAMPUS)?/', '', $v);
 	$v = preg_replace('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', '', $v);
 	$v = preg_replace('/(WINCHESTER SCHOOL OF ART|WSA)/', '', $v);
 	$v = preg_replace('/(UNIVERSITY OF )?SOUTHAMPTON/', '', $v);
