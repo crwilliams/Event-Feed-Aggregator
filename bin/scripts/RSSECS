@@ -89,7 +89,7 @@ function process($item, $options)
 		'title'		=> $title,
 		'link'		=> $link,
 		'date'		=> $pdate,
-		'desc'		=> mb_convert_encoding($desc, 'ASCII'),
+		'desc'		=> str_replace("\t", ' ', mb_convert_encoding($desc, 'ASCII')),
 		'feedName'	=> (string)$options->FeedName,
 		'type'		=> (string)$options->Type,
 		'feedID'	=> (string)$options->FeedID,
