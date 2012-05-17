@@ -267,11 +267,11 @@ function provenanceEvent($uri, $sources, $startTime = null, $endTime = null) {
 	tripleU($provuri, ns('prov', 'resultingDataset'), $uri);
 	
 	if(!is_null($startTime)) {
-		tripleU($provuri, ns('to', 'hasBeginning'), date('c', $startTime), "http://www.w3.org/2001/XMLSchema#dateTime");
+		tripleL($provuri, ns('to', 'hasBeginning'), date('c', $startTime), "http://www.w3.org/2001/XMLSchema#dateTime");
 	}
 	
 	if(!is_null($endTime)) {
-		tripleU($provuri, ns('to', 'hasEnd'), date('c', $endTime), "http://www.w3.org/2001/XMLSchema#dateTime");
+		tripleL($provuri, ns('to', 'hasEnd'), date('c', $endTime), "http://www.w3.org/2001/XMLSchema#dateTime");
 	}
 }
 
