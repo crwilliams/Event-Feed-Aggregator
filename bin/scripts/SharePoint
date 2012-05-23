@@ -1,0 +1,104 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012 Christopher Gutteridge / Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+require '../etc/config.php';
+include $diary_config["path"].'/lib/utils.php';
+include $diary_config["path"].'/lib/options.php';
+
+// Get the RSS data from the Feed URL.
+$rows = file($options->FeedURL);
+
+$data = array();
+if($rows != null )
+{
+	$headings = preg_split( '/\t/', array_shift( $rows ) );
+	foreach($rows as $row )
+	{
+		$indata = array();
+		$inrow = preg_split( '/\t/', $row );
+		for( $i=0; $i<sizeof($inrow); ++$i )
+		{
+			$indata[$headings[$i]] = $inrow[$i];
+		}
+		// Process the event.
+		$data[] = process($indata, $options);
+	}
+}
+// Output the data as XML.
+echo generateEventXML($data);
+
+/**
+ * Process a single event.
+ *
+ * @param	object	$row		The item to process.
+ * @param	array	$options	The options passed to this script.
+ */
+function process($in_data, $options)
+{
+	$title = trim($in_data["Title"]);
+	#$link = (string)str_replace(' ', '%20', trim($item->link));
+	#$extrainfo = getExtraInfo($link);
+	$desc = $in_data["Description"];
+	
+	$res = array(
+		'title'		=> $title,
+		'link'		=> "http://sharepoint.soton.ac.uk/".$in_data["URL Path"],
+		'desc'		=> $desc,
+		'feedName'	=> (string)$options->FeedName,
+#		'type'		=> (string)"Other",
+		'feedID'	=> (string)$options->FeedID,
+#		'host'		=> (string)$options->FacultyUnitGroup,
+		'tags'		=> explode(" ", @$in_data["Tags"] )
+	);
+	if( $in_data["All Day Event"] == 0 )
+	{
+		$res["date"] = array(array(
+			'from' => $in_data["Start Time"], 
+			'to' => $in_data["End Time"]
+		));
+	}
+	return $res;
+}
+
+
+/*
+	   [All Day Event] => 0
+    [Approval Status] => 0
+    [Attachments] => 0
+    [Created] => 2012-03-28 11:40:09
+    [Description] => <div>4th UK-China Tribology Symposium &quot;Lubricated and Chemical Aspects of Wear”</div> <div>&nbsp;</div> <div>FINAL CALL FOR ABSTRACTS 4th UK-China Tribology Symposium</div> <div>“Lubricated and Chemical Aspects of Wear” 29th-30th March 2012</div> <div>Chilworth Manor Hotel, Southampton, SO16 7PT</div> <div>Selected papers will be considered for publication in WEAR Prof Robert Wood (nCATS, UK) Prof Weimin Liu (LICP, China)</div> <div>Registration Fee - £100 (Includes abstract book, conference dinner &amp; lunch, tea, coffee and biscuits)</div> <div>This event precedes the first Faraday Discussion on Tribology held at Southampton University on 2-4th April 2012</div> <div>Confirmed Speakers:</div> <div>•Professor Qunji Xue, Chinese Academy of Engineering, LICP, China</div> <div>•Professor Weimin Liu, Lanzhou Institute of Chemical Physics, China</div> <div>•Professor Anne Neville, University of Leeds, UK</div> <div>•Professor Jianmin Chen, Lanzhou Institute of Chemical Physics, China</div> <div>•Professor Fengyuan Yan, Lanzhou Institute of Chemical Physics, China</div> <div>•Dr Monica Ratoi, University of Southampton, UK</div> <div>•Professor Feng Zhou, Lanzhou Institute of Chemical Physics, China</div> <div>•Professor Dongfeng Diao, Xi’an Jiaoting University, China</div> <div>•Dr Ling Wang, University of Southampton, UK</div> <div>•Professor Zhendong Dai, Nanjing University, China</div> <div>•Professor Xuedong Wu, Ningbo Institute of Material Technology &amp; Engineering, China</div> <div>PLACES AVAILABLE - To submit an oral or poster abstract please download the template at <a href="http://www.soton.ac.uk/ncats/">http://www.soton.ac.uk/ncats/</a> and e-mail to <a href="mailto:micro@soton.ac.uk">micro@soton.ac.uk</a></div> <div>Discount bed &amp; breakfast rates are available from Chilworth Manor (29th March - £73 single; 30th March - £50 single; please quote “nCATS”). Other nearby hotels include the Hilton and Days Inn.</div> <div>Sponsorship options are still available – please contact <a href="mailto:micro@soton.ac.uk">micro@soton.ac.uk</a> for more details</div> <div>Abstract Deadline 15th February 2012</div> <div>Registration Deadline 20th March 2012</div> <div>Full Paper Deadline 30th March 2012</div> <div>Final Paper Acceptance 29th September 2012</div> <div>&nbsp;</div> <div>Contact for more information:</div> <p>Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dr Shuncai Wang<br>Telephone:&nbsp; 02380594638<br>Email:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="mailto:micro@soton.ac.uk">micro@soton.ac.uk</a></p> <div>&nbsp;</div>
+    [End Time] => 2012-03-30 17:00:00
+    [Event Type] => 0
+    [ID] => 6
+    [Item Type] => 0
+    [Level] => 1
+    [Location] => Chilworth Manor Hotel, Chilwoth, Southampton
+    [Property Bag] => 
+    [Recurrence] => 0
+    [Start Time] => 2012-03-29 09:00:00
+    [Title] => UK-China Symposium Tribology
+    [URL Path] => sites/communications/Lists/Events/6_.000
+    [Unique Id] => {D5D994A5-0198-4952-BEF6-B9451C857F87}
+    [Workspace] => 0
+    [owshiddenversion
+] => 1
+
+*/
+
