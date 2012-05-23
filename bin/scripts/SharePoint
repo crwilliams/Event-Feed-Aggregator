@@ -60,7 +60,8 @@ function process($in_data, $options)
 	$res = array(
 		'title'		=> $title,
 # sharepoint events don't currently have a link.
-#		'link'		=> "http://sharepoint.soton.ac.uk/".$in_data["URL Path"],
+		'uri'		=> "http://sharepoint.soton.ac.uk/".$in_data["URL Path"],
+#		'link'		=> "null",
 		'desc'		=> $desc,
 		'feedName'	=> (string)$options->FeedName,
 #		'type'		=> (string)"Other",
@@ -68,7 +69,14 @@ function process($in_data, $options)
 #		'host'		=> (string)$options->FacultyUnitGroup,
 		'tags'		=> explode(" ", @$in_data["Tags"] )
 	);
-	if( $in_data["All Day Event"] == 0 )
+	if( $in_data["All Day Event"] == 1 )
+	{
+		$res["date"] = array(array(
+			'from' => substr($in_data["Start Time"],0,10), 
+			'to' => substr($in_data["End Time"],0,10)
+		));
+	}
+	else
 	{
 		$res["date"] = array(array(
 			'from' => $in_data["Start Time"], 

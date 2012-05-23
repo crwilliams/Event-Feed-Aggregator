@@ -382,13 +382,21 @@ function ns($prefix, $e) {
  */
 function processEvent($event, $feedid)
 {
-	if(trim($event->link) == "")
+	$uri = "";
+	if( isset($event->uri) )
+	{
+		$uri = $event->uri;
+	}
+	elseif(trim($event->link) != "" )
+	{
+		$uri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
+	}
+	else
 	{
 		printInfo("Event with name ".str_replace("\n", "", $event->title)." has no link.");
 		logError("Event with name ".str_replace("\n", "", $event->title)." has no link.", $feedid);
 		return;
 	}
-	$uri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
 
 	// Process basic info.
 	tripleA($uri, ns("event", "Event"));
