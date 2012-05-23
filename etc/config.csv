@@ -1,4 +1,4 @@
-Feed ID,Site,Feed Name,Feed URL,Faculty/Unit/Group,Script,Type,Notes,Tags
+Feed ID,Site,Feed Name,Feed URL,Faculty/Unit/Group,Script,Type,Notes,Tags,Time Limit
 ageing-events,Ageing,Events from Ageing/Gerontology,http://www.soton.ac.uk/ageing/news/feeds/gerontology_events.page,http://id.southampton.ac.uk/org/F8CC060000,RSS,Event
 ageing-seminars,Ageing,Seminars from Ageing/Gerontology,http://www.soton.ac.uk/ageing/news/feeds/gerontology_seminars.page,http://id.southampton.ac.uk/org/F8CC060000,RSS,Seminar
 archaeology-events,Archaeology,Archaeology events,http://www.soton.ac.uk/archaeology/news/feeds/archaeology_events.page,http://id.southampton.ac.uk/org/MH,RSS,Event
@@ -74,7 +74,8 @@ opendays,Open days,,http://www.soton.ac.uk/study/visitsopendays/ug_open_days.sht
 corporate,Corporate events,,http://www.events.soton.ac.uk/highlights/,,,,"Currently in Events calendar, but will have no 'home' when calendar replaced"
 ris,RIS events,,,http://id.southampton.ac.uk/org/TW,,,Not found online
 john-hansard-gallery,John Hansard Gallery,,http://www.hansardgallery.org.uk/,http://id.southampton.ac.uk/org/P2GR030000,,,Dreamweaver site
-turner-sims,Turner Sims,,http://www.turnersims.co.uk/,http://id.southampton.ac.uk/org/P2GR020000,,,CMS hosted externally to Uni
-nuffield-theatre,Nuffield Theatre,,http://www.nuffieldtheatre.co.uk/events/category/C84/,,Nuffield,,Externally hosted,TheatreEvent
+turner-sims,Turner Sims,Events from Turner Sims,http://www.turnersims.co.uk/rss.aspx,http://id.southampton.ac.uk/org/P2GR020000,RSS,,CMS hosted externally to Uni
+nuffield-theatre,Nuffield Theatre,,http://www.nuffieldtheatre.co.uk/events/category/C84/,,Nuffield,,Externally hosted,TheatreEvent,180
 multidisciplinary-events,,,http://www.multidisciplinary.soton.ac.uk/events/,,,,Have an iCal feed: http://usrg.devel.mauveinternet.co.uk/events/upcoming-events.ics
 ecs-seminars,ECS,ECS Seminars,http://www.ecs.soton.ac.uk/feeds/seminars_rss.php,http://id.southampton.ac.uk/org/FP,RSSECS,Seminar
+comms-calendar,SharePoint,Additional Events,file:///home/diary/var/sharepoint/comms-sp-calendar.tsv,http://id.southampton.ac.uk/org/DK,SharePoint,
