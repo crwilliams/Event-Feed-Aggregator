@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
 
-require('../../../etc/config.php');
+require('../../etc/config.php');
 
 $fields = array(
 'FeedID',
