@@ -115,7 +115,10 @@ function finalStrip($v)
 	$v = preg_replace('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', '', $v);
 	$v = preg_replace('/(WINCHESTER SCHOOL OF ART|WSA)/', '', $v);
 	$v = preg_replace('/(UNIVERSITY OF )?SOUTHAMPTON/', '', $v);
-	$v = preg_replace('/SO17 1BJ/', '', $v);
+	$v = preg_replace('/SO17 1BJ/', '', $v);//Highfield Campus
+	$v = preg_replace('/SO17 1BF/', '', $v);//Avenue Campus
+	$v = preg_replace('/SO23 8DL/', '', $v);//Winchester School of Art Campus
+	$v = preg_replace('/SO14 3ZH/', '', $v);//National Oceanography Centre Campus
 	$v = preg_replace('/UNITED KINGDOM/', '', $v);
 	$v = preg_replace('/ALL WELCOME/', '', $v);// Southampton Education School sometimes put this in their venue details!
 	$v = trim(preg_replace('/[^A-Za-z0-9]/', '', $v));
