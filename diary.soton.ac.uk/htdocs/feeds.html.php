@@ -76,12 +76,13 @@ tr.script_ td {
 	background-color: #fee;
 }
 </style>
-<h1>Current Sources of Data for the Southampton Diary</h1>
+<h1>Current Sources of Data for the Events Calendar</h1>
 <table class='datagrid'>
 <?php
 $i = 0;
 foreach( $feeds as $feed )
 {
+	if( $feed["Script"] == "" ) { continue; }
 	if( $i % 10 == 0 ) 
 	{
 		print "<tr>";
