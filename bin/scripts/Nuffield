@@ -74,9 +74,9 @@ function process($item, $options)
 	$theatreuri = "http://id.southampton.ac.uk/building/6";
 	$locationuri = null;
 
-	$date = html_entity_decode((string)$item->find('p.date', 0)->plaintext);
-	$title = html_entity_decode((string)$item->find('h2', 0)->plaintext);
-	$link = html_entity_decode((string)$item->find('a', 0)->href);
+	$date = html_entity_decode((string)$item->find('p.date', 0)->plaintext, ENT_COMPAT, 'UTF-8');
+	$title = html_entity_decode((string)$item->find('h2', 0)->plaintext, ENT_COMPAT, 'UTF-8');
+	$link = html_entity_decode((string)$item->find('a', 0)->href, ENT_COMPAT, 'UTF-8');
 	$desc = "";
 
 	$pdate = array();
@@ -114,7 +114,7 @@ function process($item, $options)
 			{
 				$desc .= "\n\n";
 			}
-			$desc .= $p->plaintext;
+			$desc .= html_entity_decode((string)$p->plaintext, ENT_COMPAT, 'UTF-8');
 		}
 	}
 	
