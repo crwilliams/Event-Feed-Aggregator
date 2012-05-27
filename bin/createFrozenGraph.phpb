@@ -36,7 +36,7 @@ foreach( $queries as $query )
 	$n=$graph->loadSPARQL($endpoint, $sparql );
 }
 
-$graph->load( $diary_config["path"]."/diary.soton.ac.uk/htdocs/diary.nt" );
+$graph->load( $diary_config["path"]."/diary.soton.ac.uk/htdocs/diary.ttl" );
 
 $frozen_fn = $diary_config["path"]."/var/data.php";
 $graph->freeze( "$frozen_fn.new" );

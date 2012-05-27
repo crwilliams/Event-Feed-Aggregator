@@ -26,7 +26,10 @@ cd ~diary/bin/
 php runAllScrapers.phpb $1
 
 # Combine all of the output into a single file (after passing it through rapper).
-cat ../var/output/* | /usr/local/bin/rapper -q -i ntriples - -I null | sort -u > ../diary.soton.ac.uk/htdocs/diary.nt
+cat ../var/output/* | /usr/local/bin/rapper -q -i turtle - -I null -o turtle -O http://id.southampton.ac.uk/ > ../diary.soton.ac.uk/htdocs/diary.ttl
+
+# Legacy ntriples output.  TODO remove this once data.southampton.ac.uk is amended to read turtle version.
+cat ../var/output/* | /usr/local/bin/rapper -q -i turtle - -I null > ../diary.soton.ac.uk/htdocs/diary.nt
 
 # Freeze the graph.
 php createFrozenGraph.phpb
