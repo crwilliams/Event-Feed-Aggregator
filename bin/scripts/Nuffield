@@ -71,7 +71,8 @@ echo generateEventXML($data);
 function process($item, $options)
 {
 	// The Nuffield Theatre is Building 6.
-	$location = "http://id.southampton.ac.uk/building/6";
+	$theatreuri = "http://id.southampton.ac.uk/building/6";
+	$locationuri = null;
 
 	$date = html_entity_decode((string)$item->find('p.date', 0)->plaintext);
 	$title = html_entity_decode((string)$item->find('h2', 0)->plaintext);
@@ -99,6 +100,14 @@ function process($item, $options)
 		{
 			if($p->tag != "p")
 			{
+				if($p->tag == "div" && $p->find('h2', 0) != null && $p->find('h2', 0)->plaintext == "Venue")
+				{
+					$location = html_entity_decode((string)$p->find('p', 0)->plaintext, ENT_COMPAT, 'UTF-8');
+					if($location == "Main House" || $location == "Studio")
+					{
+						$locationuri = $theatreuri;
+					}
+				}
 				continue;
 			}
 			if($desc != "")
@@ -109,12 +118,12 @@ function process($item, $options)
 		}
 	}
 	
-	return array(
+	$data = array(
 		'title'		=> $title,
 		'link'		=> $link,
 		'date'		=> $pdate,
 		'desc'		=> $desc,
-		'venuelink'	=> $location,
+		'venue'		=> $location,
 		'feedName'	=> (string)$options->FeedName,
 		'type'		=> (string)$options->Type,
 		'feedID'	=> (string)$options->FeedID,
@@ -122,6 +131,11 @@ function process($item, $options)
 		'tags'		=> explode(" ", $options->Tags),
 		'sourceDocuments' => array($link),
 	);
+	if(!is_null($locationuri))
+	{
+		$data['venuelink'] = $locationuri;
+	}
+	return $data;
 }
 
 ?>
