@@ -51,7 +51,7 @@ function process($item, $options)
 	$extrainfo = getExtraInfo($link);
 	$desc = explode("\n", $item->description);
 	$pdate = array();
-	while(trim($desc[0]) == "")
+	while(count($desc) > 0 && trim($desc[0]) == "")
 		array_shift($desc);
 	$pdate = getDates($desc);
 	$desc = trim(implode("\n", $desc));
