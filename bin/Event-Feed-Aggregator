@@ -34,3 +34,4 @@ cat ../var/output/* | /usr/local/bin/rapper -q -i turtle - -I null > ../diary.so
 # Freeze the graph.
 php createFrozenGraph.phpb
 
+curl -s http://www.events.soton.ac.uk/soton/index-gen.php > /home/diary/diary.soton.ac.uk/htdocs/soton/index.html
