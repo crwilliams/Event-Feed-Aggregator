@@ -49,10 +49,14 @@ function process($item, $options)
 	$title = trim($item->title);
 	$link = (string)str_replace(' ', '%20', trim($item->link));
 	$extrainfo = getExtraInfo($link);
+
+	
 	$desc = explode("\n", $item->description);
 	$pdate = array();
 	while(count($desc) > 0 && trim($desc[0]) == "")
+	{
 		array_shift($desc);
+	}
 	$pdate = getDates($desc);
 	$desc = trim(implode("\n", $desc));
 	$res = array(
