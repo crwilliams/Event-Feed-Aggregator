@@ -43,6 +43,7 @@ $ns['prog']	= 'http://purl.org/prog/';
 $ns['prov']	= 'http://purl.org/void/provenance/ns/';
 $ns['to']	= 'http://www.w3.org/2006/time#';
 
+$feeds = 0;
 // Try opening the config file.
 if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
 	// Get column names from the first line of the CSV file.
@@ -64,12 +65,15 @@ if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
 			}
 		}
 
+		++$feeds;
 		// Process a single feed.
 		processFeed($data[$c['Script']], $options);
 	}
 	// Close the config file.
 	fclose($handle);
 }
+if( $feeds == 0 ) { print "No feeds processed\n"; }
+exit;
 
 /**
  * Process a single feed.
@@ -382,19 +386,27 @@ function ns($prefix, $e) {
  */
 function processEvent($event, $feedid)
 {
-	$uri = "";
+	$external_uri = "";
 	if( isset($event->uri) )
 	{
-		$uri = $event->uri;
-	}
-	elseif(trim($event->link) != "" )
-	{
-		$uri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
+		$external_uri = $event->uri;
 	}
 	else
 	{
-		printInfo("Event with name ".str_replace("\n", "", $event->title)." has no link.");
-		logError("Event with name ".str_replace("\n", "", $event->title)." has no link.", $feedid);
+		$external_uri = $event->link;
+	}
+
+
+	# then we  hash the external URI to make a local one...
+
+	if(trim($external_uri) != "" )
+	{
+		$uri = 'http://id.southampton.ac.uk/event/'.md5($external_uri);
+	}
+	else
+	{
+		printInfo("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
+		logError("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.", $feedid);
 		return;
 	}
 
@@ -402,7 +414,10 @@ function processEvent($event, $feedid)
 	tripleA($uri, ns("event", "Event"));
 	tripleL($uri, ns("rdfs", "label"), str_replace("\n", "", $event->title));
 	tripleL($uri, ns("dcterms", "description"), $event->desc);
-	tripleU($uri, ns("foaf", "homepage"), $event->link);
+	if(trim($event->link) != "" )
+	{
+		tripleU($uri, ns("foaf", "homepage"), $event->link);
+	}
 
 	// Process event type.
 	if(isset($event->type) && $event->type != "")
@@ -490,3 +505,4 @@ function processEvent($event, $feedid)
 }
 
 ?>
+
