@@ -210,16 +210,6 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 		}
 		else
 		{
-			$cs = getCharacterSet($http_response_header);
-			if($cs == "")
-			{
-				$data = mb_convert_encoding($data, "ASCII");
-			}
-			else
-			{
-				$data = mb_convert_encoding($data, "ASCII", $cs);
-			}
-			$data = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x80-\xFF]/', '', $data);
 			file_put_contents($filename, $data);
 			return $getfromstring($data);
 		}
