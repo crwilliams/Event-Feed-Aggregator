@@ -24,7 +24,7 @@ include $diary_config["path"].'/lib/options.php';
 
 // Get the RSS data from the Feed URL.
 $url = (string)$options->FeedURL;
-fwrite( STDERR, print_r( $url, true ));
+#fwrite( STDERR, print_r( $url, true ));
 
 $graph = new Graphite();
 $graph->load( $url );
