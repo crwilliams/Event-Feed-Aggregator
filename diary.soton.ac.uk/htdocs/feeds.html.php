@@ -91,7 +91,7 @@ foreach( $feeds as $feed )
 	}
 	print "<tr class='script_".$feed["Script"]."'>";
 	foreach( $fields as $field_name ) { 
-		if( $field_name=="FeedURL" || $field_name == "FacultyUnitGroup" ) 
+		if( ($field_name=="FeedURL" || $field_name == "FacultyUnitGroup") && substr($feed[$field_name], 0, 4) == "http" )
 		{
 			print "<td><a href='".$feed[$field_name]."'>".$feed[$field_name]."</a></td>"; 
 		}
