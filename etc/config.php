@@ -17,9 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
 
-
-require_once( "/var/wwwsites/phplib/arc/ARC2.php" );
-require_once( "/var/wwwsites/phplib/Graphite.php" );
+require_once( "/var/wwwsites/tools/arc2/ARC2.php" );
+require_once( "/var/wwwsites/tools/Graphite/Graphite.php" );
 error_reporting(E_ALL ^ E_DEPRECATED);
 
 global $diary_config;
