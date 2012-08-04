@@ -21,8 +21,6 @@
 require '../etc/config.php';
 include $diary_config["path"].'/lib/utils.php';
 include $diary_config["path"].'/lib/options.php';
-require_once( "/var/wwwsites/phplib/arc/ARC2.php" );
-require_once( "/var/wwwsites/phplib/Graphite.php" );
 
 // Get the RSS data from the Feed URL.
 $rss = getRSS($options->FeedURL);
