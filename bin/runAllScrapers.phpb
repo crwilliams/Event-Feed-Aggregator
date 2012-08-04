@@ -156,6 +156,54 @@ function runParent($pid, $limit = 30, $options) {
 }
 
 /**
+ * Execute the command, capturing stdout and stderr.
+ *
+ * @param	string	$cmd		The command to execute.
+ * @param	array	$output		The array to capture the lines of stdout in.
+ * @param	array	$error		The array to capture the lines of stderr in.
+ */
+function myexec($cmd, &$output, &$error)
+{
+	$descriptorspec = array(
+		1 => array("pipe", "w"),
+		2 => array("pipe", "w"),
+	);
+
+	$process = proc_open($cmd, $descriptorspec, $pipes);
+
+	if (is_resource($process)) {
+		$output = stream_get_contents($pipes[1]);
+		fclose($pipes[1]);
+
+		$error = stream_get_contents($pipes[2]);
+		fclose($pipes[2]);
+
+		$return_value = proc_close($process);
+	}
+	else
+	{
+		$output = "";
+		$error = "Failed to call ".$cmd;
+	}
+	if($output == "")
+	{
+		$output = array();
+	}
+	else
+	{
+		$output = explode("\n", $output);
+	}
+	if($error == "")
+	{
+		$error = array();
+	}
+	else
+	{
+		$error = explode("\n", $error);
+	}
+}
+
+/**
  * Run the child process.
  *
  * @param	string	$script		The script to run.
