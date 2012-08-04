@@ -224,7 +224,17 @@ function runChild($script, $options) {
 	printInfo($cmd);
 
 	// Execute the command.
-	exec($cmd, $output);
+	myexec($cmd, $output, $error);
+
+	if(count($error) > 0)
+	{
+		echo "Errors encountered whilst processing ".$options['FeedID'];
+		echo "\n";
+		echo "\n";
+		echo implode("\n", $error);
+		echo "\n";
+		echo "\n";
+	}
 
 	// Convert the response XML into an object.
 	$xml = simplexml_load_string(implode("\n", $output));
