@@ -68,7 +68,7 @@ function process($item, $options)
 		'title'		=> $title,
 		'link'		=> $link,
 		'date'		=> $pdate,
-		'desc'		=> $desc,
+		'htmldesc'	=> $desc,
 		'feedName'	=> (string)$options->FeedName,
 		'type'		=> (string)$options->Type,
 		'feedID'	=> (string)$options->FeedID,

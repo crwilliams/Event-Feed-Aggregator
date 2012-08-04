@@ -413,7 +413,14 @@ function processEvent($event, $feedid)
 	// Process basic info.
 	tripleA($uri, ns("event", "Event"));
 	tripleL($uri, ns("rdfs", "label"), str_replace("\n", "", $event->title));
-	tripleL($uri, ns("dcterms", "description"), $event->desc);
+	if(trim($event->desc) != "")
+	{
+		tripleL($uri, ns("dcterms", "description"), $event->desc, "http://purl.org/xtypes/Fragment-PlainText");
+	}
+	if(trim($event->htmldesc) != "")
+	{
+		tripleL($uri, ns("dcterms", "description"), $event->htmldesc, "http://purl.org/xtypes/Fragment-XHTML");
+	}
 	if(trim($event->link) != "" )
 	{
 		tripleU($uri, ns("foaf", "homepage"), $event->link);
