@@ -75,8 +75,11 @@ function process($item, $options)
 		'feedID'	=> (string)$options->FeedID,
 		'host'		=> (string)$options->FacultyUnitGroup,
 		'tags'		=> explode(" ", $options->Tags),
-		'venue'		=> $location,
 	);
+	if(isset($location))
+	{
+		$res['venue'] = $location;
+	}
 	return $res;
 }
 
