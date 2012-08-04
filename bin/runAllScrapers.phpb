@@ -222,7 +222,14 @@ function runChild($script, $options) {
 		{
 			// Process the event.
 			processEvent($event, $options['FeedID']);
-			$eventuri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
+			if(isset($event->uri))
+			{
+				$eventuri = 'http://id.southampton.ac.uk/event/'.md5($event->uri);
+			}
+			else
+			{
+				$eventuri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
+			}
 			tripleU($feeduri, ns('prog', 'has_event'), $eventuri);
 			tripleU('http://id.southampton.ac.uk/diary/', ns('prog', 'has_event'), $eventuri);
 
