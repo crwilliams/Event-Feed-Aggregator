@@ -62,7 +62,7 @@ function process($in_data, $options)
 # sharepoint events don't currently have a link.
 		'uri'		=> "http://sharepoint.soton.ac.uk/".$in_data["URL Path"],
 #		'link'		=> "null",
-		'desc'		=> $desc,
+		'htmldesc'	=> $desc,
 		'feedName'	=> (string)$options->FeedName,
 #		'type'		=> (string)"Other",
 		'feedID'	=> (string)$options->FeedID,
