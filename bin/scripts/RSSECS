@@ -96,10 +96,16 @@ function process($item, $options)
 		'host'		=> $group,
 		'tags'		=> explode(" ", $options->Tags),
 		'venuelink'	=> $venuelink,
-		'speakerlink'	=> $speakerlink,
-		'speaker'	=> $speaker,
 		'sourceDocuments' => array($rdflink),
 	);
+	if(isset($speakerlink))
+	{
+		$res['speakerlink'] = $speakerlink;
+	}
+	if(isset($speaker))
+	{
+		$res['speaker'] = $speaker;
+	}
 	return $res;
 }
 
