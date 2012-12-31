@@ -124,6 +124,30 @@ function getVenueLink(&$venue)
 		if($v == "") $venue = "";
 		return $uri;
 	}
+	if(preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', $v, $buildingmatches) && preg_match('/LECTURE THEATRE ([A-Z])/', $v, $matches))
+	{
+		$uri = getURIByRoomName($buildingmatches[2], $matches[0]);
+		if($uri)
+		{
+			$v = str_replace($matches[0], '', $v);
+			$v = str_replace($buildingmatches[0], '', $v);
+			$v = finalStrip($v, $uri);
+			if($v == "") $venue = "";
+			return $uri;
+		}
+	}
+	if(preg_match('/AVENUE CAMPUS/', $v) && preg_match('/LECTURE THEATRE ([A-Z])/', $v, $matches))
+	{
+		$uri = getURIByRoomName(65, $matches[0]);
+		if($uri)
+		{
+			$v = str_replace($matches[0], '', $v);
+			$v = str_replace('AVENUE CAMPUS', '', $v);
+			$v = finalStrip($v, $uri);
+			if($v == "") $venue = "";
+			return $uri;
+		}
+	}
 	if(preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', $v, $buildingmatches))
 	{
 		$uri = 'http://id.southampton.ac.uk/building/'.tidyNumber($buildingmatches[2]);
