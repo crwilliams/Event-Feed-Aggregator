@@ -157,16 +157,16 @@ function getVenueLink(&$venue)
 		if($v == "") $venue = "";
 		return $uri;
 	}
-	if(preg_match('/TURNER SIMS/', $v))
+	if(preg_match('/JOHN HANSARD GALLERY/', $v))
 	{
-		$uri = 'http://id.southampton.ac.uk/building/52';
+		$uri = 'http://id.southampton.ac.uk/building/50';
 		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
 		return $uri;
 	}
-	if(preg_match('/AVENUE CAMPUS/', $v))
+	if(preg_match('/TURNER SIMS/', $v))
 	{
-		$uri = 'http://id.southampton.ac.uk/site/3';
+		$uri = 'http://id.southampton.ac.uk/building/52';
 		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
 		return $uri;
@@ -192,9 +192,9 @@ function getVenueLink(&$venue)
 		if($v == "") $venue = "";
 		return $uri;
 	}
-	if(preg_match('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', $v))
+	if(preg_match('/AVENUE CAMPUS/', $v))
 	{
-		$uri = 'http://id.southampton.ac.uk/site/6';
+		$uri = 'http://id.southampton.ac.uk/site/3';
 		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
 		return $uri;
