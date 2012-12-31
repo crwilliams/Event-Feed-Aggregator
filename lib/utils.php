@@ -109,57 +109,65 @@ function getVenueLink(&$venue)
 	if(preg_match('/(ROOM|LECTURE THEATRE) ('.$rdef.')/', $v, $roommatches) &&
 		preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', $v, $buildingmatches))
 	{
+		$uri = 'http://id.southampton.ac.uk/room/'.tidyNumber($buildingmatches[2]).'-'.tidyNumber($roommatches[2]);
 		$v = preg_replace('/(ROOM|LECTURE THEATRE) ('.$rdef.')/', '', $v);
 		$v = preg_replace('/(BUILDING|BLDG) ('.$bdef.')+/', '', $v);
-		$v = finalStrip($v);
+		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
-		return 'http://id.southampton.ac.uk/room/'.tidyNumber($buildingmatches[2]).'-'.tidyNumber($roommatches[2]);
+		return $uri;
 	}
 	if(preg_match('/('.$bdef.')[:\/]('.$rdef.')/', $v, $matches))
 	{
+		$uri = 'http://id.southampton.ac.uk/room/'.tidyNumber($matches[1]).'-'.tidyNumber($matches[2]);
 		$v = preg_replace('/('.$bdef.')[:\/]('.$rdef.')/', '', $v);
-		$v = finalStrip($v);
+		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
-		return 'http://id.southampton.ac.uk/room/'.tidyNumber($matches[1]).'-'.tidyNumber($matches[2]);
+		return $uri;
 	}
 	if(preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', $v, $buildingmatches))
 	{
+		$uri = 'http://id.southampton.ac.uk/building/'.tidyNumber($buildingmatches[2]);
 		$v = preg_replace('/(BUILDING|BLDG) ('.$bdef.')+/', '', $v);
-		$v = finalStrip($v);
+		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
-		return 'http://id.southampton.ac.uk/building/'.tidyNumber($buildingmatches[2]);
+		return $uri;
 	}
 	if(preg_match('/TURNER SIMS/', $v))
 	{
-		$v = finalStrip($v);
+		$uri = 'http://id.southampton.ac.uk/building/52';
+		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
-		return 'http://id.southampton.ac.uk/building/52';
+		return $uri;
 	}
 	if(preg_match('/AVENUE CAMPUS/', $v))
 	{
-		$v = finalStrip($v);
+		$uri = 'http://id.southampton.ac.uk/site/3';
+		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
-		return 'http://id.southampton.ac.uk/site/3';
+		return $uri;
 	}
 	if(preg_match('/HIGHFIELD CAMPUS/', $v))
 	{
-		$v = finalStrip($v);
+		$uri = 'http://id.southampton.ac.uk/site/1';
+		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
-		return 'http://id.southampton.ac.uk/site/1';
+		return $uri;
 	}
 	if(preg_match('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', $v))
 	{
-		$v = finalStrip($v);
+		$uri = 'http://id.southampton.ac.uk/site/6';
+		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
-		return 'http://id.southampton.ac.uk/site/6';
+		return $uri;
 	}
 	if(preg_match('/(WINCHESTER SCHOOL OF ART|WSA)/', $v))
 	{
-		$v = finalStrip($v);
+		$uri = 'http://id.southampton.ac.uk/site/4';
+		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
-		return 'http://id.southampton.ac.uk/site/4';
+		return $uri;
 	}
-	$v = finalStrip($v);
+	$v = finalStrip($v, null);
 	if($v == "") $venue = "";
 	return "";
 }
@@ -168,8 +176,9 @@ function getVenueLink(&$venue)
  * Remove unneccessary additional information from the venue details.
  *
  * @param	string	$v	The venue details.
+ * @param	string	$uri	The URI of the venue.
  */
-function finalStrip($v)
+function finalStrip($v, $uri)
 {
 	$v = preg_replace('/TURNER SIMS( CONCERT HALL)?/', '', $v);
 	$v = preg_replace('/AVENUE CAMPUS/', '', $v);
