@@ -20,6 +20,7 @@
 date_default_timezone_set('Europe/London');
 require_once $diary_config["path"].'/lib/xml.php';
 require_once $diary_config["path"].'/lib/simple_html_dom.php';
+$locationhierarchy = getLocationHierarchy();
 
 /**
  * Tidy a number.
@@ -191,9 +192,38 @@ function getVenueLink(&$venue)
 		if($v == "") $venue = "";
 		return $uri;
 	}
+	if(preg_match('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', $v))
+	{
+		$uri = 'http://id.southampton.ac.uk/site/6';
+		$v = finalStrip($v, $uri);
+		if($v == "") $venue = "";
+		return $uri;
+	}
 	$v = finalStrip($v, null);
 	if($v == "") $venue = "";
 	return "";
+}
+
+/**
+ * Get the path of location URIs and names that the given URI falls within.
+ *
+ * @param	string	$uri		The URI of the location.
+ * @param	array	$listuris	The array of URIs already in the path.
+ * @param	array	$listnames	The array of names already in the path.
+ */
+function getLocationPath($uri, &$listuris = array(), &$listnames = array())
+{
+	global $locationhierarchy;
+	$res = $locationhierarchy->resource($uri);
+
+	$listuris[] = $uri;
+	$listnames[] = $res->all('http://www.w3.org/2000/01/rdf-schema#label');
+
+	if($res->has('http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within'))
+	{
+		getLocationPath($res->get('http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within'), $listuris, $listnames);
+	}
+	return array($listuris, $listnames);
 }
 
 /**
