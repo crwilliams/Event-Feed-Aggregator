@@ -27,8 +27,8 @@ require_once( "../etc/config.php" );
 $graph = new Graphite();
 
 $endpoint ="http://sparql.data.southampton.ac.uk/";
-$queries = array( 'orgs','places','rooms','within' );
 
+$queries = array( 'amenityplaces','orgs','places','rooms','within' );
 foreach( $queries as $query )
 {
 	$fn = $diary_config["path"]."/etc/sparql/$query";
