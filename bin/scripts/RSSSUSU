@@ -78,7 +78,15 @@ function process($item, $options)
 	);
 	if(isset($location))
 	{
-		$res['venue'] = $location;
+		$venuelink = getVenueLink($location);
+		if($location != "")
+		{
+			$res['venue'] = $location;
+		}
+		if($venuelink != "")
+		{
+			$res['venuelink'] = $venuelink;
+		}
 	}
 	return $res;
 }
