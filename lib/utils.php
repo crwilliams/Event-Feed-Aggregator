@@ -32,6 +32,37 @@ function tidyNumber($text)
 }
 
 /**
+ * Try to get a URI for a room, given its name and building number.
+ *
+ * @param	string	$buildingNumber	The number of the building that the room is located within.
+ * @param	string	$roomName	The name of the room.
+ */
+function getURIByRoomName($buildingNumber, $roomName)
+{
+	$graph = new Graphite();
+	
+	$endpoint ="http://sparql.data.southampton.ac.uk/";
+	$sparql = 'CONSTRUCT {
+    ?s <http://www.w3.org/2000/01/rdf-schema#label> ?l .
+} WHERE {
+    ?s a <http://vocab.deri.ie/rooms#Room> .
+    ?s <http://www.w3.org/2000/01/rdf-schema#label> ?l .
+    ?s <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within> <http://id.southampton.ac.uk/building/'.$buildingNumber.'> .
+    FILTER (REGEX(?l, "'.$roomName.'", "i")) 
+}';
+
+	$n = $graph->loadSPARQL($endpoint, $sparql);
+	if($n == 1)
+	{
+		$res = $graph->allSubjects();
+		return (string)$res[0];
+	}
+	else
+	{
+		logError($n . " results found in lookup of '" . $roomName . "' in building " . $buildingNumber);
+	}
+	return false;
+}
 
 /**
  * Get the graph of location hierarchy.
@@ -62,6 +93,7 @@ CONSTRUCT {
 	return $graph;
 }
 
+/**
  * Try to get a venue link from the venue details.
  *
  * @param	string	$venue	The venue details.
