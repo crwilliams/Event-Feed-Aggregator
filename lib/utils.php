@@ -94,6 +94,37 @@ CONSTRUCT {
 	return $graph;
 }
 
+function getMatches()
+{
+	$matches = array();
+	$matches['http://id.southampton.ac.uk/point-of-service/chilworth-manor-hotel'] = 
+		array(
+			'match'		=> 'CHILWORTH MANOR',
+			'remove'	=> array('CHILWORTH MANOR', 'CHILWORTH', 'SO16 7PT')
+		);
+	$matches['http://id.southampton.ac.uk/point-of-service/the-talking-heads'] = 
+		array(
+			'match'		=> 'THE TALKING HEADS',
+			'remove'	=> 'THE TALKING HEADS'
+		);
+	$matches['http://id.southampton.ac.uk/point-of-service/devere-grand-harbour-hotel'] = 
+		array(
+			'match'		=> '/DE ?VERE GRAND HARBOUR/',
+			'remove'	=> array('/DE ?VERE GRAND HARBOUR( HOTEL)?/', 'WEST QUAY ROAD', 'SO15 1AG')
+		);
+	$matches['http://id.southampton.ac.uk/point-of-service/st-michaels-church'] = 
+		array(
+			'match'		=> 'ST MICHAEL\'S CHURCH',
+			'remove'	=> array('ST MICHAEL\'S CHURCH', 'BUGLE STREET')
+		);
+	$matches['http://id.southampton.ac.uk/point-of-service/chawton-house-library'] = 
+		array(
+			'match'		=> 'CHAWTON HOUSE LIBRARY',
+			'remove'	=> array('CHAWTON HOUSE LIBRARY', 'CHAWTON', 'ALTON', 'GU34 1SJ')
+		);
+	return $matches;
+}
+
 /**
  * Try to get a venue link from the venue details.
  *
@@ -157,40 +188,22 @@ function getVenueLink(&$venue)
 		if($v == "") $venue = "";
 		return $uri;
 	}
-	if(preg_match('/CHILWORTH MANOR/', $v))
+	foreach(getMatches() as $uri => $match)
 	{
-		$uri = 'http://id.southampton.ac.uk/point-of-service/chilworth-manor-hotel';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/THE TALKING HEADS/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/point-of-service/the-talking-heads';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/DE ?VERE GRAND HARBOUR/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/point-of-service/devere-grand-harbour-hotel';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/ST MICHAEL\'S CHURCH/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/point-of-service/st-michaels-church';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/CHAWTON HOUSE/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/point-of-service/chawton-house-library';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
+		if($match['match'][0] == '/')
+		{
+			$ismatch = preg_match($match['match'], $v);
+		}
+		else
+		{
+			$ismatch = (strpos($v, $match['match']) !== false);
+		}
+		if($ismatch)
+		{
+			$v = finalStrip($v, $uri);
+			if($v == "") $venue = "";
+			return $uri;
+		}
 	}
 	if(preg_match('/JOHN HANSARD GALLERY/', $v))
 	{
@@ -329,33 +342,26 @@ function finalStrip($v, $uri)
 		$v = str_replace('SO14 3ZH', '', $v);
 	}
 
-	if(in_array('http://id.southampton.ac.uk/point-of-service/chawton-house-library', $locationuris))
+	foreach(getMatches() as $uri => $match)
 	{
-		$v = str_replace('CHAWTON HOUSE LIBRARY', '', $v);
-		$v = str_replace('CHAWTON', '', $v);
-		$v = str_replace('ALTON', '', $v);
-		$v = str_replace('GU34 1SJ', '', $v);
-	}
-	if(in_array('http://id.southampton.ac.uk/point-of-service/chilworth-manor-hotel', $locationuris))
-	{
-		$v = str_replace('CHILWORTH MANOR', '', $v);
-		$v = str_replace('CHILWORTH', '', $v);
-		$v = str_replace('SO16 7PT', '', $v);
-	}
-	if(in_array('http://id.southampton.ac.uk/point-of-service/devere-grand-harbour-hotel', $locationuris))
-	{
-		$v = preg_replace('/DE ?VERE GRAND HARBOUR( HOTEL)?/', '', $v);
-		$v = str_replace('WEST QUAY ROAD', '', $v);
-		$v = str_replace('SO15 1AG', '', $v);
-	}
-	if(in_array('http://id.southampton.ac.uk/point-of-service/st-michaels-church', $locationuris))
-	{
-		$v = str_replace('ST MICHAEL\'S CHURCH', '', $v);
-		$v = str_replace('BUGLE STREET', '', $v);
-	}
-	if(in_array('http://id.southampton.ac.uk/point-of-service/the-talking-heads', $locationuris))
-	{
-		$v = str_replace('THE TALKING HEADS', '', $v);
+		if(in_array($uri, $locationuris))
+		{
+			if(!is_array($match['remove']))
+			{
+				$match['remove'] = array($match['remove']);
+			}
+			foreach($match['remove'] as $remove)
+			{
+				if($remove[0] == '/')
+				{
+					$v = preg_replace($remove, '', $v);
+				}
+				else
+				{
+					$v = str_replace($remove, '', $v);
+				}
+			}
+		}
 	}
 
 	foreach($locationnames as $name)
