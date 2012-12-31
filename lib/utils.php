@@ -32,6 +32,36 @@ function tidyNumber($text)
 }
 
 /**
+
+/**
+ * Get the graph of location hierarchy.
+ */
+function getLocationHierarchy()
+{
+	$graph = new Graphite();
+	
+	$endpoint ="http://sparql.data.southampton.ac.uk/";
+	$sparql = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX spacerel: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/>
+
+CONSTRUCT {
+    ?a spacerel:within ?b .
+    ?a rdfs:label ?al .
+    ?b rdfs:label ?bl .
+} WHERE {
+    ?a spacerel:within ?b .
+    ?a rdfs:label ?al .
+    ?b rdfs:label ?bl .
+    ?a a ?type .
+    FILTER ( ?type = <http://vocab.deri.ie/rooms#Room> ||
+             ?type = <http://vocab.deri.ie/rooms#Building> ||
+             ?type = <http://www.w3.org/ns/org#Site> )
+}';
+
+	$graph->loadSPARQL($endpoint, $sparql);
+	return $graph;
+}
+
  * Try to get a venue link from the venue details.
  *
  * @param	string	$venue	The venue details.
