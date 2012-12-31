@@ -28,7 +28,7 @@ require_once $diary_config["path"].'/lib/simple_html_dom.php';
  */
 function tidyNumber($text)
 {
-	return str_replace(array('(', ')'), '', $text);
+	return ltrim(str_replace(array('(', ')'), '', $text), '0');
 }
 
 /**
