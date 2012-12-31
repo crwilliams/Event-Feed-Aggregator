@@ -157,6 +157,41 @@ function getVenueLink(&$venue)
 		if($v == "") $venue = "";
 		return $uri;
 	}
+	if(preg_match('/CHILWORTH MANOR/', $v))
+	{
+		$uri = 'http://id.southampton.ac.uk/point-of-service/chilworth-manor-hotel';
+		$v = finalStrip($v, $uri);
+		if($v == "") $venue = "";
+		return $uri;
+	}
+	if(preg_match('/THE TALKING HEADS/', $v))
+	{
+		$uri = 'http://id.southampton.ac.uk/point-of-service/the-talking-heads';
+		$v = finalStrip($v, $uri);
+		if($v == "") $venue = "";
+		return $uri;
+	}
+	if(preg_match('/DE ?VERE GRAND HARBOUR/', $v))
+	{
+		$uri = 'http://id.southampton.ac.uk/point-of-service/devere-grand-harbour-hotel';
+		$v = finalStrip($v, $uri);
+		if($v == "") $venue = "";
+		return $uri;
+	}
+	if(preg_match('/ST MICHAEL\'S CHURCH/', $v))
+	{
+		$uri = 'http://id.southampton.ac.uk/point-of-service/st-michaels-church';
+		$v = finalStrip($v, $uri);
+		if($v == "") $venue = "";
+		return $uri;
+	}
+	if(preg_match('/CHAWTON HOUSE/', $v))
+	{
+		$uri = 'http://id.southampton.ac.uk/point-of-service/chawton-house-library';
+		$v = finalStrip($v, $uri);
+		if($v == "") $venue = "";
+		return $uri;
+	}
 	if(preg_match('/JOHN HANSARD GALLERY/', $v))
 	{
 		$uri = 'http://id.southampton.ac.uk/building/50';
@@ -292,6 +327,35 @@ function finalStrip($v, $uri)
 	{
 		$v = preg_replace('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', '', $v);
 		$v = str_replace('SO14 3ZH', '', $v);
+	}
+
+	if(in_array('http://id.southampton.ac.uk/point-of-service/chawton-house-library', $locationuris))
+	{
+		$v = str_replace('CHAWTON HOUSE LIBRARY', '', $v);
+		$v = str_replace('CHAWTON', '', $v);
+		$v = str_replace('ALTON', '', $v);
+		$v = str_replace('GU34 1SJ', '', $v);
+	}
+	if(in_array('http://id.southampton.ac.uk/point-of-service/chilworth-manor-hotel', $locationuris))
+	{
+		$v = str_replace('CHILWORTH MANOR', '', $v);
+		$v = str_replace('CHILWORTH', '', $v);
+		$v = str_replace('SO16 7PT', '', $v);
+	}
+	if(in_array('http://id.southampton.ac.uk/point-of-service/devere-grand-harbour-hotel', $locationuris))
+	{
+		$v = preg_replace('/DE ?VERE GRAND HARBOUR( HOTEL)?/', '', $v);
+		$v = str_replace('WEST QUAY ROAD', '', $v);
+		$v = str_replace('SO15 1AG', '', $v);
+	}
+	if(in_array('http://id.southampton.ac.uk/point-of-service/st-michaels-church', $locationuris))
+	{
+		$v = str_replace('ST MICHAEL\'S CHURCH', '', $v);
+		$v = str_replace('BUGLE STREET', '', $v);
+	}
+	if(in_array('http://id.southampton.ac.uk/point-of-service/the-talking-heads', $locationuris))
+	{
+		$v = str_replace('THE TALKING HEADS', '', $v);
 	}
 
 	foreach($locationnames as $name)
