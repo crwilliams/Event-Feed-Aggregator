@@ -234,18 +234,79 @@ function getLocationPath($uri, &$listuris = array(), &$listnames = array())
  */
 function finalStrip($v, $uri)
 {
-	$v = preg_replace('/TURNER SIMS( CONCERT HALL)?/', '', $v);
-	$v = preg_replace('/AVENUE CAMPUS/', '', $v);
-	$v = preg_replace('/HIGHFIELD( CAMPUS)?/', '', $v);
-	$v = preg_replace('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', '', $v);
-	$v = preg_replace('/(WINCHESTER SCHOOL OF ART|WSA)/', '', $v);
-	$v = preg_replace('/(UNIVERSITY OF )?SOUTHAMPTON/', '', $v);
-	$v = preg_replace('/SO17 1BJ/', '', $v);//Highfield Campus
-	$v = preg_replace('/SO17 1BF/', '', $v);//Avenue Campus
-	$v = preg_replace('/SO23 8DL/', '', $v);//Winchester School of Art Campus
-	$v = preg_replace('/SO14 3ZH/', '', $v);//National Oceanography Centre Campus
-	$v = preg_replace('/UNITED KINGDOM/', '', $v);
-	$v = preg_replace('/ALL WELCOME/', '', $v);// Southampton Education School sometimes put this in their venue details!
+	if(!is_null($uri))
+	{
+		list($locationuris, $locationnames) = getLocationPath($uri);
+		$locs = array();
+		foreach($locationnames as $locations)
+		{
+			foreach($locations as $location)
+			{
+				$locs[] = (string)$location;
+			}
+		}
+		$locationnames = $locs;
+	}
+	else
+	{
+		$locationuris = array();
+		$locationnames = array();
+	}
+
+	//Building 50
+	if(in_array('http://id.southampton.ac.uk/building/50', $locationuris))
+	{
+		$v = str_replace('JOHN HANSARD GALLERY', '', $v);
+	}
+
+	//Building 52
+	if(in_array('http://id.southampton.ac.uk/building/52', $locationuris))
+	{
+		$v = preg_replace('/TURNER SIMS( CONCERT HALL)?/', '', $v);
+	}
+
+	//Highfield Campus
+	if(in_array('http://id.southampton.ac.uk/site/1', $locationuris))
+	{
+		$v = preg_replace('/HIGHFIELD( CAMPUS)?/', '', $v);
+		$v = preg_replace('/SO17 ?1BJ/', '', $v);
+	}
+
+	//Avenue Campus
+	if(in_array('http://id.southampton.ac.uk/site/3', $locationuris))
+	{
+		$v = str_replace('AVENUE CAMPUS', '', $v);
+		$v = str_replace('HIGHFIELD ROAD', '', $v);
+		$v = str_replace('SO17 1BF', '', $v);
+	}
+
+	//Winchester School of Art Campus
+	if(in_array('http://id.southampton.ac.uk/site/4', $locationuris))
+	{
+		$v = preg_replace('/(WINCHESTER SCHOOL OF ART|WSA)/', '', $v);
+		$v = str_replace('SO23 8DL', '', $v);
+	}
+
+	//National Oceanography Centre Campus
+	if(in_array('http://id.southampton.ac.uk/site/6', $locationuris))
+	{
+		$v = preg_replace('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', '', $v);
+		$v = str_replace('SO14 3ZH', '', $v);
+	}
+
+	foreach($locationnames as $name)
+	{
+		$v = str_replace(strtoupper($name) . ' BUILDING', '', $v);
+		$v = str_replace(strtoupper($name), '', $v);
+	}
+
+	$v = str_replace('UNIVERSITY OF SOUTHAMPTON', '', $v);
+	$v = str_replace('SOUTHAMPTON', '', $v);
+	$v = str_replace('HAMPSHIRE', '', $v);
+	$v = str_replace('UNITED KINGDOM', '', $v);
+	$v = str_replace('UK', '', $v);
+	$v = str_replace('ALL WELCOME', '', $v);// Southampton Education School sometimes put this in their venue details!
+
 	$v = trim(preg_replace('/[^A-Za-z0-9]/', '', $v));
 	return $v;
 }
