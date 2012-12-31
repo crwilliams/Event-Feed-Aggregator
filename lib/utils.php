@@ -97,6 +97,7 @@ CONSTRUCT {
 function getMatches()
 {
 	$matches = array();
+	//Non-university Venues
 	$matches['http://id.southampton.ac.uk/point-of-service/chilworth-manor-hotel'] = 
 		array(
 			'match'		=> 'CHILWORTH MANOR',
@@ -121,6 +122,40 @@ function getMatches()
 		array(
 			'match'		=> 'CHAWTON HOUSE LIBRARY',
 			'remove'	=> array('CHAWTON HOUSE LIBRARY', 'CHAWTON', 'ALTON', 'GU34 1SJ')
+		);
+
+	//University Buildings
+	$matches['http://id.southampton.ac.uk/building/50'] = 
+		array(
+			'match'		=> 'JOHN HANSARD GALLERY',
+			'remove'	=> 'JOHN HANSARD GALLERY'
+		);
+	$matches['http://id.southampton.ac.uk/building/52'] = 
+		array(
+			'match'		=> 'TURNER SIMS',
+			'remove'	=> '/TURNER SIMS( CONCERT HALL)?/'
+		);
+
+	//University Sites
+	$matches['http://id.southampton.ac.uk/site/1'] = 
+		array(
+			'match'		=> 'HIGHFIELD CAMPUS',
+			'remove'	=> array('/HIGHFIELD( CAMPUS)?/', 'UNIVERSITY ROAD', '/SO17 ?1BJ/')
+		);
+	$matches['http://id.southampton.ac.uk/site/3'] = 
+		array(
+			'match'		=> 'AVENUE CAMPUS',
+			'remove'	=> array('AVENUE CAMPUS', 'HIGHFIELD ROAD', 'SO17 1BF')
+		);
+	$matches['http://id.southampton.ac.uk/site/4'] = 
+		array(
+			'match'		=> '/(WINCHESTER SCHOOL OF ART|WSA)/',
+			'remove'	=> array('/(WINCHESTER SCHOOL OF ART|WSA)/', 'SO23 8DL')
+		);
+	$matches['http://id.southampton.ac.uk/site/6'] = 
+		array(
+			'match'		=> '/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/',
+			'remove'	=> array('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', 'SO14 3ZH')
 		);
 	return $matches;
 }
@@ -205,48 +240,6 @@ function getVenueLink(&$venue)
 			return $uri;
 		}
 	}
-	if(preg_match('/JOHN HANSARD GALLERY/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/building/50';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/TURNER SIMS/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/building/52';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/HIGHFIELD CAMPUS/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/site/1';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/AVENUE CAMPUS/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/site/3';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/(WINCHESTER SCHOOL OF ART|WSA)/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/site/4';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
-	if(preg_match('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', $v))
-	{
-		$uri = 'http://id.southampton.ac.uk/site/6';
-		$v = finalStrip($v, $uri);
-		if($v == "") $venue = "";
-		return $uri;
-	}
 	$v = finalStrip($v, null);
 	if($v == "") $venue = "";
 	return "";
@@ -301,46 +294,6 @@ function finalStrip($v, $uri)
 		$locationnames = array();
 	}
 
-	//Building 50
-	if(in_array('http://id.southampton.ac.uk/building/50', $locationuris))
-	{
-		$v = str_replace('JOHN HANSARD GALLERY', '', $v);
-	}
-
-	//Building 52
-	if(in_array('http://id.southampton.ac.uk/building/52', $locationuris))
-	{
-		$v = preg_replace('/TURNER SIMS( CONCERT HALL)?/', '', $v);
-	}
-
-	//Highfield Campus
-	if(in_array('http://id.southampton.ac.uk/site/1', $locationuris))
-	{
-		$v = preg_replace('/HIGHFIELD( CAMPUS)?/', '', $v);
-		$v = preg_replace('/SO17 ?1BJ/', '', $v);
-	}
-
-	//Avenue Campus
-	if(in_array('http://id.southampton.ac.uk/site/3', $locationuris))
-	{
-		$v = str_replace('AVENUE CAMPUS', '', $v);
-		$v = str_replace('HIGHFIELD ROAD', '', $v);
-		$v = str_replace('SO17 1BF', '', $v);
-	}
-
-	//Winchester School of Art Campus
-	if(in_array('http://id.southampton.ac.uk/site/4', $locationuris))
-	{
-		$v = preg_replace('/(WINCHESTER SCHOOL OF ART|WSA)/', '', $v);
-		$v = str_replace('SO23 8DL', '', $v);
-	}
-
-	//National Oceanography Centre Campus
-	if(in_array('http://id.southampton.ac.uk/site/6', $locationuris))
-	{
-		$v = preg_replace('/(NATIONAL OCEANOGRAPHY CENTRE|NOCS)/', '', $v);
-		$v = str_replace('SO14 3ZH', '', $v);
-	}
 
 	foreach(getMatches() as $uri => $match)
 	{
