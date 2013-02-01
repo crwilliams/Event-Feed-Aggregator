@@ -21,6 +21,7 @@
 require '../etc/config.php';
 include $diary_config["path"].'/lib/utils.php';
 include $diary_config["path"].'/lib/options.php';
+require_once $diary_config["path"].'/lib/htmlpurifier/HTMLPurifier.auto.php';
 
 // Get the RSS data from the Feed URL.
 $rows = file($options->FeedURL);
@@ -56,6 +57,10 @@ function process($in_data, $options)
 	#$link = (string)str_replace(' ', '%20', trim($item->link));
 	#$extrainfo = getExtraInfo($link);
 	$desc = $in_data["Description"];
+	$config = HTMLPurifier_Config::createDefault();
+	$config->set('HTML.Doctype', 'XHTML 1.1');
+	$purifier = new HTMLPurifier($config);
+	$desc = $purifier->purify($desc);
 	
 	$res = array(
 		'title'		=> $title,
