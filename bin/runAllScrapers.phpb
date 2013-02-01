@@ -53,7 +53,7 @@ if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
 	while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
 
 		// skip if we're running a specific config item (for testing) and this ain't it.
-		if( $argc == 2 && $data[0] != $argv[1] ) { continue; }
+		if( $argc >= 2 && $data[0] != $argv[1] ) { continue; }
 
 		// Generate the options array.
 		$options = array();
