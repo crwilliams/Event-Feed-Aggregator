@@ -72,18 +72,29 @@ function process($in_data, $options)
 	if( $in_data["All Day Event"] == 1 )
 	{
 		$res["date"] = array(array(
-			'from' => substr($in_data["Start Time"],0,10), 
-			'to' => substr($in_data["End Time"],0,10)
+			'date' => substr($in_data["Start Time"],0,10)
 		));
 	}
 	else
 	{
-		$res["date"] = array(array(
-			'from' => $in_data["Start Time"], 
-			'to' => $in_data["End Time"]
-		));
+		$from = addTimezone( $in_data["Start Time"] );
+		$to   = addTimezone( $in_data["End Time"] );
+		
+		$res["date"] = array(array( 'from' => $from, 'to' => $to));
 	}
 	return $res;
+}
+
+# shift from untimezoned to timezoned using this servers timezone 
+function addTimezone( $sp_date )
+{
+	list( $year, $month, $day, $hour, $minute, $second ) = preg_split( "/[- :]/", $sp_date );
+
+	$time_t = mktime( $hour, $minute, $second, $month, $day, $year );
+	
+	$date = date( "c", $time_t );
+
+	return $date;
 }
 
 
