@@ -229,6 +229,8 @@ function runChild($script, $options) {
 	if(count($error) > 0)
 	{
 		echo "Errors encountered whilst processing ".$options['FeedID'];
+		echo "Script: $script";
+		print_r( $options );
 		echo "\n";
 		echo "\n";
 		echo implode("\n", $error);
