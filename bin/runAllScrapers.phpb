@@ -54,6 +54,8 @@ if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
 
 		// skip if we're running a specific config item (for testing) and this ain't it.
 		if( $argc >= 2 && $data[0] != $argv[1] ) { continue; }
+		// skip if we're running normally but the config item name begins with an underscore.
+		if( $argc == 1 && $data[0][0] == '_' ) { continue; }
 
 		// Generate the options array.
 		$options = array();
