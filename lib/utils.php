@@ -398,6 +398,12 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 	else
 	{
 		$hostname = parse_url($url, PHP_URL_HOST);
+		if($hostname == "")
+		{
+			logError("URL $url has no hostname, ignoring.");
+			file_put_contents($filename . ".err", $url."\n");
+			return "";
+		}
 		if(!dns_check_record($hostname, 'A') && !dns_check_record($hostname, 'AAAA'))
 		{
 			if(preg_match('/^([a-z]+)\.(soton|southampton)\.ac\.uk$/', $hostname, $matches))
