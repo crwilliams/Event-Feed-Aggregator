@@ -417,7 +417,7 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 			}
 			else
 			{
-				logError("Hostname $hostname has no DNS entry, unable to modify URL");
+				logError("Hostname $hostname has no DNS entry, unable to modify URL.");
 				file_put_contents($filename . ".err", $url."\n");
 				return "";
 			}
