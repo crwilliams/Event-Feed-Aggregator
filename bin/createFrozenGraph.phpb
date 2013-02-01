@@ -44,22 +44,4 @@ $graph->freeze( "$frozen_fn.new" );
 # don't leave a half written file lying around or a few web hits will fail while updateing!
 rename( "$frozen_fn.new","$frozen_fn" );
 
-# now do the same for oxford
-$graph = new Graphite();
-
-$endpoint ="http://oxpoints.oucs.ox.ac.uk/sparql.html";
-$queries = array( 'things' );
-
-foreach( $queries as $query )
-{
-#	$fn = $diary_config["path"]."/etc/sparql/ox/$query";
-#	$sparql = join(file($fn));
-#	$n=$graph->loadSPARQL($endpoint, $sparql );
-}
-
-$graph->load("http://data.ox.ac.uk/graph/www-ox-ac-uk-events/data");
-$frozen_fn = $diary_config["path"]."/var/data-ox.php";
-$graph->freeze( "$frozen_fn.new" );
-rename( "$frozen_fn.new","$frozen_fn" );
-
 exit;
