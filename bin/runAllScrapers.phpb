@@ -21,6 +21,8 @@ require('../etc/config.php');
 require($diary_config["path"].'/lib/xml.php');
 require($diary_config["path"].'/lib/utils.php');
 
+$procstarttime = time();
+
 $errors = array();
 set_error_handler('log_error');
 
@@ -217,8 +219,6 @@ function myexec($cmd, &$output, &$error)
 function runChild($script, $options) {
 	global $fh;
 	global $diary_config;
-
-	$procstarttime = time();
 
 	// Convert the options array into XML form.
 	$optionsxml = generate_xml_from_array($options, 'options');
