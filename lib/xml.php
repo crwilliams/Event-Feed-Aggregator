@@ -2,7 +2,7 @@
 # Based on http://www.sean-barton.co.uk/2009/03/turning-an-array-or-object-into-xml-using-php/
 
 function generateEventXML($array) {
-	return generate_valid_xml_from_array($array, 'events', 'event');
+	return generate_valid_xml_from_array($array, 'events', 'item');
 }
 
 function generate_xml_from_array($array, $node_name) {

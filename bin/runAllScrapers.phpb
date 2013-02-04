@@ -1,5 +1,5 @@
 <?php
-# Copyright (c) 2012 Colin Williams / University of Southampton
+# Copyright (c) 2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -248,7 +248,7 @@ function runChild($script, $options) {
 	}
 
 	// Check the number of events.
-	$eventcount = count($xml->event);
+	$eventcount = count($xml->item);
 	if($eventcount == 0)
 	{
 		printInfo("No events found while processing ".$options['FeedID']);
@@ -274,9 +274,9 @@ function runChild($script, $options) {
 
 
 	// If the XML has events...
-	if($xml->event != null)
+	if($xml->item != null)
 	{
-		foreach($xml->event as $event)
+		foreach($xml->item as $event)
 		{
 			// Process the event.
 			processEvent($event, $options['FeedID']);
