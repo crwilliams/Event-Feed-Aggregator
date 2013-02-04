@@ -362,6 +362,34 @@ function logError($error, $feedid=null)
 	fclose($file);
 }
 
+function process_libxml_errors()
+{
+	foreach(libxml_get_errors() as $error)
+	{
+		$return = "";
+
+		switch ($error->level) {
+			case LIBXML_ERR_WARNING:
+				$return .= "Warning $error->code: ";
+				break;
+			case LIBXML_ERR_ERROR:
+				$return .= "Error $error->code: ";
+				break;
+			case LIBXML_ERR_FATAL:
+				$return .= "Fatal Error $error->code: ";
+				break;
+		}
+
+		$return .= trim($error->message) . " Line: $error->line, Column: $error->column";
+
+		if ($error->file) {
+			$return .= "  File: $error->file";
+		}
+
+		trigger_error($return);
+	}
+}
+
 /**
  * Get an RSS feed.
  *
@@ -370,7 +398,7 @@ function logError($error, $feedid=null)
  */	
 function getRSS(&$url, $timeout=1)
 {
-	return getFromURL($url, $timeout, 'simplexml_load_file', 'simplexml_load_string');
+	return getFromURL($url, $timeout, 'simplexml_load_file', 'simplexml_load_string', 'process_libxml_errors');
 }
 
 /**
@@ -392,7 +420,7 @@ function getHTML(&$url, $timeout=1)
  * @param	function	$getfromfile	Function to call to load the data from a file.
  * @param	function	$getfromstring	Function to call to load the data from a string.
  */
-function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
+function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunction = null)
 {
 	$cacheid = md5($url);
 	$filename = '/home/diary/var/cache/'.$cacheid;
