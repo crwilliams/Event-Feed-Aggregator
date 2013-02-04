@@ -21,6 +21,7 @@
 require '../etc/config.php';
 include $diary_config["path"].'/lib/utils.php';
 include $diary_config["path"].'/lib/options.php';
+require_once $diary_config["path"].'/lib/htmlpurifier/HTMLPurifier.auto.php';
 
 // Get the RSS data from the Feed URL.
 $rows = file($options->FeedURL);
@@ -56,34 +57,79 @@ function process($in_data, $options)
 	#$link = (string)str_replace(' ', '%20', trim($item->link));
 	#$extrainfo = getExtraInfo($link);
 	$desc = $in_data["Description"];
+	$config = HTMLPurifier_Config::createDefault();
+	$config->set('HTML.Doctype', 'XHTML 1.1');
+	$purifier = new HTMLPurifier($config);
+	$desc = $purifier->purify($desc);
 	
 	$res = array(
 		'title'		=> $title,
-# sharepoint events don't currently have a link.
 		'uri'		=> "http://sharepoint.soton.ac.uk/".$in_data["URL Path"],
-#		'link'		=> "null",
 		'htmldesc'	=> $desc,
 		'feedName'	=> (string)$options->FeedName,
-#		'type'		=> (string)"Other",
+		'type'          => (string)$in_data["Event type"],
 		'feedID'	=> (string)$options->FeedID,
-#		'host'		=> (string)$options->FacultyUnitGroup,
 		'tags'		=> explode(" ", @$in_data["Tags"] )
 	);
+
+	if( $in_data["Event webpage"] != "" )
+	{
+	        $res["link"] = trim($in_data["Event webpage"]);
+	}
+
+	$div_code = $in_data["University division"];
+	$loc_code = $in_data["University location - Open data link"];
+	$room_code = $in_data["Room number - Open data link"];
+
+	if( preg_match( '/- ([A-Z0-9]+)$/', $div_code, $matches ))
+	{
+	        $res["host"] = "http://id.southampton.ac.uk/org/".$matches[1];
+	}
+	if( preg_match( '/- B:(.*)$/', $loc_code, $matches ))
+	{
+	        $res["venuelink"] = "http://id.southampton.ac.uk/building/".$matches[1];
+	        $building = $matches[1];
+	        if( preg_match( '/(\d\d\d\d)$/', $room_code, $matches ))
+	        {
+	                $res["venuelink"] = "http://id.southampton.ac.uk/room/$building-".$matches[1];
+	        }
+	}
+	if( preg_match( '/- S:(.*)$/', $loc_code, $matches ))
+	{
+	        $res["venuelink"] = "http://id.southampton.ac.uk/site/".$matches[1];
+	}
+
+	if( trim($in_data["Location"]) != "" )
+	{
+	        $res['venue'] = trim($in_data["Location"]);
+	}
+
 	if( $in_data["All Day Event"] == 1 )
 	{
 		$res["date"] = array(array(
-			'from' => substr($in_data["Start Time"],0,10), 
-			'to' => substr($in_data["End Time"],0,10)
+			'date' => substr($in_data["Start Time"],0,10)
 		));
 	}
 	else
 	{
-		$res["date"] = array(array(
-			'from' => $in_data["Start Time"], 
-			'to' => $in_data["End Time"]
-		));
+		$from = addTimezone( $in_data["Start Time"] );
+		$to   = addTimezone( $in_data["End Time"] );
+		
+		$res["date"] = array(array( 'from' => $from, 'to' => $to));
 	}
 	return $res;
+}
+
+# shift from untimezoned to timezoned using this servers timezone 
+function addTimezone( $sp_date )
+{
+	list( $year, $month, $day, $hour, $minute, $second ) = preg_split( "/[- :]/", $sp_date );
+
+	$time_t = mktime( $hour, $minute, $second, $month, $day, $year );
+	
+	$date = date( "c", $time_t );
+
+	return $date;
 }
 
 

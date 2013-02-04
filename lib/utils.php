@@ -398,6 +398,12 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 	else
 	{
 		$hostname = parse_url($url, PHP_URL_HOST);
+		if($hostname == "")
+		{
+			logError("URL $url has no hostname, ignoring.");
+			file_put_contents($filename . ".err", $url."\n");
+			return "";
+		}
 		if(!dns_check_record($hostname, 'A') && !dns_check_record($hostname, 'AAAA'))
 		{
 			if(preg_match('/^([a-z]+)\.(soton|southampton)\.ac\.uk$/', $hostname, $matches))
@@ -411,7 +417,7 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 			}
 			else
 			{
-				logError("Hostname $hostname has no DNS entry, unable to modify URL");
+				logError("Hostname $hostname has no DNS entry, unable to modify URL.");
 				file_put_contents($filename . ".err", $url."\n");
 				return "";
 			}
