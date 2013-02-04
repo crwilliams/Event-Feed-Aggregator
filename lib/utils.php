@@ -439,6 +439,8 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 		$data = @file_get_contents($url);
 		if($data === false)
 		{
+			trigger_error("Failed to fetch $url.");
+			return;
 		}
 		else
 		{
