@@ -405,8 +405,6 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 		$hostname = parse_url($url, PHP_URL_HOST);
 		if($hostname == "")
 		{
-			logError("URL $url has no hostname, ignoring.");
-			file_put_contents($filename . ".err", $url."\n");
 			return "";
 		}
 		if(!dns_check_record($hostname, 'A') && !dns_check_record($hostname, 'AAAA'))
@@ -426,6 +424,7 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
 				file_put_contents($filename . ".err", $url."\n");
 				return "";
 			}
+			trigger_error("URL $url has no hostname, ignoring.");
 		}
 		$data = @file_get_contents($url);
 		$code = getResponseCode($http_response_header);
