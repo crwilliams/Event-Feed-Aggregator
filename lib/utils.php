@@ -27,9 +27,14 @@ $locationhierarchy = getLocationHierarchy();
  *
  * @param	string	$text	The text to tidy.
  */
-function tidyNumber($text)
+function tidyNumber($text, $remove_leading_zeros = true)
 {
-	return ltrim(str_replace(array('(', ')'), '', $text), '0');
+	$text = str_replace(array('(', ')'), '', $text);
+	if($remove_leading_zeros)
+	{
+		$text = ltrim($text, '0');
+	}
+	return $text;
 }
 
 /**
@@ -176,7 +181,7 @@ function getVenueLink(&$venue)
 	if(preg_match('/(ROOM|LECTURE THEATRE) ('.$rdef.')/', $v, $roommatches) &&
 		preg_match('/(BUILDING|BLDG) ('.$bdef.')+/', $v, $buildingmatches))
 	{
-		$uri = 'http://id.southampton.ac.uk/room/'.tidyNumber($buildingmatches[2]).'-'.tidyNumber($roommatches[2]);
+		$uri = 'http://id.southampton.ac.uk/room/'.tidyNumber($buildingmatches[2]).'-'.tidyNumber($roommatches[2], false);
 		$v = preg_replace('/(ROOM|LECTURE THEATRE) ('.$rdef.')/', '', $v);
 		$v = preg_replace('/(BUILDING|BLDG) ('.$bdef.')+/', '', $v);
 		$v = finalStrip($v, $uri);
@@ -185,7 +190,7 @@ function getVenueLink(&$venue)
 	}
 	if(preg_match('/('.$bdef.')[:\/]('.$rdef.')/', $v, $matches))
 	{
-		$uri = 'http://id.southampton.ac.uk/room/'.tidyNumber($matches[1]).'-'.tidyNumber($matches[2]);
+		$uri = 'http://id.southampton.ac.uk/room/'.tidyNumber($matches[1]).'-'.tidyNumber($matches[2], false);
 		$v = preg_replace('/('.$bdef.')[:\/]('.$rdef.')/', '', $v);
 		$v = finalStrip($v, $uri);
 		if($v == "") $venue = "";
