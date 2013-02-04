@@ -426,7 +426,12 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 	$filename = '/home/diary/var/cache/'.$cacheid;
 	if(file_exists($filename) && filesize($filename) > 0 && filemtime($filename)+($timeout*60*60) > time())
 	{
-		return $getfromfile($filename);
+		$data = $getfromfile($filename);
+		if($data === false && !is_null($errorfunction))
+		{
+			$errorfunction();
+		}
+		return $data;
 	}
 	else
 	{
@@ -445,7 +450,12 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 		else
 		{
 			file_put_contents($filename, $data);
-			return $getfromstring($data);
+			$data = $getfromstring($data);
+			if($data === false && !is_null($errorfunction))
+			{
+				$errorfunction();
+			}
+			return $data;
 		}
 	}
 }
