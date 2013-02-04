@@ -28,6 +28,9 @@ $graph = new Graphite();
 
 $endpoint ="http://sparql.data.southampton.ac.uk/";
 
+# load any extra bits and bobs:
+$n = $graph->load( "file:///".$diary_config["path"]."/etc/extra-triples.ttl" );
+
 $queries = array( 'amenityplaces','orgs','places','rooms','within' );
 foreach( $queries as $query )
 {
