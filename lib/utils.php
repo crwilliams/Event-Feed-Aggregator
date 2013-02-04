@@ -437,10 +437,8 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 			return;
 		}
 		$data = @file_get_contents($url);
-		$code = getResponseCode($http_response_header);
-		if($code != 200 && $code != 301 && $code != 302)
+		if($data === false)
 		{
-			logError("Failed to fetch $url.  Response code: $code");
 		}
 		else
 		{
@@ -448,16 +446,6 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 			return $getfromstring($data);
 		}
 	}
-}
-
-/**
- * Get the response code from a HTTP response header.
- *
- * @param	array	$http_response_header	The HTTP response header.
- */
-function getResponseCode($http_response_header) {
-	$statusline = explode(' ', $http_response_header[0], 3);
-	return $statusline[1];
 }
 
 /**
