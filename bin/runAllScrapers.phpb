@@ -1,5 +1,5 @@
 <?php
-# Copyright (c) 2013 Colin Williams / University of Southampton
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -20,6 +20,9 @@
 require('../etc/config.php');
 require($diary_config["path"].'/lib/xml.php');
 require($diary_config["path"].'/lib/utils.php');
+
+$errors = array();
+set_error_handler('log_error');
 
 // Disable reporting of deprecated features.
 error_reporting(E_ALL ^ E_DEPRECATED);
@@ -230,14 +233,7 @@ function runChild($script, $options) {
 
 	if(count($error) > 0)
 	{
-		echo "Errors encountered whilst processing ".$options['FeedID'];
-		echo "Script: $script";
-		print_r( $options );
-		echo "\n";
-		echo "\n";
-		echo implode("\n", $error);
-		echo "\n";
-		echo "\n";
+		trigger_error("Errors encountered whilst processing ".$options['FeedID'].": ".implode("\n", $error));
 	}
 
 	// Convert the response XML into an object.
@@ -246,8 +242,7 @@ function runChild($script, $options) {
 	// Check that the response is valid.
 	if($xml == null)
 	{
-		printInfo("Bad response from ".$options['FeedID']." script: ".implode("", $output), true);
-		logError("Bad response from script: ".implode("", $output), $options['FeedID']);
+		trigger_error("Bad response from ".$options['FeedID']." script: ".implode("", $output));
 		return 1;
 	}
 
@@ -256,7 +251,7 @@ function runChild($script, $options) {
 	if($eventcount == 0)
 	{
 		printInfo("No events found while processing ".$options['FeedID']);
-		logError(strtoupper("No events found"), $options['FeedID']);
+		trigger_error("No events found");
 	}
 	else if($eventcount == 1)
 	{
@@ -475,7 +470,7 @@ function processEvent($event, $feedid)
 	else
 	{
 		printInfo("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
-		logError("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.", $feedid);
+		trigger_error("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
 		return;
 	}
 

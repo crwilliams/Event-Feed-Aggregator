@@ -1,5 +1,5 @@
 <?
-# Copyright (c) 2012 Colin Williams / University of Southampton
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -21,6 +21,11 @@ date_default_timezone_set('Europe/London');
 require_once $diary_config["path"].'/lib/xml.php';
 require_once $diary_config["path"].'/lib/simple_html_dom.php';
 $locationhierarchy = getLocationHierarchy();
+
+function log_error($errno, $errstr, $errfile, $errline, $errcontext) {
+	global $errors;
+	$errors[] = $errstr;
+}
 
 /**
  * Tidy a number.
@@ -65,7 +70,7 @@ function getURIByRoomName($buildingNumber, $roomName)
 	}
 	else
 	{
-		logError($n . " results found in lookup of '" . $roomName . "' in building " . $buildingNumber);
+		trigger_error($n . " results found in lookup of '" . $roomName . "' in building " . $buildingNumber);
 	}
 	return false;
 }

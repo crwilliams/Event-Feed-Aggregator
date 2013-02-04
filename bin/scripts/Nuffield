@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-# Copyright (c) 2012 Colin Williams / University of Southampton
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -21,6 +21,9 @@
 require '../etc/config.php';
 include $diary_config["path"].'/lib/utils.php';
 include $diary_config["path"].'/lib/options.php';
+
+$errors = array();
+set_error_handler('log_error');
 
 $data = array();
 
