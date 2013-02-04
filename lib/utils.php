@@ -433,8 +433,8 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 		$hostname = parse_url($url, PHP_URL_HOST);
 		if($hostname == "")
 		{
-			return "";
 			trigger_error("URL $url has no hostname, ignoring.");
+			return;
 		}
 		$data = @file_get_contents($url);
 		$code = getResponseCode($http_response_header);
