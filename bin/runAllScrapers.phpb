@@ -517,7 +517,7 @@ function processEvent($event, $feedid)
 
 	// Process dates.
 	$i = 0;
-	foreach($event->date->event as $d)
+	foreach($event->date->item as $d)
 	{
 		$i++;
 		// The event has a 'from' datetime.
