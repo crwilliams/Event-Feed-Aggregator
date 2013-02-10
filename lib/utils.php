@@ -61,7 +61,7 @@ function tidyNumber($text, $removeLeadingZeros = true)
  * Try to get a URI for a room, given its name and building number.
  *
  * @param	string	$buildingNumber	The number of the building that the room is located within.
- * @param	string	$roomName	The name of the room.
+ * @param	string	$roomName		The name of the room.
  */
 function getURIByRoomName($buildingNumber, $roomName)
 {
