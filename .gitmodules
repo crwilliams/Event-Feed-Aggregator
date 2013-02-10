@@ -1,3 +1,6 @@
 [submodule "htmlpurifier"]
 	path = htmlpurifier
 	url = git://repo.or.cz/htmlpurifier.git
+[submodule "diary.soton.ac.uk/htdocs/icons/silk"]
+	path = diary.soton.ac.uk/htdocs/img/silk
+	url = https://github.com/markjames/famfamfam-silk-icons.git

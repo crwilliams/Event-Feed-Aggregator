@@ -11,6 +11,8 @@ Dependencies:
 				(https://github.com/semsol/arc2)
 	Rapper			Raptor RDF parsing and serializing utility
 				(http://librdf.org/raptor/rapper.html)
+	famfamfam silk icons	Icon Set
+				(https://github.com/markjames/famfamfam-silk-icons)
 
 
 The file structure is as follows:
@@ -33,6 +35,8 @@ diary.soton.ac.uk/
 	htdocs/			These are the documents that are intended to be
 				served by the web server.
 		view.php	A simple web page to display all future events.
+		img/
+			silk/	The famfamfam silk icon set (git submodule).
 
 etc/
 	sparql/			Set of SPARQL queries that are performed as part
