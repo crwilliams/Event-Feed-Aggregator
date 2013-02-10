@@ -18,19 +18,20 @@
 # along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
 
 require('../../etc/config.php');
-require('dev/inc/functions.php');
+//require('dev/inc/functions.php');
 
 $fields = array(
-'FeedID',
 'Site',
-'FeedName',
-'FeedURL',
-'FacultyUnitGroup',
 'Type',
+/*
 'Notes',
+*/
 'Script',
+/*
 'Tags',
-'TimeLimit');
+'TimeLimit',
+*/
+);
 
 $feeds = array();
 
@@ -58,61 +59,86 @@ if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
 	fclose($handle);
 }
 ?>
-<!DOCTYPE html>
-<html>
-<style>
-.datagrid {
-	border-collapse: collapse;
-}
-.datagrid th { 
-	padding-top: 0.5em;
-}
-.datagrid td { 
-	padding: 5px;
-	border: solid 1px #ccc;
-	background-color: #efe;
-}
-tr.script_ td {
-	text-decoration: line-through;
-	background-color: #fee;
-}
-</style>
 <h1>Current Sources of Data for the Events Calendar</h1>
 <table class='datagrid'>
 <?php
 list($eventcount, $eventinstancecount, $eventfutureinstancecount) = getCounts();
+//print_r($eventcount);
+//print_r($eventinstancecount);
+//print_r($eventfutureinstancecount);
 $i = 0;
 foreach( $feeds as $feed )
 {
+	$uri = 'http://id.southampton.ac.uk/diary/'.preg_replace('/[^A-Za-z0-9]/', '', $feed['FeedID']);
 	if( $feed["Script"] == "" ) { continue; }
 	if( $i % 10 == 0 ) 
 	{
 		print "<tr>";
-		foreach( $fields as $field_name ) { print "<th>$field_name</th>"; }
-		print "<th>Events</th>";
-		print "<th>Event Instances</th>";
-		print "<th>Future Event Instances</th>";
+		print "<th>FeedID</th>";
+		print "<th>Feed Name / URL / Group</th>";
+		print "<th>Site</th>";
+		print "<th>Type</th>";
+		print "<th>Script</th>";
+		print "<th>Extra</th>";
+		print "<th>Counts</th>";
 		print "</tr>";
 	}
-	print "<tr class='script_".$feed["Script"]."'>";
-	foreach( $fields as $field_name ) { 
-		if( ($field_name=="FeedURL" || $field_name == "FacultyUnitGroup") && substr($feed[$field_name], 0, 4) == "http" )
-		{
-			print "<td><a href='".$feed[$field_name]."'>".$feed[$field_name]."</a></td>"; 
-		}
-		else
-		{
-			print "<td>".$feed[$field_name]."</td>"; 
-		}
+	print "<tr class='script_".$feed["Script"]." status_".$progstates[$uri]."'>";
+	print "<td class='feedID'><a href='/prov.html.php?prog=".urlencode($uri)."'>".$feed['FeedID']."</a></td>";
+	print "<td>";
+	print $feed['FeedName'];
+	print "<br />";
+	if(substr($feed['FeedURL'], 0, 4) == "http")
+	{
+		print "<a href='".$feed['FeedURL']."'>".$feed['FeedURL']."</a>";
 	}
-	print "<td>".$eventcount['http://id.southampton.ac.uk/diary/'.preg_replace('/[^A-Za-z0-9]/', '', $feed['FeedID'])]."</td>";
-	print "<td>".$eventinstancecount['http://id.southampton.ac.uk/diary/'.preg_replace('/[^A-Za-z0-9]/', '', $feed['FeedID'])]."</td>";
-	print "<td>".$eventfutureinstancecount['http://id.southampton.ac.uk/diary/'.preg_replace('/[^A-Za-z0-9]/', '', $feed['FeedID'])]."</td>";
+	else
+	{
+		print $feed['FeedURL']; 
+	}
+	print "<br />";
+	if(substr($feed['FacultyUnitGroup'], 0, 4) == "http")
+	{
+		print "<a href='".$feed['FacultyUnitGroup']."'>".$feed['FacultyUnitGroup']."</a>";
+	}
+	else
+	{
+		print $feed['FacultyUnitGroup']; 
+	}
+	print "</td>"; 
+	print "<td>".$feed['Site']."</td>"; 
+	print "<td>".$feed['Type']."</td>"; 
+	print "<td>".$feed['Script']."</td>"; 
+	//foreach( $fields as $field_name ) { 
+	//	print "<td>".$feed[$field_name]."</td>"; 
+	//}
+	print "<td>";//Extra (Notes, Tags, TimeLimit)
+	if(trim($feed['Notes']) != "")
+	{
+		echo "<img src='/img/silk/icons/note.png' alt='Note' title='Note' />".$feed['Notes']."<br />";
+	}
+	if(trim($feed['Tags']) != "")
+	{
+		echo "<img src='/img/silk/icons/tag_blue.png' alt='Tag' title='Tag' />".$feed['Tags']."<br />";
+	}
+	if(trim($feed['TimeLimit']) != "")
+	{
+		echo "<img src='/img/silk/icons/clock_red.png' alt='Time Limit' title='Time Limit' />".$feed['TimeLimit']."<br />";
+	}
+	print "</td>";
+	print "<td>";
+	print "<img src='/img/silk/icons/date.png' alt='Events' title='Events' />".str_pad(@$eventcount[$uri], 1, 0);
+	print "<br />";
+	print "<img src='/img/silk/icons/date_magnify.png' alt='Event Instances' title='Events Instances' />".str_pad(@$eventinstancecount[$uri], 1, 0);
+	print "<br />";
+	print "<img src='/img/silk/icons/date_next.png' alt='Future Event Instances' title='Future Event Instances' />".str_pad(@$eventfutureinstancecount[$uri], 1, 0);
+	print "</td>";
 	print "</tr>";
 	++$i;
 }
-print "</table>";
-print "</html>";
+?>
+</table>
+<?php
 
 function getCounts()
 {
@@ -121,7 +147,7 @@ function getCounts()
         {
 		foreach($event->all("-http://purl.org/prog/has_event") as $feed)
 		{
-			$eventcount[(string)$feed]++;
+			@$eventcount[(string)$feed]++;
 		}
                 if($event->has("event:time"))
                 {
@@ -129,13 +155,13 @@ function getCounts()
                         {
 				foreach($event->all("-http://purl.org/prog/has_event") as $feed)
 				{
-					$eventinstancecount[(string)$feed]++;
+					@$eventinstancecount[(string)$feed]++;
                                 	if($time->has("tl:at"))
                                 	{
 						//echo $time->getString("tl:at");
 						if($time->getString("tl:at") > date('Y-m-d'))
 						{
-							$eventfutureinstancecount[(string)$feed]++;
+							@$eventfutureinstancecount[(string)$feed]++;
 						}
                                 	}
                                 	elseif($time->has("tl:start"))
@@ -143,7 +169,7 @@ function getCounts()
 						//echo $time->getString("tl:start");
 						if(substr($time->getString("tl:start"), 0, 10) > date('Y-m-d'))
 						{
-							$eventfutureinstancecount[(string)$feed]++;
+							@$eventfutureinstancecount[(string)$feed]++;
 						}
                                 	}
 				}
@@ -153,3 +179,11 @@ function getCounts()
 	return array($eventcount, $eventinstancecount, $eventfutureinstancecount);
 }
 
+function getGraph()
+{
+	global $graph;
+	$graph->ns( "event", "http://purl.org/NET/c4dm/event.owl#" );
+	$graph->ns( "tl", "http://purl.org/NET/c4dm/timeline.owl#" );
+	return $graph;
+}
+?>

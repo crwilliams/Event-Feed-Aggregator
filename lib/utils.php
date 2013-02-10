@@ -44,12 +44,13 @@ function log_error($errno, $errstr, $errfile, $errline, $errcontext) {
 /**
  * Tidy a number.
  *
- * @param	string	$text	The text to tidy.
+ * @param	string	$text				The text to tidy.
+ * @param	bool	$removeLeadingZeros	True to remove leading zeros.
  */
-function tidyNumber($text, $remove_leading_zeros = true)
+function tidyNumber($text, $removeLeadingZeros = true)
 {
 	$text = str_replace(array('(', ')'), '', $text);
-	if($remove_leading_zeros)
+	if($removeLeadingZeros)
 	{
 		$text = ltrim($text, '0');
 	}
