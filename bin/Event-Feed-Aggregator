@@ -36,3 +36,6 @@ cat ../var/output/* | /usr/local/bin/rapper -e -q -i turtle - -I null > ../diary
 php createFrozenGraph.phpb
 
 curl -s http://www.events.soton.ac.uk/soton/index-gen.php > /home/diary/diary.soton.ac.uk/htdocs/soton/index.html
+
+cd ~diary/diary.soton.ac.uk/htdocs
+php prov.html.php > feeds.html
