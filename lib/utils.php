@@ -534,4 +534,33 @@ function getCharacterSet($http_response_header) {
 	}
 	return "";
 }
+
+/**
+ * Make array containing provenance information.
+ *
+ * @param	string	$type	URI of process type.
+ * @param	string	$src	URI of source document.
+ * @param	string	$dst	URI of destination document.
+ * @param	float	$start	Start time.
+ * @param	float	$end	End time.
+ */
+function makeProvenanceInfo($type, $src, $dst, $start, $end) {
+	$pi = array();
+	if($type != null) {
+		$pi['type'] = $type;
+	}
+	if($src != null) {
+		$pi['src'] = $src;
+	}
+	if($dst != null) {
+		$pi['dst'] = $dst;
+	}
+	if($start != null) {
+		$pi['start'] = $start;
+	}
+	if($end != null) {
+		$pi['end'] = $end;
+	}
+	return $pi;
+}
 ?>
