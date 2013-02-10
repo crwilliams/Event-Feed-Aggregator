@@ -1,5 +1,5 @@
 <?
-# Copyright (c) 2012 Colin Williams / University of Southampton
+# Copyright (c) 2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -21,6 +21,20 @@ date_default_timezone_set('Europe/London');
 require_once $diary_config["path"].'/lib/xml.php';
 require_once $diary_config["path"].'/lib/simple_html_dom.php';
 $locationhierarchy = getLocationHierarchy();
+
+/**
+ * Log an error.
+ *
+ * @param	int		$errno
+ * @param	string	$errstr
+ * @param	string	$errfile
+ * @param	int		$errline
+ * @param	array	$errcontext
+ */
+function log_error($errno, $errstr, $errfile, $errline, $errcontext) {
+	global $errors;
+	$errors[] = $errstr;
+}
 
 /**
  * Tidy a number.
