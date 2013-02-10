@@ -84,7 +84,7 @@ foreach( $feeds as $feed )
 		print "</tr>";
 	}
 	print "<tr class='script_".$feed["Script"]." status_".$progstates[$uri]."'>";
-	print "<td class='feedID'><a href='/prov.html.php?prog=".urlencode($uri)."'>".$feed['FeedID']."</a></td>";
+	print "<td class='feedID'><a href='/prov.html.php?prog=".urlencode($uri)."'>".$feed['FeedID']." <br /><small>(see details)</small></a></td>";
 	print "<td>";
 	print $feed['FeedName'];
 	print "<br />";
