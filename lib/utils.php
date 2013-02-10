@@ -22,11 +22,6 @@ require_once $diary_config["path"].'/lib/xml.php';
 require_once $diary_config["path"].'/lib/simple_html_dom.php';
 $locationhierarchy = getLocationHierarchy();
 
-function log_error($errno, $errstr, $errfile, $errline, $errcontext) {
-	global $errors;
-	$errors[] = $errstr;
-}
-
 /**
  * Log an error.
  *
