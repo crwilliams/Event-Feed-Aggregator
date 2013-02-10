@@ -406,6 +406,39 @@ function process_libxml_errors()
 }
 
 /**
+ * Retrigger errors.
+ *
+ * @param	array	$errors	The errors to retrigger.
+ */
+function retriggerErrors($errors)
+{
+	foreach($errors as $error)
+	{
+		$return = "";
+
+		switch ($error->level) {
+			case LIBXML_ERR_WARNING:
+				$return .= "Warning $error->code: ";
+				break;
+			case LIBXML_ERR_ERROR:
+				$return .= "Error $error->code: ";
+				break;
+			case LIBXML_ERR_FATAL:
+				$return .= "Fatal Error $error->code: ";
+				break;
+		}
+
+		$return .= trim($error->message) . " Line: $error->line, Column: $error->column";
+
+		if ($error->file) {
+			$return .= "  File: $error->file";
+		}
+
+		trigger_error($return);
+	}
+}
+
+/**
  * Get an RSS feed.
  *
  * @param	string	$url	The URL of the RSS feed.
