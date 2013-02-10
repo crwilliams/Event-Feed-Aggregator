@@ -271,6 +271,10 @@ function runChild($script, $options) {
 	$feeduri = 'http://id.southampton.ac.uk/diary/'.$safeid;
 	tripleA($feeduri, ns('prog', 'Programme'));
 
+	if($options['FeedName'] != '')
+	{
+		tripleL($feeduri, ns('rdfs', 'label'), $options['FeedName']);
+	}
 
 	// If the XML has events...
 	if($xml->item != null)
