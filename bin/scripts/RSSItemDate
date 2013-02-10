@@ -33,19 +33,22 @@ $graph = new Graphite();
 $graph->load( $url );
 #fwrite( STDERR, print_r( $graph->dumpText(), true ));
 
-$rss = getRSS($options->FeedURL);
+list($rss, $sourcedocuments) = getRSS($options->FeedURL);
 
 
 $data = array();
 foreach( $graph->allOfType( "http://purl.org/rss/1.0/item" ) as $item )
 {
+	$feederrors = $errors;
+	$errors = array();
 	// Process the event.
-	$data[] = process($item, $options);
+	$data[] = process($item, $options, $sourcedocuments);
+	$errors = $feederrors;
 }
 
 
 // Output the data as XML.
-echo generateEventXML($data);
+echo generateEventXML($data, $sourcedocuments, $errors);
 
 /**
  * Process a single event.
@@ -53,7 +56,7 @@ echo generateEventXML($data);
  * @param	object	$item		The item to process.( graphite node)
  * @param	array	$options	The options passed to this script.
  */
-function process($item, $options)
+function process($item, $options, $sourcedocuments)
 {
 	$title = trim($item->getString( "http://purl.org/rss/1.0/title" ));
 	$link = (string)str_replace(' ', '%20', trim($item->getString( "http://purl.org/rss/1.0/link" )));
@@ -77,6 +80,7 @@ function process($item, $options)
 		'feedID'	=> (string)$options->FeedID,
 		'host'		=> (string)$options->FacultyUnitGroup,
 		'tags'		=> explode(" ", $options->Tags),
+		'sourceDocuments' => $sourcedocuments,
 	);
 	foreach($extrainfo as $k => $v)
 	{
@@ -120,7 +124,7 @@ function makeDateArray($datefrom, $dateto, $timefrom = null, $timeto = null) {
 function getExtraInfo(&$link)
 {
 	$l = $link;
-	$dom = getHTML($l, 24);
+	list($dom, $sourcedocuments) = getHTML($l, 24);
 	$link = $l;
 	if($dom == null) { return array(); }
 	$base = parse_url($link, PHP_URL_SCHEME).'://'.parse_url($link, PHP_URL_HOST);
@@ -168,7 +172,7 @@ function getExtraInfo(&$link)
 		'venuelink' => str_replace(array("\n", "\r"), " ", $venuelink),
 		'speaker' => str_replace(array("\n", "\r"), " ", $speaker),
 		'speakerlink' => str_replace(array("\n", "\r"), " ", $speakerlink),
-		'sourceDocuments' => array($link),
+		'sourceDocuments' => $sourcedocuments,
 	);
 }
 

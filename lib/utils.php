@@ -446,7 +446,12 @@ function retriggerErrors($errors)
  */	
 function getRSS(&$url, $timeout=1)
 {
-	return getFromURL($url, $timeout, 'simplexml_load_file', 'simplexml_load_string', 'process_libxml_errors');
+	$starttime = microtime(true);
+	$prev_error_state = libxml_use_internal_errors(true);
+	list($rss, $sourcedocuments, $src) = getFromURL($url, $timeout, 'simplexml_load_file', 'simplexml_load_string', 'libxml_get_errors');
+	libxml_use_internal_errors($prev_error_state);
+	$sourcedocuments[] = makeProvenanceInfo('getRSS', (string)$src, null, $starttime, microtime(true));
+	return array($rss, $sourcedocuments);
 }
 
 /**
@@ -457,7 +462,10 @@ function getRSS(&$url, $timeout=1)
  */
 function getHTML(&$url, $timeout=1)
 {
-	return getFromURL($url, $timeout, 'file_get_html', 'str_get_html');
+	$starttime = microtime(true);
+	list($html, $sourcedocuments, $src) = getFromURL($url, $timeout, 'file_get_html', 'str_get_html');
+	$sourcedocuments[] = makeProvenanceInfo('getHTML', (string)$src, null, $starttime, microtime(true));
+	return array($html, $sourcedocuments);
 }
 
 /**
@@ -467,6 +475,7 @@ function getHTML(&$url, $timeout=1)
  * @param	int			$timeout		The cache timeout in hours.
  * @param	function	$getfromfile	Function to call to load the data from a file.
  * @param	function	$getfromstring	Function to call to load the data from a string.
+ * @param	function	$errorfunction	Function to call for each error.
  */
 function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunction = null)
 {
@@ -474,12 +483,13 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 	$filename = '/home/diary/var/cache/'.$cacheid;
 	if(file_exists($filename) && filesize($filename) > 0 && filemtime($filename)+($timeout*60*60) > time())
 	{
+		$sourcedocuments = array(makeProvenanceInfo('cache', (string)$url, 'cache:'.$cacheid, null, filemtime($filename)));
 		$data = $getfromfile($filename);
 		if($data === false && !is_null($errorfunction))
 		{
-			$errorfunction();
+			retriggerErrors($errorfunction());
 		}
-		return $data;
+		return array($data, $sourcedocuments, 'cache:'.$cacheid);
 	}
 	else
 	{
@@ -489,21 +499,24 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 			trigger_error("URL $url has no hostname, ignoring.");
 			return;
 		}
-		$data = @file_get_contents($url);
-		if($data === false)
-		{
-			trigger_error("Failed to fetch $url.");
-			return;
-		}
-		else
+		$data = file_get_contents($url);
+		if($data !== false)
 		{
 			file_put_contents($filename, $data);
 			$data = $getfromstring($data);
 			if($data === false && !is_null($errorfunction))
 			{
-				$errorfunction();
+				retriggerErrors($errorfunction());
 			}
-			return $data;
+			return array($data, array(), $url);
+		}
+		else
+		{
+			if(!is_null($errorfunction))
+			{
+				retriggerErrors($errorfunction());
+			}
+			return;
 		}
 	}
 }

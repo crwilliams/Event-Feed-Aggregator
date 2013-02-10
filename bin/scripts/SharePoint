@@ -27,7 +27,9 @@ $errors = array();
 set_error_handler('log_error');
 
 // Get the RSS data from the Feed URL.
+$starttime = microtime(true);
 $rows = file($options->FeedURL);
+$sourcedocuments = array(makeProvenanceInfo('getFromSharePoint', (string)$options->FeedURL, null, $starttime, microtime(true)));
 
 $data = array();
 if($rows != null )
@@ -41,12 +43,15 @@ if($rows != null )
 		{
 			$indata[$headings[$i]] = $inrow[$i];
 		}
+		$feederrors = $errors;
+		$errors = array();
 		// Process the event.
 		$data[] = process($indata, $options);
+		$errors = $feederrors;
 	}
 }
 // Output the data as XML.
-echo generateEventXML($data);
+echo generateEventXML($data, $sourcedocuments, $errors);
 
 /**
  * Process a single event.

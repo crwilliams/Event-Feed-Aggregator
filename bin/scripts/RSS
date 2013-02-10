@@ -26,20 +26,23 @@ $errors = array();
 set_error_handler('log_error');
 
 // Get the RSS data from the Feed URL.
-$rss = getRSS($options->FeedURL);
+list($rss, $sourcedocuments) = getRSS($options->FeedURL);
 
 $data = array();
 if($rss != null && $rss->channel != null && $rss->channel->item != null)
 {
 	foreach($rss->channel->item as $item)
 	{
+		$feederrors = $errors;
+		$errors = array();
 		// Process the event.
-		$data[] = process($item, $options);
+		$data[] = process($item, $options, $sourcedocuments);
+		$errors = $feederrors;
 	}
 }
 
 // Output the data as XML.
-echo generateEventXML($data);
+echo generateEventXML($data, $sourcedocuments, $errors);
 
 /**
  * Process a single event.
@@ -47,7 +50,7 @@ echo generateEventXML($data);
  * @param	object	$item		The item to process.
  * @param	array	$options	The options passed to this script.
  */
-function process($item, $options)
+function process($item, $options, $sourcedocuments)
 {
 	$title = trim($item->title);
 	$link = (string)str_replace(' ', '%20', trim($item->link));
@@ -78,6 +81,12 @@ function process($item, $options)
 		if(is_array($v) || trim($v) != "")
 			$res[$k] = $v;
 	}
+	foreach($sourcedocuments as $sd)
+	{
+		$res['sourceDocuments'][] = $sd;
+	}
+	global $errors;
+	$res['errors'] =  $errors;
 	return $res;
 }
 
@@ -220,7 +229,7 @@ function makeDateArray($datefrom, $dateto, $timefrom = null, $timeto = null) {
 function getExtraInfo(&$link)
 {
 	$l = $link;
-	$dom = getHTML($l, 24);
+	list($dom, $sourcedocuments) = getHTML($l, 24);
 	$link = $l;
 	if($dom == null) { return array(); }
 	$base = parse_url($link, PHP_URL_SCHEME).'://'.parse_url($link, PHP_URL_HOST);
@@ -268,7 +277,7 @@ function getExtraInfo(&$link)
 		'venuelink' => str_replace(array("\n", "\r"), " ", $venuelink),
 		'speaker' => str_replace(array("\n", "\r"), " ", $speaker),
 		'speakerlink' => str_replace(array("\n", "\r"), " ", $speakerlink),
-		'sourceDocuments' => array($link),
+		'sourceDocuments' => $sourcedocuments,
 	);
 }
 

@@ -21,7 +21,7 @@ require('../etc/config.php');
 require($diary_config["path"].'/lib/xml.php');
 require($diary_config["path"].'/lib/utils.php');
 
-$procstarttime = time();
+$procstarttime = microtime(true);
 
 $errors = array();
 set_error_handler('log_error');
@@ -47,6 +47,8 @@ $ns['deri']	= 'http://vocab.deri.ie/rooms#';
 $ns['prog']	= 'http://purl.org/prog/';
 $ns['prov']	= 'http://purl.org/void/provenance/ns/';
 $ns['to']	= 'http://www.w3.org/2006/time#';
+$ns['type']	= 'http://example.org/type#';
+$ns['error']	= 'http://example.org/error#';
 
 $feeds = 0;
 // Try opening the config file.
@@ -294,24 +296,101 @@ function runChild($script, $options) {
 			tripleU($feeduri, ns('prog', 'has_event'), $eventuri);
 			tripleU('http://id.southampton.ac.uk/diary/', ns('prog', 'has_event'), $eventuri);
 
-			// Determine source datasets.
-			$sourceDatasets = array($options['FeedURL']);
-			if(!is_null($event->sourceDocuments) && !is_null($event->sourceDocuments->event)) {
-				foreach($event->sourceDocuments->event as $sds) {
-					$sourceDatasets[] = $sds;
+			$eventerrors = array();
+			if(isset($event->errors))
+			{
+				foreach($event->errors->item as $eventerror)
+				{
+					$eventerrors[] = (string)$eventerror;
 				}
 			}
-
-			// Output provenance information.
-			provenanceEvent($eventuri, array($options['FeedURL']));
+	
+			// Determine source datasets.
+			if(!is_null($event->sourceDocuments) && !is_null($event->sourceDocuments->item)) {
+				foreach($event->sourceDocuments->item as $sd) {
+					$sda = array('type' => null, 'src' => null, 'dst' => null, 'start' => null, 'end' => null);
+					if(isset($sd->type)) {
+						$sda['type'] = (string)$sd->type;
+					}
+					if(isset($sd->src)) {
+						$sda['src'] = (string)$sd->src;
+					}
+					if(isset($sd->dst)) {
+						$sda['dst'] = (string)$sd->dst;
+					} else {
+						$sda['dst'] = $eventuri;
+					}
+					if(isset($sd->start)) {
+						$sda['start'] = (float)$sd->start;
+					}
+					if(isset($sd->end)) {
+						$sda['end'] = (float)$sd->end;
+					}
+					// Output provenance information.
+					provenanceEvent($sda['dst'], $sda['src'], $sda['start'], $sda['end'], $sda['type']);
+					if(count($eventerrors) > 0 && $sda['dst'] == $eventuri)
+					{
+						provenanceEvent($eventuri.'#errors', $eventuri, $sda['start'], $sda['end'], $sda['type']);
+					}
+				}
+			}
+			if(count($eventerrors) > 0)
+			{
+				tripleA($eventuri.'#errors', ns('error', 'ErrorDocument'));
+				foreach($eventerrors as $error)
+				{
+					tripleL($eventuri.'#errors', ns('error', 'hasError'), (string)$error);
+				}
+			}
 		}
 	}
 	
-	// Output provenance information.
-	provenanceEvent($feeduri, array($options['FeedURL']), $procstarttime, time());
+	global $procstarttime;
+	global $errors;
+	foreach($xml->errors->item as $error)
+	{
+		$errors[] = (string)$error;
+	}
+
+	foreach($xml->sourceDocuments->item as $sd) {
+		$sda = array('type' => null, 'src' => null, 'dst' => null, 'start' => null, 'end' => null);
+		if(isset($sd->type)) {
+			$sda['type'] = (string)$sd->type;
+		}
+		if(isset($sd->src)) {
+			$sda['src'] = (string)$sd->src;
+		}
+		if(isset($sd->dst)) {
+			$sda['dst'] = (string)$sd->dst;
+		} else {
+			$sda['dst'] = $feeduri;
+		}
+		if(isset($sd->start)) {
+			$sda['start'] = (float)$sd->start;
+		}
+		if(isset($sd->end)) {
+			$sda['end'] = (float)$sd->end;
+		}
+		// Output provenance information.
+		provenanceEvent($sda['dst'], $sda['src'], $sda['start'], $sda['end'], $sda['type']);
+		if(count($errors) > 0 && $sda['dst'] == $feeduri)
+		{
+			provenanceEvent($feeduri.'#errors', $feeduri, $sda['start'], $sda['end'], $sda['type']);
+		}
+	}
 	
+	if(count($errors) > 0)
+	{
+		tripleA($feeduri.'#errors', ns('error', 'ErrorDocument'));
+		foreach($errors as $error)
+		{
+			tripleL($feeduri.'#errors', ns('error', 'hasError'), (string)$error);
+		}
+	}
+
 	// Close the file.
 	fclose($fh);
+
 	return 0;
 }
 
@@ -323,30 +402,28 @@ function runChild($script, $options) {
  * @param	DateTime	$startTime	The start time of the process.
  * @param	DateTime	$endTime	The end time of the process.
  */
-function provenanceEvent($uri, $sources, $startTime = null, $endTime = null) {
-	if(is_null($startTime)) {
-		$provtime = time();
+function provenanceEvent($uri, $source, $startTime = null, $endTime = null, $type = null) {
+	$provuri = (string)$uri.'#provenance-'.md5($uri."|".$source."|".$startTime."|".$endTime."|".$type);
+	if(is_null($type)) {
+		$type = (string)$uri.'#process';
 	} else {
-		$provtime = $startTime;
+		$type = ns('type', (string)$type);
 	}
-	$provuri = $uri.'#provenance-'.date('U', $provtime);
 	
 	tripleA($provuri, ns('prov', 'ProvenanceEvent'));
 
-	tripleU($provuri, ns('prov', 'processType'), $uri.'#process');
+	tripleU($provuri, ns('prov', 'processType'), (string)$type);
 
-	foreach($sources as $source) {
-		tripleU($provuri, ns('prov', 'sourceDataset'), $source);
-	}
+	tripleU($provuri, ns('prov', 'sourceDataset'), (string)$source);
 	
-	tripleU($provuri, ns('prov', 'resultingDataset'), $uri);
+	tripleU($provuri, ns('prov', 'resultingDataset'), (string)$uri);
 	
 	if(!is_null($startTime)) {
-		tripleL($provuri, ns('to', 'hasBeginning'), date('c', $startTime), "http://www.w3.org/2001/XMLSchema#dateTime");
+		tripleL($provuri, ns('to', 'hasBeginning'), DateTime::createFromFormat('U u', floor($startTime)." ".str_pad((1000000*$startTime)%1000000, 6, "0", STR_PAD_LEFT))->format('Y-m-d\TH:i:s.u'), "http://www.w3.org/2001/XMLSchema#dateTime");
 	}
 	
 	if(!is_null($endTime)) {
-		tripleL($provuri, ns('to', 'hasEnd'), date('c', $endTime), "http://www.w3.org/2001/XMLSchema#dateTime");
+		tripleL($provuri, ns('to', 'hasEnd'), DateTime::createFromFormat('U u', floor($endTime)." ".str_pad((1000000*$endTime)%1000000, 6, "0", STR_PAD_LEFT))->format('Y-m-d\TH:i:s.u'), "http://www.w3.org/2001/XMLSchema#dateTime");
 	}
 }
 
@@ -454,6 +531,7 @@ function ns($prefix, $e) {
  */
 function processEvent($event, $feedid)
 {
+	$provInfo = array();
 	$external_uri = "";
 	if( isset($event->uri) )
 	{
@@ -577,6 +655,8 @@ function processEvent($event, $feedid)
 			tripleU("$uri#speaker", ns("foaf", "homepage"), $event->speakerlink);
 		}
 	}
+
+	return $provInfo;
 }
 
 ?>

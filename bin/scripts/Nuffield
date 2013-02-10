@@ -30,17 +30,25 @@ $data = array();
 // Initialise the Feed URL.
 $url = $options->FeedURL;
 
+$sourcedocuments = array();
 while(true)
 {
-	$dom = getHTML($url);
+	list($dom, $thissourcedocuments) = getHTML($url);
+	foreach($thissourcedocuments as $sd)
+	{
+		$sourcedocuments[] = $sd;
+	}
 
 	// Break the while loop if the HTML could not be loaded or the listing 'div' could not be found.
 	if($dom == null || $dom->find('div#main_content/div.listing') == null) { break; }
 	
 	foreach($dom->find('div#main_content/div.listing') as $item)
 	{
+		$feederrors = $errors;
+		$errors = array();
 		// Process the event.
-		$data[] = process($item, $options);
+		$data[] = process($item, $options, $thissourcedocuments);
+		$errors = $feederrors;
 	}
 
 	// Try to find a 'next page' link.
@@ -63,7 +71,7 @@ while(true)
 	if(!$hasnext) { break; }
 }
 // Output the data as XML.
-echo generateEventXML($data);
+echo generateEventXML($data, $sourcedocuments, $errors);
 
 /**
  * Process a single event.
@@ -71,7 +79,7 @@ echo generateEventXML($data);
  * @param	object	$item		The item to process.
  * @param	array	$options	The options passed to this script.
  */
-function process($item, $options)
+function process($item, $options, $sourcedocuments)
 {
 	// The Nuffield Theatre is Building 6.
 	$theatreuri = "http://id.southampton.ac.uk/building/6";
@@ -84,7 +92,11 @@ function process($item, $options)
 
 	$pdate = array();
 
-	$dom = getHTML($link);
+	list($dom, $thissourcedocuments) = getHTML($link);
+	foreach($thissourcedocuments as $sd)
+	{
+		$sourcedocuments[] = $sd;
+	}
 	if($dom->find('div#secondary_content/ul.perdates/li') != null)
 	{
 		foreach($dom->find('div#secondary_content/ul.perdates/li') as $perdate)
@@ -132,7 +144,7 @@ function process($item, $options)
 		'feedID'	=> (string)$options->FeedID,
 		'host'		=> (string)$options->FacultyUnitGroup,
 		'tags'		=> explode(" ", $options->Tags),
-		'sourceDocuments' => array($link),
+		'sourceDocuments' => $sourcedocuments,
 	);
 	if(!is_null($locationuri))
 	{

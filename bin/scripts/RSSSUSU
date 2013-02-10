@@ -26,20 +26,23 @@ $errors = array();
 set_error_handler('log_error');
 
 // Get the RSS data from the Feed URL.
-$rss = getRSS($options->FeedURL);
+list($rss, $sourcedocuments) = getRSS($options->FeedURL);
 
 $data = array();
 if($rss != null && $rss->channel != null && $rss->channel->item != null)
 {
 	foreach($rss->channel->item as $item)
 	{
+		$feederrors = $errors;
+		$errors = array();
 		// Process the event.
-		$data[] = process($item, $options);
+		$data[] = process($item, $options, $sourcedocuments);
+		$errors = $feederrors;
 	}
 }
 
 // Output the data as XML.
-echo generateEventXML($data);
+echo generateEventXML($data, $sourcedocuments, $errors);
 
 /**
  * Process a single event.
@@ -47,7 +50,7 @@ echo generateEventXML($data);
  * @param	object	$item		The item to process.
  * @param	array	$options	The options passed to this script.
  */
-function process($item, $options)
+function process($item, $options, $sourcedocuments)
 {
 	$title = trim($item->title);
 	$pdate = array();
@@ -78,6 +81,7 @@ function process($item, $options)
 		'feedID'	=> (string)$options->FeedID,
 		'host'		=> (string)$options->FacultyUnitGroup,
 		'tags'		=> explode(" ", $options->Tags),
+		'sourceDocuments' => $sourcedocuments,
 	);
 	if(isset($location))
 	{

@@ -26,20 +26,23 @@ $errors = array();
 set_error_handler('log_error');
 
 // Get the RSS data from the Feed URL.
-$rss = getRSS($options->FeedURL);
+list($rss, $sourcedocuments) = getRSS($options->FeedURL);
 
 $data = array();
 if($rss->item != null)
 {
 	foreach($rss->item as $item)
 	{
+		$feederrors = $errors;
+		$errors = array();
 		// Process the event.
-		$data[] = process($item, $options);
+		$data[] = process($item, $options, $sourcedocuments);
+		$errors = $feederrors;
 	}
 }
 
 // Output the data as XML.
-echo generateEventXML($data);
+echo generateEventXML($data, $sourcedocuments, $errors);
 
 /**
  * Process a single event.
@@ -47,12 +50,13 @@ echo generateEventXML($data);
  * @param	object	$item		The item to process.
  * @param	array	$options	The options passed to this script.
  */
-function process($item, $options)
+function process($item, $options, $sourcedocuments)
 {
 	global $diary_config;
 	$link = trim($item->link);
 	$rdflink = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://rdf.ecs.soton.ac.uk/presentation/', $link);
 	$id = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://id.ecs.soton.ac.uk/presentation/', $link);
+	$starttime = microtime();
 	$graph = new Graphite();
 	$graph->cacheDir($diary_config["path"]."/diary.soton.ac.uk/cache");
 	$graph->load($rdflink);
@@ -97,7 +101,7 @@ function process($item, $options)
 		'host'		=> $group,
 		'tags'		=> explode(" ", $options->Tags),
 		'venuelink'	=> $venuelink,
-		'sourceDocuments' => array($rdflink),
+		'sourceDocuments' => array(makeProvenanceInfo('getRDF', $rdflink, null, $starttime, microtime())),
 	);
 	if(isset($speakerlink))
 	{
@@ -106,6 +110,10 @@ function process($item, $options)
 	if(isset($speaker))
 	{
 		$res['speaker'] = $speaker;
+	}
+	foreach($sourcedocuments as $sd)
+	{
+		$res['sourceDocuments'][] = $sd;
 	}
 	return $res;
 }

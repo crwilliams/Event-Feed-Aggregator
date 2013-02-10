@@ -26,19 +26,22 @@ $errors = array();
 set_error_handler('log_error');
 
 // Get the HTML from the Feed URL.
-$dom = getHTML($options->FeedURL);
+list($dom, $sourcedocuments) = getHTML($options->FeedURL);
 
 $data = array();
 if($dom->find('table/tbody/tr') != null)
 {
 	foreach($dom->find('table/tbody/tr') as $item)
 	{
+		$feederrors = $errors;
+		$errors = array();
 		// Process the event.
-		$data[] = process($item, $options);
+		$data[] = process($item, $options, $sourcedocuments);
+		$errors = $feederrors;
 	}
 }
 // Output the data as XML.
-echo generateEventXML($data);
+echo generateEventXML($data, $sourcedocuments, $errors);
 
 /**
  * Process a single event.
@@ -46,7 +49,7 @@ echo generateEventXML($data);
  * @param	object	$item		The item to process.
  * @param	array	$options	The options passed to this script.
  */
-function process($item, $options)
+function process($item, $options, $sourcedocuments)
 {
 	$area = html_entity_decode((string)$item->find('td', 0)->plaintext);
 	if($area == 'UCAS') { return array(); } // This is the header row, ignore it.
@@ -80,6 +83,7 @@ function process($item, $options)
 		'feedID'	=> (string)$options->FeedID,
 		'host'		=> (string)$options->FacultyUnitGroup,
 		'tags'		=> explode(" ", $options->Tags),
+		'sourceDocuments' => $sourcedocuments,
 	);
 }
 
