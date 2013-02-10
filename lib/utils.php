@@ -1,5 +1,5 @@
 <?
-# Copyright (c) 2013 Colin Williams / University of Southampton
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -21,6 +21,11 @@ date_default_timezone_set('Europe/London');
 require_once $diary_config["path"].'/lib/xml.php';
 require_once $diary_config["path"].'/lib/simple_html_dom.php';
 $locationhierarchy = getLocationHierarchy();
+
+function log_error($errno, $errstr, $errfile, $errline, $errcontext) {
+	global $errors;
+	$errors[] = $errstr;
+}
 
 /**
  * Log an error.
@@ -79,7 +84,7 @@ function getURIByRoomName($buildingNumber, $roomName)
 	}
 	else
 	{
-		logError($n . " results found in lookup of '" . $roomName . "' in building " . $buildingNumber);
+		trigger_error($n . " results found in lookup of '" . $roomName . "' in building " . $buildingNumber);
 	}
 	return false;
 }
@@ -371,6 +376,34 @@ function logError($error, $feedid=null)
 	fclose($file);
 }
 
+function process_libxml_errors()
+{
+	foreach(libxml_get_errors() as $error)
+	{
+		$return = "";
+
+		switch ($error->level) {
+			case LIBXML_ERR_WARNING:
+				$return .= "Warning $error->code: ";
+				break;
+			case LIBXML_ERR_ERROR:
+				$return .= "Error $error->code: ";
+				break;
+			case LIBXML_ERR_FATAL:
+				$return .= "Fatal Error $error->code: ";
+				break;
+		}
+
+		$return .= trim($error->message) . " Line: $error->line, Column: $error->column";
+
+		if ($error->file) {
+			$return .= "  File: $error->file";
+		}
+
+		trigger_error($return);
+	}
+}
+
 /**
  * Get an RSS feed.
  *
@@ -379,7 +412,7 @@ function logError($error, $feedid=null)
  */	
 function getRSS(&$url, $timeout=1)
 {
-	return getFromURL($url, $timeout, 'simplexml_load_file', 'simplexml_load_string');
+	return getFromURL($url, $timeout, 'simplexml_load_file', 'simplexml_load_string', 'process_libxml_errors');
 }
 
 /**
@@ -401,63 +434,44 @@ function getHTML(&$url, $timeout=1)
  * @param	function	$getfromfile	Function to call to load the data from a file.
  * @param	function	$getfromstring	Function to call to load the data from a string.
  */
-function getFromURL(&$url, $timeout, $getfromfile, $getfromstring)
+function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunction = null)
 {
 	$cacheid = md5($url);
 	$filename = '/home/diary/var/cache/'.$cacheid;
 	if(file_exists($filename) && filesize($filename) > 0 && filemtime($filename)+($timeout*60*60) > time())
 	{
-		return $getfromfile($filename);
+		$data = $getfromfile($filename);
+		if($data === false && !is_null($errorfunction))
+		{
+			$errorfunction();
+		}
+		return $data;
 	}
 	else
 	{
 		$hostname = parse_url($url, PHP_URL_HOST);
 		if($hostname == "")
 		{
-			logError("URL $url has no hostname, ignoring.");
-			file_put_contents($filename . ".err", $url."\n");
-			return "";
-		}
-		if(!dns_check_record($hostname, 'A') && !dns_check_record($hostname, 'AAAA'))
-		{
-			if(preg_match('/^([a-z]+)\.(soton|southampton)\.ac\.uk$/', $hostname, $matches))
-			{
-				if($matches[1] != "www")
-				{
-					logError("Hostname $hostname has no DNS entry, trying to modify URL.");
-					$url = str_replace($hostname, "www.".$matches[2].".ac.uk/".$matches[1], $url);
-					return getFromURL($url, $timeout, $getfromfile, $getfromstring);
-				}
-			}
-			else
-			{
-				logError("Hostname $hostname has no DNS entry, unable to modify URL.");
-				file_put_contents($filename . ".err", $url."\n");
-				return "";
-			}
+			trigger_error("URL $url has no hostname, ignoring.");
+			return;
 		}
 		$data = @file_get_contents($url);
-		$code = getResponseCode($http_response_header);
-		if($code != 200 && $code != 301 && $code != 302)
+		if($data === false)
 		{
-			logError("Failed to fetch $url.  Response code: $code");
+			trigger_error("Failed to fetch $url.");
+			return;
 		}
 		else
 		{
 			file_put_contents($filename, $data);
-			return $getfromstring($data);
+			$data = $getfromstring($data);
+			if($data === false && !is_null($errorfunction))
+			{
+				$errorfunction();
+			}
+			return $data;
 		}
 	}
-}
-
-/**
- * Get the response code from a HTTP response header.
- *
- * @param	array	$http_response_header	The HTTP response header.
- */
-function getResponseCode($http_response_header) {
-	$statusline = explode(' ', $http_response_header[0], 3);
-	return $statusline[1];
 }
 
 /**

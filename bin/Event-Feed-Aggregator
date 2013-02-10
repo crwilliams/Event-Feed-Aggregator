@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012 Colin Williams / University of Southampton
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -27,7 +27,7 @@ php runAllScrapers.phpb $1
 
 # Combine all of the output into a single file (after passing it through rapper).
 cat ../var/output/* | /usr/local/bin/rapper -e -q -i turtle - -I null -o turtle -O http://id.southampton.ac.uk/ > ../diary.soton.ac.uk/htdocs/diary.ttl
-cat ../var/output/* | /usr/local/bin/rapper -e -q -i turtle - -I null -o turtle -O http://id.southampton.ac.uk/ > ../diary.soton.ac.uk/htdocs/diary.rdf
+cat ../var/output/* | /usr/local/bin/rapper -e -q -i turtle - -I null -o rdfxml -O http://id.southampton.ac.uk/ > ../diary.soton.ac.uk/htdocs/diary.rdf
 
 # Legacy ntriples output.  TODO remove this once data.southampton.ac.uk is amended to read turtle version.
 cat ../var/output/* | /usr/local/bin/rapper -e -q -i turtle - -I null > ../diary.soton.ac.uk/htdocs/diary.nt

@@ -1,5 +1,5 @@
 <?php
-# Copyright (c) 2012 Colin Williams / University of Southampton
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -20,6 +20,11 @@
 require('../etc/config.php');
 require($diary_config["path"].'/lib/xml.php');
 require($diary_config["path"].'/lib/utils.php');
+
+$procstarttime = time();
+
+$errors = array();
+set_error_handler('log_error');
 
 // Disable reporting of deprecated features.
 error_reporting(E_ALL ^ E_DEPRECATED);
@@ -215,8 +220,6 @@ function runChild($script, $options) {
 	global $fh;
 	global $diary_config;
 
-	$procstarttime = time();
-
 	// Convert the options array into XML form.
 	$optionsxml = generate_xml_from_array($options, 'options');
 	$optionsxml = '<options>'.$optionsxml.'</options>';
@@ -230,14 +233,7 @@ function runChild($script, $options) {
 
 	if(count($error) > 0)
 	{
-		echo "Errors encountered whilst processing ".$options['FeedID'];
-		echo "Script: $script";
-		print_r( $options );
-		echo "\n";
-		echo "\n";
-		echo implode("\n", $error);
-		echo "\n";
-		echo "\n";
+		trigger_error("Errors encountered whilst processing ".$options['FeedID'].": ".implode("\n", $error));
 	}
 
 	// Convert the response XML into an object.
@@ -246,17 +242,16 @@ function runChild($script, $options) {
 	// Check that the response is valid.
 	if($xml == null)
 	{
-		printInfo("Bad response from ".$options['FeedID']." script: ".implode("", $output), true);
-		logError("Bad response from script: ".implode("", $output), $options['FeedID']);
+		trigger_error("Bad response from ".$options['FeedID']." script: ".implode("", $output));
 		return 1;
 	}
 
 	// Check the number of events.
-	$eventcount = count($xml->event);
+	$eventcount = count($xml->item);
 	if($eventcount == 0)
 	{
 		printInfo("No events found while processing ".$options['FeedID']);
-		logError(strtoupper("No events found"), $options['FeedID']);
+		trigger_error("No events found");
 	}
 	else if($eventcount == 1)
 	{
@@ -278,9 +273,9 @@ function runChild($script, $options) {
 
 
 	// If the XML has events...
-	if($xml->event != null)
+	if($xml->item != null)
 	{
-		foreach($xml->event as $event)
+		foreach($xml->item as $event)
 		{
 			// Process the event.
 			processEvent($event, $options['FeedID']);
@@ -475,7 +470,7 @@ function processEvent($event, $feedid)
 	else
 	{
 		printInfo("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
-		logError("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.", $feedid);
+		trigger_error("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
 		return;
 	}
 
