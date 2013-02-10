@@ -1,5 +1,5 @@
 <?php
-# Copyright (c) 2012 Colin Williams / University of Southampton
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
 # License: GPL
 
 # This file is part of Event Feed Aggregator.
@@ -18,20 +18,6 @@
 # along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
 
 require('../../etc/config.php');
-//require('dev/inc/functions.php');
-
-$fields = array(
-'Site',
-'Type',
-/*
-'Notes',
-*/
-'Script',
-/*
-'Tags',
-'TimeLimit',
-*/
-);
 
 $feeds = array();
 
@@ -63,9 +49,6 @@ if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
 <table class='datagrid'>
 <?php
 list($eventcount, $eventinstancecount, $eventfutureinstancecount) = getCounts();
-//print_r($eventcount);
-//print_r($eventinstancecount);
-//print_r($eventfutureinstancecount);
 $i = 0;
 foreach( $feeds as $feed )
 {
@@ -109,10 +92,7 @@ foreach( $feeds as $feed )
 	print "<td>".$feed['Site']."</td>"; 
 	print "<td>".$feed['Type']."</td>"; 
 	print "<td>".$feed['Script']."</td>"; 
-	//foreach( $fields as $field_name ) { 
-	//	print "<td>".$feed[$field_name]."</td>"; 
-	//}
-	print "<td>";//Extra (Notes, Tags, TimeLimit)
+	print "<td>";
 	if(trim($feed['Notes']) != "")
 	{
 		echo "<img src='/img/silk/icons/note.png' alt='Note' title='Note' />".$feed['Notes']."<br />";
