@@ -260,7 +260,7 @@ function renderProcess($p)
 			$str .= "<img src='/img/silk/icons/html.png' alt='$proc' title='$proc' />";
 			break;
 		case 'http://example.org/type#getFromSharePoint':
-			$proc = "Get HTML ".$date;
+			$proc = "Get from SharePoint ".$date;
 			$str .= "<img src='/img/silk/icons/world.png' alt='$proc' title='$proc' />";
 			break;
 		case 'http://example.org/type#cache':
