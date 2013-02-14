@@ -14,112 +14,96 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+
+global $diary_config;
+$diary_config["path"] = dirname(dirname(__FILE__));
+require($diary_config["path"].'/etc/config.php');
+
 ?>
 <html>
 	<head>
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 		<script type="text/javascript" src="js/filtering.js"></script>
 		<link rel="stylesheet" href="css/style.css" />
-		<title>University of Southampton | Diary</title>
+		<title>Diary</title>
 		<meta charset="utf-8" />
 	</head>
 	<body>
 <?php
-require_once( "/var/wwwsites/phplib/arc/ARC2.php" );
-require_once( "/var/wwwsites/phplib/Graphite.php" );
+	printDefaultHomepage();
+?>
+</body>
+</html>
+<?php
+exit;
 
-if(isset($_GET['ox'])) {
-	$graph = Graphite::thaw( "/home/diary/var/data-ox.php" );
-} else {
-	$graph = Graphite::thaw( "/home/diary/var/data.php" );
-}
-
-$graph->cacheDir("/home/diary/diary.soton.ac.uk/cache");
-
-$graph->ns( "event", "http://purl.org/NET/c4dm/event.owl#" );
-$graph->ns( "tl", "http://purl.org/NET/c4dm/timeline.owl#" );
-
-function getPlaceLabel($place)
+/*
+////////////////////////////////////////////////////////////
+*/
+function printDefaultHomepage()
 {
-	$str = "";
-	// Try to get a rdfs:label which is not simply the building/room number.
-	foreach($place->all("rdfs:label") as $label)
+	global $diary_config;
+	global $graph; // lets the org tree render see it easily
+	$graph = Graphite::thaw( $diary_config["path"]."/var/frozen-graph" );
+	#$graph->cacheDir( "/home/diary/diary.soton.ac.uk/cache");
+	$graph->ns( "event", "http://purl.org/NET/c4dm/event.owl#" );
+	$graph->ns( "tl", "http://purl.org/NET/c4dm/timeline.owl#" );
+	
+	foreach($graph->allOfType("event:Event") as $event)
 	{
-		if(!preg_match('/^[0-9]+[A-Z] \/ [0-9]+$/', $label))
-		{
-			if(substr($place, 0, 34) == 'http://id.southampton.ac.uk/event/')
-				$str = $label;
-			else
-				$str = "<a href='".$place."'>" . $label . "</a>";
-		}
-	}
-	// If that fails, use any label.
-	if($str == "")
-	{
-		if(substr($place, 0, 34) == 'http://id.southampton.ac.uk/event/')
-			$str = $place->label();
-		else
-			$str = "<a href='".$place."'>" . $place->label() . "</a>";
-	}
-	if($place->has("http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within"))
-	{
-		$within = $place->get("http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within");
-		$str .= ", ".getPlaceLabel($within);
-	}
-	return $str;
-}
-
-foreach($graph->allOfType("event:Event") as $event)
-{
-	if($event->has("event:time"))
-        {
-                foreach($event->all("event:time") as $time)
-                {
-                        if($time->has("tl:at"))
-                        {
-				$events[$time->getString("tl:at")]["0"][] = $time;
-                        }
-                        if($time->has("tl:start"))
-                        {
-                                $start = $time->getString("tl:start");
-				$events[substr($time->getString("tl:start"), 0, 10)][substr($time->getString("tl:start"), 11, 5)][] = $time;
-                        	if($time->has("tl:end"))
+		if($event->has("event:time"))
+        	{
+                	foreach($event->all("event:time") as $time)
+                	{
+                        	if($time->has("tl:at"))
                         	{
-                        	        $end = $time->getString("tl:end");
+					$events[$time->getString("tl:at")]["0"][] = $time;
                         	}
-                        }
-                }
-        }
-}
-
-ksort($events);
-
-$organisers = array();
-$types = array();
-$places = array();
-foreach($events as $date => $dayevents)
-{
-	if($date < date('Y-m-d'))
-		continue;
-	echo "<div class='day'>\n";
-	echo "\t<h2>".date('l jS F Y', strtotime($date))."</h2>\n";
-	ksort($dayevents);
-	foreach($dayevents as $time => $timeevents)
-	{
-		foreach($timeevents as $eventtime)
-		{
-			formatEvent($eventtime, $date);
-			getOrganisers($organisers, $eventtime->get("-event:time"));
-			getTypes($types, $eventtime->get("-event:time"));
-			getPlaces($places, $eventtime->get("-event:time"));
-		}
+                        	if($time->has("tl:start"))
+                        	{
+                                	$start = $time->getString("tl:start");
+					$events[substr($time->getString("tl:start"), 0, 10)][substr($time->getString("tl:start"), 11, 5)][] = $time;
+                        		if($time->has("tl:end"))
+                        		{
+                        	        	$end = $time->getString("tl:end");
+                        		}
+                        	}
+                	}
+        	}
 	}
-	echo "</div>\n";
+		
+	ksort($events);
+	
+	$organisers = array();
+	$types = array();
+	$places = array();
+	foreach($events as $date => $dayevents)
+	{
+		if($date < date('Y-m-d'))
+		{
+			continue;
+		}
+		echo "<div class='day'>\n";
+		echo "\t<h2>".date('l jS F Y', strtotime($date))."</h2>\n";
+		ksort($dayevents);
+		foreach($dayevents as $time => $timeevents)
+		{
+			foreach($timeevents as $eventtime)
+			{
+				formatEvent($eventtime, $date);
+				getOrganisers($organisers, $eventtime->get("-event:time"));
+				getTypes($types, $eventtime->get("-event:time"));
+				getPlaces($places, $eventtime->get("-event:time"));
+			}
+		}
+		echo "</div>\n";
+	}
+
+	printDropDowns($organisers, 'org', 'Show entire university', 'printOrganisationTreeOptions');
+	printDropDowns($places, 'place', 'Show all locations');
+	printDropDowns($types, 'type', 'Show all types');
 }
 
-printDropDowns($organisers, 'org', 'Show entire university', 'printOrganisationTreeOptions');
-printDropDowns($places, 'place', 'Show all locations');
-printDropDowns($types, 'type', 'Show all types');
 
 /**
  * Print a drop-down box to select from a set of values.
@@ -429,6 +413,41 @@ function getAgents($event, $filter=null)
 	return $agents;
 }
 
-?>
-</body>
-</html>
+function getPlaceLabel($place)
+{
+	$str = "";
+	// Try to get a rdfs:label which is not simply the building/room number.
+	foreach($place->all("rdfs:label") as $label)
+	{
+		if(!preg_match('/^[0-9]+[A-Z] \/ [0-9]+$/', $label))
+		{
+			if(substr($place, 0, 34) == 'http://id.southampton.ac.uk/event/')
+			{
+				$str = $label;
+			}
+			else
+			{
+				$str = "<a href='".$place."'>" . $label . "</a>";
+			}
+		}
+	}
+	// If that fails, use any label.
+	if($str == "")
+	{
+		if(substr($place, 0, 34) == 'http://id.southampton.ac.uk/event/')
+		{
+			$str = $place->label();
+		}
+		else
+		{
+			$str = "<a href='".$place."'>" . $place->label() . "</a>";
+		}
+	}
+	if($place->has("http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within"))
+	{
+		$within = $place->get("http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within");
+		$str .= ", ".getPlaceLabel($within);
+	}
+	return $str;
+}
+

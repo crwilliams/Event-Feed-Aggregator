@@ -1,0 +1,73 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+# Arguments:
+#	The first argument is passed to runAllScrapers.phpb.
+
+global $diary_config;
+$diary_config["path"] = dirname(dirname(__FILE__));
+require($diary_config["path"].'/etc/config.php');
+
+# Run all of the scrapers.
+exec_command( $diary_config["path"]."/bin/run-scrapers" ); # not passing $1 anymore
+
+# Combine all of the output into a single file (after passing it through rapper).
+exec_command( "cat ".$diary_config["path"]."/var/output/* | ".$diary_config["rapper"]." -e -q -i turtle - -I null -o turtle -O http://id.southampton.ac.uk/ > ".$diary_config["path"]."/htdocs/diary.ttl" );
+exec_command( "cat ".$diary_config["path"]."/var/output/* | ".$diary_config["rapper"]." -e -q -i turtle - -I null -o rdfxml -O http://id.southampton.ac.uk/ > ".$diary_config["path"]."/htdocs/diary.rdf" );
+
+# Legacy ntriples output.  
+exec_command( "cat ".$diary_config["path"]."/var/output/* | ".$diary_config["rapper"]." -e -q -i turtle - -I null > ".$diary_config["path"]."/htdocs/diary.nt" );
+
+# Freeze the graph.
+
+$graph = new Graphite();
+
+if( $diary_config["fn_loadExtraTriples"] )
+{
+	$fn = $diary_config["fn_loadExtraTriples"];
+	$fn( $graph );
+}
+
+$fn = $diary_config["path"]."/htdocs/diary.rdf";
+$n = $graph->load( $fn );
+
+$frozen_fn = $diary_config["path"]."/var/frozen-graph";
+$graph->freeze( "$frozen_fn.new" );
+
+# don't leave a half written file lying around or a few web hits will fail while updateing!
+rename( "$frozen_fn.new","$frozen_fn" );
+
+exec_command( "php ".$diary_config["path"]."/htdocs/feeds.html.php > ".$diary_config["path"]."/htdocs/feeds.html" );
+
+exit;
+
+# Southampton Extras
+#php $BASEDIR/htdocs-soton/index-gen.php > $BASEDIR/htdocs-soton/index.html
+
+function exec_command( $cmd )
+{
+	global $diary_config;
+	if( @$diary_config["verbose"] ) {
+		echo $cmd."\n";
+	}
+
+	passthru( $cmd );
+}
+	

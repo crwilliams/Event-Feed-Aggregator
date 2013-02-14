@@ -24,7 +24,6 @@ require($diary_config["path"].'/etc/config.php');
 require($diary_config["path"].'/lib/xml.php');
 require($diary_config["path"].'/lib/utils.php');
 
-
 $procstarttime = microtime(true);
 
 $errors = array();
@@ -39,6 +38,8 @@ declare(ticks = 1);
 pcntl_signal(SIGALRM, "alarm", false);
 
 // Setup namespace prefixes.
+$ns = $diary_config["ns"];
+
 $ns['event']	= 'http://purl.org/NET/c4dm/event.owl#';
 $ns['rdfs']	= 'http://www.w3.org/2000/01/rdf-schema#';
 $ns['rdf']	= 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
@@ -46,7 +47,6 @@ $ns['tl']	= 'http://purl.org/NET/c4dm/timeline.owl#';
 $ns['geo']	= 'http://www.w3.org/2003/01/geo/wgs84_pos#';
 $ns['foaf']	= 'http://xmlns.com/foaf/0.1/';
 $ns['dcterms']	= 'http://purl.org/dc/terms/';
-$ns['diary']	= 'http://id.southampton.ac.uk/ns/diary/';
 $ns['deri']	= 'http://vocab.deri.ie/rooms#';
 $ns['prog']	= 'http://purl.org/prog/';
 $ns['prov']	= 'http://purl.org/void/provenance/ns/';
@@ -56,7 +56,7 @@ $ns['error']	= 'http://example.org/error#';
 
 $feeds = 0;
 // Try opening the config file.
-if (($handle = fopen($diary_config["path"]."/etc/config.csv", "r")) !== FALSE) {
+if (($handle = fopen($diary_config["path"]."/etc/feeds.csv", "r")) !== FALSE) {
 	// Get column names from the first line of the CSV file.
 	$c = array_flip(fgetcsv($handle, 1000, ","));
 
@@ -231,7 +231,7 @@ function runChild($script, $options) {
 	$optionsxml = '<options>'.$optionsxml.'</options>';
 
 	// Generate the command, with the options XML as a command line argument.
-	$cmd = $diary_config["path"].'/bin/scripts/'.$script.' -o '.escapeshellarg($optionsxml);
+	$cmd = $diary_config["path"].'/scrapers/'.$script.' -o '.escapeshellarg($optionsxml);
 	printInfo($cmd);
 
 	// Execute the command.
@@ -272,9 +272,9 @@ function runChild($script, $options) {
 	// Open a file to write the output (as RDF triples) to.
 	$fh = fopen($diary_config["path"].'/var/output/'.$safeid, 'w');
 
-	tripleA('http://id.southampton.ac.uk/diary/', ns('prog', 'Programme'));
+	tripleA( $diary_config["master_feed_uri"], ns('prog', 'Programme'));
 		
-	$feeduri = 'http://id.southampton.ac.uk/diary/'.$safeid;
+	$feeduri = ns( 'localfeed', $safeid );
 	tripleA($feeduri, ns('prog', 'Programme'));
 
 	if($options['FeedName'] != '')
@@ -291,14 +291,14 @@ function runChild($script, $options) {
 			processEvent($event, $options['FeedID']);
 			if(isset($event->uri))
 			{
-				$eventuri = 'http://id.southampton.ac.uk/event/'.md5($event->uri);
+				$eventuri = ns( "localevent", md5($event->uri) );
 			}
 			else
 			{
-				$eventuri = 'http://id.southampton.ac.uk/event/'.md5($event->link);
+				$eventuri = ns( "localevent", md5($event->link) );
 			}
 			tripleU($feeduri, ns('prog', 'has_event'), $eventuri);
-			tripleU('http://id.southampton.ac.uk/diary/', ns('prog', 'has_event'), $eventuri);
+			tripleU($diary_config["master_feed_uri"], ns('prog', 'has_event'), $eventuri);
 
 			$eventerrors = array();
 			if(isset($event->errors))
@@ -390,7 +390,7 @@ function runChild($script, $options) {
 		{
 			tripleL($feeduri.'#errors', ns('error', 'hasError'), (string)$error);
 print $error."\n";
-			logErrorToFile( (string)$error );
+			logErrorToFile( (string)$error, $options['FeedID'] );
 		}
 	}
 
@@ -554,7 +554,7 @@ function processEvent($event, $feedid)
 
 	if(trim($external_uri) != "" )
 	{
-		$uri = 'http://id.southampton.ac.uk/event/'.md5($external_uri);
+		$uri = ns( "localevent", md5($external_uri) );
 	}
 	else
 	{
@@ -582,7 +582,7 @@ function processEvent($event, $feedid)
 	// Process event type.
 	if(isset($event->type) && $event->type != "")
 	{
-		tripleU($uri, ns("diary", "event-type"), ns("diary", $event->type));
+		tripleU($uri, ns("diaryterms", "event-type"), ns("diaryvalues", $event->type));
 	}
 
 	// Process host.
@@ -596,7 +596,7 @@ function processEvent($event, $feedid)
 	{
 		foreach($event->tags->event as $tag)
 		{
-			tripleU($uri, ns("diary", "tag"), ns("diary", $tag));
+			tripleU($uri, ns("diaryterms", "tag"), ns("diaryvalues", $tag));
 		}
 	}
 
@@ -630,14 +630,16 @@ function processEvent($event, $feedid)
 	if(isset($event->venuelink))
 	{
 		tripleU($uri, ns("event", "place"), $event->venuelink);
-		$roomprefix = "http://id.southampton.ac.uk/room/";
+		global $ns;
+		$roomprefix = $ns["localroom"];
 		if(substr($event->venuelink, 0, strlen($roomprefix)) == $roomprefix)
 		{
+			# some very southampton specific assumptions here :-(
 			$roomid = substr($event->venuelink, strlen($roomprefix));
 			$roomid = explode('-', $roomid);
 			tripleA($event->venuelink, ns("deri", "Room"));
 			tripleL($event->venuelink, ns("rdfs", "label"), implode(" / ", $roomid));
-			tripleU($event->venuelink, "http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within", "http://id.southampton.ac.uk/building/".$roomid[0]);
+			tripleU($event->venuelink, "http://data.ordnancesurvey.co.uk/ontology/spatialrelations/within", ns( "localbuilding",$roomid[0]) );
 		}
 	}
 
@@ -665,6 +667,4 @@ function processEvent($event, $feedid)
 
 	return $provInfo;
 }
-
-?>
 

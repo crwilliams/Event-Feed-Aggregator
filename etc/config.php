@@ -22,8 +22,38 @@ require_once( "/var/wwwsites/tools/Graphite/Graphite.php" );
 error_reporting(E_ALL ^ E_DEPRECATED);
 
 global $diary_config;
+
 $diary_config["verbose"] = true;
 
+$diary_config["rapper"] = '/usr/local/bin/rapper';
+
+$diary_config["master_feed_uri"] = 'http://id.southampton.ac.uk/diary/'; 
+
+$diary_config["ns"] = array(
+	'diaryterms'=> 'http://id.southampton.ac.uk/ns/diary/',
+	'diaryvalues'=> 'http://id.southampton.ac.uk/ns/diary/',
+	'localfeed'=> 'http://id.southampton.ac.uk/diary/',
+	'localevent'=> 'http://id.southampton.ac.uk/event/',
+	'localroom'=> 'http://id.southampton.ac.uk/room/',
+	'localbuilding'=> 'http://id.southampton.ac.uk/building/',
+);
+
+
+# load any extra bits and bobs:
+
+$diary_config["fn_loadExtraTriples"] = function(&$graph)
+{
+	global $diary_config;
+	$n = $graph->load( "file:///".$diary_config["path"]."/etc/extra-triples.ttl" );
+	$endpoint ="http://sparql.data.southampton.ac.uk/";
+	$queries = array( 'amenityplaces','orgs','places','rooms','within' );
+	foreach( $queries as $query )
+	{
+		$fn = $diary_config["path"]."/etc/sparql/$query";
+		$sparql = join(file($fn));
+		$n=$graph->loadSPARQL($endpoint, $sparql );
+	}
+};
 
 # Venue resolution code
 
