@@ -1,0 +1,11 @@
+local
+var
+.ssh/
+.vim/
+.viminfo
+.lesshst
+htdocs/diary.nt
+htdocs/diary.rdf
+htdocs/diary.ttl
+htdocs/feeds.html
+htdocs-soton
