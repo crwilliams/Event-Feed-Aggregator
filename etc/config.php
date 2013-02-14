@@ -28,6 +28,7 @@ $diary_config["verbose"] = true;
 $diary_config["rapper"] = '/usr/local/bin/rapper';
 
 $diary_config["master_feed_uri"] = 'http://id.southampton.ac.uk/diary/'; 
+$diary_config["master_org_uri"] = 'http://id.southampton.ac.uk/'; 
 
 $diary_config["ns"] = array(
 	'diaryterms'=> 'http://id.southampton.ac.uk/ns/diary/',

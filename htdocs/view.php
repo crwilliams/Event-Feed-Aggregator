@@ -129,9 +129,10 @@ function printDropDowns($values, $id, $showAllString, $processOptions) {
  */
 function printOrganisationTreeOptions($values, $node = null, $depth = 0) {
 	global $graph;
+	global $diary_config;
 	if($node == null) {
-		$orgtree = getOrganisationTree($graph->resource("http://id.southampton.ac.uk/"), array_keys($values));
-		printOrganisationTreeOptions($values, $orgtree[md5('http://id.southampton.ac.uk/')]);
+		$orgtree = getOrganisationTree($graph->resource($diary_config["master_org_uri"] ), array_keys($values));
+		printOrganisationTreeOptions($values, $orgtree[md5($diary_config["master_org_uri"])]);
 	}
 	if(!isset($node['children'])) {
 		return;
@@ -265,11 +266,16 @@ function outputPlaces($event, $filter=null)
  */
 function getTypes(&$types, $event)
 {
-	foreach( $event->all("http://id.southampton.ac.uk/ns/diary/event-type") as $type )
+	global $diary_config;	
+	$event_type_term = $diary_config["ns"]["diaryterms"]."event-type";
+
+	foreach( $event->all($event_type_term) as $type )
 	{
-		$typename = str_replace('http://id.southampton.ac.uk/ns/diary/', '', (string)$type);
+		$typename = substr( (string)$type, strlen( $diary_config["ns"]["diaryvalues"] ) );
 		if(trim($typename) != "")
+		{
 			$types[md5((string)$type)] = trim(preg_replace('/([A-Z])/', ' \1', $typename));
+		}
 	}
 	return $types;
 }
@@ -416,12 +422,14 @@ function getAgents($event, $filter=null)
 function getPlaceLabel($place)
 {
 	$str = "";
+	global $diary_config;
 	// Try to get a rdfs:label which is not simply the building/room number.
 	foreach($place->all("rdfs:label") as $label)
 	{
 		if(!preg_match('/^[0-9]+[A-Z] \/ [0-9]+$/', $label))
 		{
-			if(substr($place, 0, 34) == 'http://id.southampton.ac.uk/event/')
+			# if the URI is in the local event namespace
+			if( strpos( $place, $diary_config["ns"]["localevent"] ) === 0 )
 			{
 				$str = $label;
 			}
@@ -434,7 +442,8 @@ function getPlaceLabel($place)
 	// If that fails, use any label.
 	if($str == "")
 	{
-		if(substr($place, 0, 34) == 'http://id.southampton.ac.uk/event/')
+		# if the URI is in the local event namespace
+		if( strpos( $place, $diary_config["ns"]["localevent"] ) === 0 )
 		{
 			$str = $place->label();
 		}

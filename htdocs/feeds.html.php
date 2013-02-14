@@ -428,12 +428,14 @@ function printFeeds($progstates)
 	print "<h1>Current Sources of Data for the Events Calendar</h1>\n";
 	print "<table class='datagrid'>\n";
 
+	global $diary_config;
 	list($eventcount, $eventinstancecount, $eventfutureinstancecount) = getCounts();
 	$i = 0;
 	foreach( $feeds as $feed )
 	{
-		$uri = 'http://id.southampton.ac.uk/diary/'.preg_replace('/[^A-Za-z0-9]/', '', $feed['FeedID']);
 		if( $feed["Script"] == "" ) { continue; }
+
+		$uri = $diary_config["ns"]["localfeed"].preg_replace('/[^A-Za-z0-9]/', '', $feed['FeedID']);
 		if( $i % 10 == 0 ) 
 		{
 			print "<tr>";
