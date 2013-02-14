@@ -4,6 +4,11 @@ It was developed for use on http://soton-diary.ecs.soton.ac.uk/ .
 
 To run the tool, firstly execute bin/getConfig, then execute bin/Event-Feed-Aggregator .
 
+you'll need to create the following directories after install:
+var/cache
+var/log
+var/output
+
 Dependencies:
 	Graphite		PHP RDF Library
 				(https://github.com/cgutteridge/Graphite)

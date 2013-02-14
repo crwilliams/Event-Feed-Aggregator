@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 # Copyright (c) 2012-2013 Colin Williams / University of Southampton
 # License: GPL
@@ -17,9 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
 
-require('../etc/config.php');
+global $diary_config;
+$diary_config["path"] = dirname(dirname(__FILE__));
+require($diary_config["path"].'/etc/config.php');
 require($diary_config["path"].'/lib/xml.php');
 require($diary_config["path"].'/lib/utils.php');
+
 
 $procstarttime = microtime(true);
 
@@ -385,6 +389,8 @@ function runChild($script, $options) {
 		foreach($errors as $error)
 		{
 			tripleL($feeduri.'#errors', ns('error', 'hasError'), (string)$error);
+print $error."\n";
+			logErrorToFile( (string)$error );
 		}
 	}
 
@@ -434,7 +440,8 @@ function provenanceEvent($uri, $source, $startTime = null, $endTime = null, $typ
  * @param	bool	$force	True if the string should be printed even when not in verbose mode.
  */
 function printInfo($string="", $force=false) {
-	if($force || getopt('v')) {
+	global $diary_config;
+	if( $force || @$diary_config["verbose"] ) {
 		echo $string."\n";
 	}
 }

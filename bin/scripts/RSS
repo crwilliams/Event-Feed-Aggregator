@@ -18,7 +18,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
 
-require '../etc/config.php';
+global $diary_config;
+$diary_config["path"] = dirname(dirname(dirname(__FILE__)));
+require($diary_config["path"].'/etc/config.php');
 include $diary_config["path"].'/lib/utils.php';
 include $diary_config["path"].'/lib/options.php';
 
@@ -86,7 +88,7 @@ function process($item, $options, $sourcedocuments)
 		$res['sourceDocuments'][] = $sd;
 	}
 	global $errors;
-	$res['errors'] =  $errors;
+	$res['errors'] = $errors;
 	return $res;
 }
 

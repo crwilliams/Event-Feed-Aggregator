@@ -79,7 +79,7 @@ turner-sims,Turner Sims,Events from Turner Sims,http://www.turnersims.co.uk/rss.
 nuffield-theatre,Nuffield Theatre,,http://www.nuffieldtheatre.co.uk/events/category/C86/,,Nuffield,,Externally hosted,TheatreEvent,180
 multidisciplinary-events,,,http://www.multidisciplinary.soton.ac.uk/events/,,,,Have an iCal feed: http://usrg.devel.mauveinternet.co.uk/events/upcoming-events.ics,,
 ecs-seminars,ECS,ECS Seminars,http://www.ecs.soton.ac.uk/feeds/seminars_rss.php,http://id.southampton.ac.uk/org/FP,RSSECS,Seminar,,,
-comms-calendar,Sharepoint,Additional Events,file:///home/diary/var/sharepoint/comms-sp-calendar.tsv,http://id.southampton.ac.uk/org/DK,SharePoint,Event,,,
+comms-calendar,Sharepoint,Additional Events,file:///home/diary2/var/sharepoint/comms-sp-calendar.tsv,http://id.southampton.ac.uk/org/DK,SharePoint,Event,,,
 susu,SUSU,SUSU Events,http://www.susu.org/feeds/whatson.xml,http://id.southampton.ac.uk/org/SU,RSSSUSU,Event,,,
 lifelong-learning-events,Lifelong Learning,Lifelong Learning Events,http://www.southampton.ac.uk/lifelonglearning/news/feeds/lll_events_feed.page,,RSS,Event,,,
 theano,Theano,Theano Events,http://www.southampton.ac.uk/theano/news/feeds/event_feed_2.page,,RSS,Event,,,
