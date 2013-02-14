@@ -1,0 +1,48 @@
+h3 {
+	float:left;
+	font-size:1.5em;
+	margin:0px;
+}
+
+div.speakers {
+}
+
+div.description {
+	font-size:1.2em;
+	text-align:justify;
+}
+
+div.event {
+	position: relative;
+	border: solid 3px navy;
+	padding: 5px;
+	margin: 5px;
+}
+
+div.event-info {
+	position: relative;
+	float: right;
+	width: 30%;
+	height: 100%;
+	margin: 10px;
+	padding: 10px;
+	margin-top: 0px;
+	margin-right: 0px;
+}
+
+select {
+	position:fixed;
+	right:5px;
+}
+
+select#org {
+	top:5px;
+}
+
+select#place {
+	top:25px;
+}
+
+select#type {
+	top:45px;
+}
