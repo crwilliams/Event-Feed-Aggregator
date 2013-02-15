@@ -45,7 +45,7 @@ $diary_config["ns"] = array(
 $diary_config["fn_loadExtraTriples"] = function(&$graph)
 {
 	global $diary_config;
-	$n = $graph->load( "file:///".$diary_config["path"]."/etc/extra-triples.ttl" );
+	$n = $graph->load( "file:///".$diary_config["path"]."/soton/etc/extra-triples.ttl" );
 	$endpoint ="http://sparql.data.southampton.ac.uk/";
 	$queries = array( 'amenityplaces','orgs','places','rooms','within' );
 	foreach( $queries as $query )
