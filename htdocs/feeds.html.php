@@ -25,6 +25,7 @@ if(PHP_SAPI !== 'cli' && !isset($_GET['prog']))
 global $diary_config;
 $diary_config["path"] = dirname(dirname(__FILE__));
 require($diary_config["path"].'/etc/config.php');
+require($diary_config["path"].'/lib/utils.php');
 global $graph; // bit hacky
 $graph = Graphite::thaw( $diary_config["path"]."/var/frozen-graph" );
 
@@ -88,7 +89,7 @@ td img, h2 img, h3 img {
 	padding-right: 5px;
 }
 
-div.proc<?= md5('http://example.org/type#cache') ?> {
+div.proc<?= md5(ns('type', 'cache')) ?> {
 	display: inline;
 }
 
@@ -147,7 +148,7 @@ if( $render_mode == "single" )
 }
 if( $render_mode == "all" )
 {
-	foreach($graph->allOfType('http://purl.org/prog/Programme') as $prog)
+	foreach($graph->allOfType(ns('prog', 'Programme')) as $prog)
 	{
 		processProgramme($prog, $progprovdata, $allprogerrors, $progstates);
 	}
@@ -158,7 +159,7 @@ foreach($progprovdata as $d)
 	list($prog, $progmaps, $progerrors, $progerrorstate) = $d;
 	$prog = $graph->resource($prog);
 	$progeventprovdata = array();
-	foreach($prog->all('http://purl.org/prog/has_event') as $e)
+	foreach($prog->all(ns('prog', 'has_event')) as $e)
 	{
 		$maps = array();
 		$errors = array();
@@ -245,23 +246,23 @@ function renderProcess($p)
 	}
 	switch($p[3])
 	{
-		case 'http://example.org/type#getRSS':
+		case ns('type', 'getRSS'):
 			$proc = "Get RSS ".$date;
 			$str .= "<img src='/img/silk/icons/rss.png' alt='$proc' title='$proc'/>";
 			break;
-		case 'http://example.org/type#getRDF':
+		case ns('type', 'getRDF'):
 			$proc = "Get RDF ".$date;
 			$str .= "<img src='/img/silk/icons/database.png' alt='$proc' title='$proc'/>";
 			break;
-		case 'http://example.org/type#getHTML':
+		case ns('type', 'getHTML'):
 			$proc = "Get HTML ".$date;
 			$str .= "<img src='/img/silk/icons/html.png' alt='$proc' title='$proc' />";
 			break;
-		case 'http://example.org/type#getFromSharePoint':
+		case ns('type', 'getFromSharePoint'):
 			$proc = "Get from SharePoint ".$date;
 			$str .= "<img src='/img/silk/icons/world.png' alt='$proc' title='$proc' />";
 			break;
-		case 'http://example.org/type#cache':
+		case ns('type', 'cache'):
 			$proc = "From document cached ".$date;
 			$str .= "<img src='/img/silk/icons/disk_multiple.png' alt='$proc' title='$proc' />";
 			break;
@@ -308,12 +309,12 @@ function renderProvenance($prog, $maps, $errors, $prefix)
 function getProvenance($doc, &$maps, &$errors)
 {
 	$errorstate = 0;
-	foreach($doc->all('-http://purl.org/void/provenance/ns/resultingDataset') as $pe)
+	foreach($doc->all('-'.ns('prov', 'resultingDataset')) as $pe)
 	{
-		$src = $pe->all('http://purl.org/void/provenance/ns/sourceDataset');
-		$process = $pe->get('http://purl.org/void/provenance/ns/processType');
-		$start = str_replace(array("[NULL]", "T"), array("", " "), $pe->get('http://www.w3.org/2006/time#hasBeginning'));
-		$end = str_replace(array("[NULL]", "T"), array("", " "), $pe->get('http://www.w3.org/2006/time#hasEnd'));
+		$src = $pe->all(ns('prov', 'sourceDataset'));
+		$process = $pe->get(ns('prov', 'processType'));
+		$start = str_replace(array("[NULL]", "T"), array("", " "), $pe->get(ns('to', 'hasBeginning')));
+		$end = str_replace(array("[NULL]", "T"), array("", " "), $pe->get(ns('to', 'hasEnd')));
 		foreach($src as $s)
 		{
 			$entry = array((string)$start, (string)$end, (string)$s, (string)$process);
@@ -321,13 +322,13 @@ function getProvenance($doc, &$maps, &$errors)
 			{
 				@$maps[(string)$doc][] = $entry;
 			}
-			foreach($s->all('-http://purl.org/void/provenance/ns/sourceDataset') as $pe2)
+			foreach($s->all('-'.ns('prov', 'sourceDataset')) as $pe2)
 			{
-				foreach($pe2->all('http://purl.org/void/provenance/ns/resultingDataset') as $dst)
+				foreach($pe2->all(ns('prov', 'resultingDataset')) as $dst)
 				{
-					if($dst->isType('http://example.org/error#ErrorDocument'))
+					if($dst->isType(ns('error', 'ErrorDocument')))
 					{
-						foreach($dst->all('http://example.org/error#hasError') as $e)
+						foreach($dst->all(ns('error', 'hasError')) as $e)
 						{
 							$e = trim($e);
 							@$errors[(string)$s][] = $e;
@@ -347,13 +348,13 @@ function getProvenance($doc, &$maps, &$errors)
 		}
 	}
 	@asort($maps[(string)$doc]);
-	foreach($doc->all('-http://purl.org/void/provenance/ns/sourceDataset') as $pe)
+	foreach($doc->all('-'.ns('prov', 'sourceDataset')) as $pe)
 	{
-		foreach($pe->all('http://purl.org/void/provenance/ns/resultingDataset') as $dst)
+		foreach($pe->all(ns('prov', 'resultingDataset')) as $dst)
 		{
-			if($dst->isType('http://example.org/error#ErrorDocument'))
+			if($dst->isType(ns('error', 'ErrorDocument')))
 			{
-				foreach($dst->all('http://example.org/error#hasError') as $e)
+				foreach($dst->all(ns('error', 'hasError')) as $e)
 				{
 					$e = trim($e);
 					if(!@in_array($e, $ignorederrors[(string)$doc]))
@@ -377,7 +378,7 @@ function getProvenance($doc, &$maps, &$errors)
 
 function processProgramme($prog, &$progprovdata, &$allprogerrors, &$progstates)
 {
-	if( !$prog->has('-http://purl.org/void/provenance/ns/resultingDataset') )
+	if( !$prog->has('-'.ns('prov', 'resultingDataset')) )
 	{
 		return;
 	}
@@ -504,31 +505,29 @@ function printFeeds($progstates)
 function getCounts()
 {
 	$graph = getGraph();
-        foreach($graph->allOfType("event:Event") as $event)
-        {
-		foreach($event->all("-http://purl.org/prog/has_event") as $feed)
+	foreach($graph->allOfType(ns('event', 'Event')) as $event)
+	{
+		foreach($event->all('-'.ns('prog', 'has_event')) as $feed)
 		{
 			@$eventcount[(string)$feed]++;
 		}
-                if($event->has("event:time"))
+		if($event->has(ns('event', 'time')))
                 {
-                        foreach($event->all("event:time") as $time)
+			foreach($event->all(ns('event', 'time')) as $time)
                         {
-				foreach($event->all("-http://purl.org/prog/has_event") as $feed)
+				foreach($event->all('-'.ns('prog', 'has_event')) as $feed)
 				{
 					@$eventinstancecount[(string)$feed]++;
-                                	if($time->has("tl:at"))
+					if($time->has(ns('tl', 'at')))
                                 	{
-						//echo $time->getString("tl:at");
-						if($time->getString("tl:at") > date('Y-m-d'))
+						if($time->getString(ns('tl', 'at')) > date('Y-m-d'))
 						{
 							@$eventfutureinstancecount[(string)$feed]++;
 						}
                                 	}
-                                	elseif($time->has("tl:start"))
-                                	{
-						//echo $time->getString("tl:start");
-						if(substr($time->getString("tl:start"), 0, 10) > date('Y-m-d'))
+					elseif($time->has(ns('tl', 'start')))
+					{
+						if(substr($time->getString(ns('tl', 'start')), 0, 10) > date('Y-m-d'))
 						{
 							@$eventfutureinstancecount[(string)$feed]++;
 						}
