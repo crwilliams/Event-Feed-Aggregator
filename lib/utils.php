@@ -70,34 +70,6 @@ function logErrorToFile($error, $feedid=null)
 	fclose($file);
 }
 
-function process_libxml_errors()
-{
-	foreach(libxml_get_errors() as $error)
-	{
-		$return = "";
-
-		switch ($error->level) {
-			case LIBXML_ERR_WARNING:
-				$return .= "Warning $error->code: ";
-				break;
-			case LIBXML_ERR_ERROR:
-				$return .= "Error $error->code: ";
-				break;
-			case LIBXML_ERR_FATAL:
-				$return .= "Fatal Error $error->code: ";
-				break;
-		}
-
-		$return .= trim($error->message) . " Line: $error->line, Column: $error->column";
-
-		if ($error->file) {
-			$return .= "  File: $error->file";
-		}
-
-		trigger_error($return);
-	}
-}
-
 /**
  * Retrigger errors.
  *
