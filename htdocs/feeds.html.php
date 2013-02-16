@@ -517,7 +517,6 @@ function getCounts()
 				foreach($event->all('-', ns('prog', 'has_event')) as $feed)
 				{
 					@$eventinstancecount[(string)$feed]++;
-						if($time->getString("tl:at") > date('Y-m-d'))
 					if($time->has(ns('tl', 'at')))
 					{
 						if($time->getString(ns('tl', 'at')) > date('Y-m-d'))
