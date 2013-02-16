@@ -356,8 +356,6 @@ function getProvenance($doc, &$maps, &$errors)
 				foreach($dst->all(ns('error', 'hasError')) as $e)
 				{
 					$e = trim($e);
-					if(!@in_array($e, $ignorederrors[(string)$doc]))
-					{
 						@$errors[(string)$doc][] = $e;
 						if($e == 'No events found')
 						{
@@ -367,7 +365,6 @@ function getProvenance($doc, &$maps, &$errors)
 						{
 							$errorstate = max($errorstate, 2);
 						}
-					}
 				}
 			}
 		}
