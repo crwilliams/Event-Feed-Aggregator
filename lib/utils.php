@@ -73,9 +73,11 @@ function logErrorToFile($error, $feedid=null)
 /**
  * Retrigger errors.
  *
- * @param	array	$errors	The errors to retrigger.
+ * @param	array	$errors		The errors to retrigger.
+ * @param	string	$filename	The filename of the script which generated these errors.
+ * @param	int		$linenumber	The line number within the script which generated these errors.
  */
-function retriggerErrors($errors)
+function retriggerErrors($errors, $filename, $linenumber)
 {
 	foreach($errors as $error)
 	{
@@ -99,7 +101,7 @@ function retriggerErrors($errors)
 			$return .= "  File: $error->file";
 		}
 
-		trigger_error($return);
+		log_error(E_USER_ERROR, $return, $filename, $linenumber);
 	}
 }
 
@@ -150,10 +152,10 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 	if(file_exists($filename) && filesize($filename) > 0 && filemtime($filename)+($timeout*60*60) > time())
 	{
 		$sourcedocuments = array(makeProvenanceInfo('cache', (string)$url, 'cache:'.$cacheid, null, filemtime($filename)));
-		$data = $getfromfile($filename);
+		$data = $getfromfile($filename);  $lineno = __LINE__;
 		if($data === false && !is_null($errorfunction))
 		{
-			retriggerErrors($errorfunction());
+			retriggerErrors($errorfunction(), __FILE__, $lineno);
 		}
 		return array($data, $sourcedocuments, 'cache:'.$cacheid);
 	}
@@ -169,10 +171,10 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 		if($data !== false)
 		{
 			file_put_contents($filename, $data);
-			$data = $getfromstring($data);
+			$data = $getfromstring($data);  $lineno = __LINE__;
 			if($data === false && !is_null($errorfunction))
 			{
-				retriggerErrors($errorfunction());
+				retriggerErrors($errorfunction(), __FILE__, $lineno);
 			}
 			return array($data, array(), $url);
 		}
