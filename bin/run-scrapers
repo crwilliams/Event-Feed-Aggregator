@@ -41,17 +41,17 @@ pcntl_signal(SIGALRM, "alarm", false);
 $ns = $diary_config["ns"];
 
 $ns['event']	= 'http://purl.org/NET/c4dm/event.owl#';
-$ns['rdfs']	= 'http://www.w3.org/2000/01/rdf-schema#';
-$ns['rdf']	= 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
-$ns['tl']	= 'http://purl.org/NET/c4dm/timeline.owl#';
-$ns['geo']	= 'http://www.w3.org/2003/01/geo/wgs84_pos#';
-$ns['foaf']	= 'http://xmlns.com/foaf/0.1/';
+$ns['rdfs']		= 'http://www.w3.org/2000/01/rdf-schema#';
+$ns['rdf']		= 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+$ns['tl']		= 'http://purl.org/NET/c4dm/timeline.owl#';
+$ns['geo']		= 'http://www.w3.org/2003/01/geo/wgs84_pos#';
+$ns['foaf']		= 'http://xmlns.com/foaf/0.1/';
 $ns['dcterms']	= 'http://purl.org/dc/terms/';
-$ns['deri']	= 'http://vocab.deri.ie/rooms#';
-$ns['prog']	= 'http://purl.org/prog/';
-$ns['prov']	= 'http://purl.org/void/provenance/ns/';
-$ns['to']	= 'http://www.w3.org/2006/time#';
-$ns['type']	= 'http://example.org/type#';
+$ns['deri']		= 'http://vocab.deri.ie/rooms#';
+$ns['prog']		= 'http://purl.org/prog/';
+$ns['prov']		= 'http://purl.org/void/provenance/ns/';
+$ns['to']		= 'http://www.w3.org/2006/time#';
+$ns['type']		= 'http://example.org/type#';
 $ns['error']	= 'http://example.org/error#';
 
 $feeds = 0;
