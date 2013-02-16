@@ -139,8 +139,6 @@ if(isset($_GET['prog']))
 	$render_mode = "single";
 }
 
-
-
 if( $render_mode == "single" )
 {
 	processProgramme($graph->resource(urldecode($_GET['prog'])), $progprovdata, $allprogerrors, $progstates);
@@ -275,6 +273,7 @@ function renderProcess($p)
 	}
 	return $str;
 }
+
 function renderProvenance($prog, $maps, $errors, $prefix)
 {
 	if(isset($errors[(string)$prog]))
@@ -449,7 +448,9 @@ function printFeeds($progstates)
 			print "</tr>";
 		}
 		print "<tr class='script_".$feed["Script"]." status_".@$progstates[$uri]."'>";
-		print "<td class='feedID'><a href='feeds.html.php?prog=".urlencode($uri)."'>".$feed['FeedID']." <br /><small>(see details)</small></a></td>";
+		print "<td class='feedID'>";
+		print "<a href='feeds.html.php?prog=".urlencode($uri)."'>".$feed['FeedID']." <br /><small>(see details)</small></a>";
+		print "</td>";
 		print "<td>";
 		print $feed['FeedName'];
 		print "<br />";
@@ -491,9 +492,11 @@ function printFeeds($progstates)
 		print "<td>";
 		print "<img src='/img/silk/icons/date.png' alt='Events' title='Events' />".str_pad(@$eventcount[$uri], 1, 0);
 		print "<br />";
-		print "<img src='/img/silk/icons/date_magnify.png' alt='Event Instances' title='Events Instances' />".str_pad(@$eventinstancecount[$uri], 1, 0);
+		print "<img src='/img/silk/icons/date_magnify.png' alt='Event Instances' title='Events Instances' />";
+		print str_pad(@$eventinstancecount[$uri], 1, 0);
 		print "<br />";
-		print "<img src='/img/silk/icons/date_next.png' alt='Future Event Instances' title='Future Event Instances' />".str_pad(@$eventfutureinstancecount[$uri], 1, 0);
+		print "<img src='/img/silk/icons/date_next.png' alt='Future Event Instances' title='Future Event Instances' />";
+		print str_pad(@$eventfutureinstancecount[$uri], 1, 0);
 		print "</td>";
 		print "</tr>";
 		++$i;
@@ -504,40 +507,38 @@ function printFeeds($progstates)
 function getCounts()
 {
 	$graph = getGraph();
-        {
 	foreach($graph->allOfType(ns('event', 'Event')) as $event)
+	{
 		foreach($event->all('-', ns('prog', 'has_event')) as $feed)
 		{
 			@$eventcount[(string)$feed]++;
 		}
-                {
-                        {
 		if($event->has(ns('event', 'time')))
+		{
 			foreach($event->all(ns('event', 'time')) as $time)
+			{
 				foreach($event->all('-', ns('prog', 'has_event')) as $feed)
 				{
 					@$eventinstancecount[(string)$feed]++;
-                                	{
-						//echo $time->getString("tl:at");
 						if($time->getString("tl:at") > date('Y-m-d'))
 					if($time->has(ns('tl', 'at')))
+					{
 						if($time->getString(ns('tl', 'at')) > date('Y-m-d'))
 						{
 							@$eventfutureinstancecount[(string)$feed]++;
 						}
-                                	}
-                                	{
-						//echo $time->getString("tl:start");
+					}
 					elseif($time->has(ns('tl', 'start')))
+					{
 						if(substr($time->getString(ns('tl', 'start')), 0, 10) > date('Y-m-d'))
 						{
 							@$eventfutureinstancecount[(string)$feed]++;
 						}
-                                	}
+					}
 				}
-                        }
-                }
-        }
+			}
+		}
+	}
 	return array($eventcount, $eventinstancecount, $eventfutureinstancecount);
 }
 
