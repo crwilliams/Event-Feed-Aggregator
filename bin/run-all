@@ -18,9 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
 
-# Arguments:
-#	The first argument is passed to runAllScrapers.phpb.
-
 global $diary_config;
 $diary_config["path"] = dirname(dirname(__FILE__));
 require($diary_config["path"].'/etc/config.php');
