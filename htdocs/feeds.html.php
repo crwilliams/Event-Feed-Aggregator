@@ -222,10 +222,10 @@ exit;############################################################
 
 function renderProcess($p)
 {
-	$str = "";
 	$p[0] = substr($p[0], 0, -7);
 	$p[1] = substr($p[1], 0, -7);
 	if($p[0] == $p[1])
+	$str = getProcessString($p[3], $date);
 	{
 		$date = "at ".$p[0];
 	}
@@ -242,34 +242,33 @@ function renderProcess($p)
 		$date = "between ".$p[0]." and ".$p[1];
 	}
 	switch($p[3])
+}
+
+function getProcessString($pred, $date)
+{
+	switch($pred)
 	{
 		case ns('type', 'getRSS'):
 			$proc = "Get RSS ".$date;
-			$str .= "<img src='/img/silk/icons/rss.png' alt='$proc' title='$proc'/>";
-			break;
+			return "<img src='/img/silk/icons/rss.png' alt='$proc' title='$proc'/>";
 		case ns('type', 'getRDF'):
 			$proc = "Get RDF ".$date;
-			$str .= "<img src='/img/silk/icons/database.png' alt='$proc' title='$proc'/>";
-			break;
+			return "<img src='/img/silk/icons/database.png' alt='$proc' title='$proc'/>";
 		case ns('type', 'getHTML'):
 			$proc = "Get HTML ".$date;
-			$str .= "<img src='/img/silk/icons/html.png' alt='$proc' title='$proc' />";
-			break;
+			return "<img src='/img/silk/icons/html.png' alt='$proc' title='$proc' />";
 		case ns('type', 'getFromSharePoint'):
 			$proc = "Get from SharePoint ".$date;
-			$str .= "<img src='/img/silk/icons/world.png' alt='$proc' title='$proc' />";
-			break;
+			return "<img src='/img/silk/icons/world.png' alt='$proc' title='$proc' />";
 		case ns('type', 'cache'):
 			$proc = "From document cached ".$date;
-			$str .= "<img src='/img/silk/icons/disk_multiple.png' alt='$proc' title='$proc' />";
-			break;
+			return "<img src='/img/silk/icons/disk_multiple.png' alt='$proc' title='$proc' />";
 		default:
-			$str .= "<span class='process'>".$p[3]." between ".$p[0]." and ".$p[1]."</span>";
-			break;
 	}
 	if(substr($p[2], 0, 6) != 'cache:')
 	{
 		$str .= "<a class='document' href='".$p[2]."'>".$p[2]."</a>";
+			return "<span class='process'>".$pred." ".$date."</span>";
 	}
 	return $str;
 }
