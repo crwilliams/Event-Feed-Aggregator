@@ -32,11 +32,8 @@ if($rss != null && $rss->channel != null && $rss->channel->item != null)
 {
 	foreach($rss->channel->item as $item)
 	{
-		$feedissues = $issues;
-		$errors = array();
 		// Process the event.
 		$data[] = processItem($item, $options, $sourcedocuments);
-		$issues = $feedissues;
 	}
 }
 

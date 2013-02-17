@@ -26,7 +26,7 @@ require($diary_config["path"].'/lib/utils.php');
 
 $procstarttime = microtime(true);
 
-$errors = array();
+$issues = array();
 set_error_handler('log_error');
 
 // Disable reporting of deprecated features.
@@ -288,7 +288,7 @@ function runChild($script, $options) {
 			{
 				foreach($event->issues->item as $eventissue)
 				{
-					$eventissues[] = $eventissue;
+					$eventissues[] = (array)$eventissue;
 				}
 			}
 	
@@ -327,26 +327,26 @@ function runChild($script, $options) {
 				$issueindex = 0;
 				foreach($eventissues as $issue)
 				{
-					$pred = getIssuePredicate($issue->level);
+					$pred = getIssuePredicate($issue['level']);
 					if(!is_null($pred))
 					{
 						$issueindex++;
 						tripleA($eventuri.'#issue-'.$issueindex, ns('error', 'IssueLine'));
 						tripleU($eventuri.'#issues', ns('error', 'hasIssueLine'), $eventuri.'#issue-'.$issueindex);
-						tripleL($eventuri.'#issue-'.$issueindex, $pred, (string)$issue->message);
-						tripleL($eventuri.'#issue-'.$issueindex, ns('error', 'hasFilename'), (string)$issue->file);
-						tripleL($eventuri.'#issue-'.$issueindex, ns('error', 'hasLineNumber'), (int)$issue->line);
+						tripleL($eventuri.'#issue-'.$issueindex, $pred, (string)$issue['message']);
+						tripleL($eventuri.'#issue-'.$issueindex, ns('error', 'hasFilename'), (string)$issue['file']);
+						tripleL($eventuri.'#issue-'.$issueindex, ns('error', 'hasLineNumber'), (int)$issue['line']);
 					}
 				}
 			}
 		}
 	}
-	
+
 	global $procstarttime;
 	global $issues;
 	foreach($xml->issues->item as $issue)
 	{
-		$issues[] = $issue;
+		$issues[] = (array)$issue;
 	}
 
 	foreach($xml->sourceDocuments->item as $sd) {
@@ -382,18 +382,18 @@ function runChild($script, $options) {
 		$issueindex = 0;
 		foreach($issues as $issue)
 		{	
-			$pred = getIssuePredicate($issue->level);
+			$pred = getIssuePredicate($issue['level']);
 			if(!is_null($pred))
 			{
 				$issueindex++;
 				tripleA($feeduri.'#issue-'.$issueindex, ns('error', 'IssueLine'));
 				tripleU($feeduri.'#issues', ns('error', 'hasIssueLine'), $feeduri.'#issue-'.$issueindex);
-				tripleL($feeduri.'#issue-'.$issueindex, $pred, (string)$issue->message);
-				tripleL($feeduri.'#issue-'.$issueindex, ns('error', 'hasFilename'), (string)$issue->file);
-				tripleL($feeduri.'#issue-'.$issueindex, ns('error', 'hasLineNumber'), (int)$issue->line);
+				tripleL($feeduri.'#issue-'.$issueindex, $pred, (string)$issue['message']);
+				tripleL($feeduri.'#issue-'.$issueindex, ns('error', 'hasFilename'), (string)$issue['file']);
+				tripleL($feeduri.'#issue-'.$issueindex, ns('error', 'hasLineNumber'), (int)$issue['line']);
 			}
-			print $issue->message." ".$issue->file." ".$issue->line."\n";
-			logErrorToFile( (string)$issue->message, $options['FeedID'] );
+			print $issue['message']." ".$issue['file']." ".$issue['line']."\n";
+			logErrorToFile( (string)$issue['message'], $options['FeedID'] );
 		}
 	}
 

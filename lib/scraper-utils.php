@@ -247,13 +247,13 @@ function initialiseScraper()
 	set_error_handler('log_error');
 }
 
-function processItem()
+function processItem($item, $options, $sourcedocuments)
 {
 	global $issues;
 	$feedissues = $issues;
 	$issues = array();
 	$res = process($item, $options, $sourcedocuments);
-	$res['issues'] = $errors;
+	$res['issues'] = $issues;
 	$issues = $feedissues;
 	return $res;
 }
