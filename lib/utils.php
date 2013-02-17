@@ -55,6 +55,17 @@ function getVenueLink(&$venue)
 }
 
 /**
+ * Set a fixed error level.
+ *
+ * @param	int	$errno
+ */
+function set_error_level($errno = null)
+{
+	global $fixed_errno;
+	$fixed_errno = $errno;
+}
+
+/**
  * Log an error.
  *
  * @param	int		$errno
@@ -65,6 +76,11 @@ function getVenueLink(&$venue)
  */
 function log_error($errno, $errstr, $errfile, $errline, $errcontext = null) {
 	global $errors;
+	global $fixed_errno;
+	if(!is_null($fixed_errno))
+	{
+		$errno = $fixed_errno;
+	}
 	$errors[] = array(
 		'level' => $errno,
 		'message' => $errstr,
