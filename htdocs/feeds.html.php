@@ -490,7 +490,7 @@ function printFeeds($progstates)
 
 function getCounts()
 {
-	$graph = getGraph();
+	global $graph;
 	foreach($graph->allOfType(ns('event', 'Event')) as $event)
 	{
 		foreach($event->all('-'.ns('prog', 'has_event')) as $feed)
@@ -523,12 +523,4 @@ function getCounts()
 		}
 	}
 	return array($eventcount, $eventinstancecount, $eventfutureinstancecount);
-}
-
-function getGraph()
-{
-	global $graph;
-	$graph->ns( "event", "http://purl.org/NET/c4dm/event.owl#" );
-	$graph->ns( "tl", "http://purl.org/NET/c4dm/timeline.owl#" );
-	return $graph;
 }
