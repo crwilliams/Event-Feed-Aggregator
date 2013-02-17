@@ -21,8 +21,7 @@
 global $diary_config;
 $diary_config["path"] = dirname(dirname(__FILE__));
 require($diary_config["path"].'/etc/config.php');
-include $diary_config["path"].'/lib/utils.php';
-include $diary_config["path"].'/lib/options.php';
+include $diary_config["path"].'/lib/scraper-utils.php';
 
 $errors = array();
 set_error_handler('log_error');
@@ -91,101 +90,5 @@ function process($item, $options, $sourcedocuments)
 	}
 #fwrite( STDERR, print_r( $res, true ));
 	return $res;
-}
-
-/**
- * Make an array of dates between the specified date range (inclusive).
- *
- * @param	DateTime	$datefrom	The start date.
- * @param	DateTime	$dateto		The end date.
- * @param	string		$timefrom	The start time (optional).
- * @param	string		$timeto		The end time (optional).
- */
-function makeDateArray($datefrom, $dateto, $timefrom = null, $timeto = null) {
-	$pdate = array();
-	while($datefrom <= $dateto) {
-		if($timefrom != null && $timeto != null) {
-			$tmpfrom = strtotime($timefrom.' '.date_format($datefrom, 'Y/m/d'));
-			$tmpto = strtotime($timeto.' '.date_format($datefrom, 'Y/m/d'));
-			$date['from'] = date('c', $tmpfrom);
-			$date['to'] = date('c', $tmpto);
-		} else {
-			$date['date'] = date_format($datefrom, 'c');
-		}
-		$pdate[] = $date;
-		date_add($datefrom, new DateInterval('P1D'));
-	}
-	return $pdate;
-}
-
-/**
- * Try to get additional information regarding the event.
- *
- * @param	string	$link	The page which provides details about the event.
- */
-function getExtraInfo(&$link)
-{
-	$l = $link;
-	list($dom, $sourcedocuments) = getHTML($l, 24);
-	$link = $l;
-	if($dom == null) { return array(); }
-	$base = parse_url($link, PHP_URL_SCHEME).'://'.parse_url($link, PHP_URL_HOST);
-	$div = $dom->find('div[id=content]', 0);
-	if($div == null) { return array(); }
-	$div = $div->find('div.iw_component', 0);
-	if($div == null) { return array(); }
-	$div = $div->find('div', 0);
-	if($div == null) { return array(); }
-	$venue = "";
-	$venuelink = "";
-	$speaker = "";
-	$speakerlink = "";
-	foreach($div->children() as $c)
-	{
-		if(strtolower($c->plaintext) == 'venue')
-		{
-			$venue = $c->next_sibling()->plaintext;
-			$venuelink = getVenueLink($venue);
-		}
-		if(strtolower($c->plaintext) == 'speaker information')
-		{
-			$speakerel = $c->next_sibling();
-			if($slink = $speakerel->find('a', 0))
-			{
-				$speaker = tidySpeaker($slink->innertext);
-				$speakerlink = $slink->href;
-				if($speakerlink[0] == '/')
-				{
-					$speakerlink = $base.$speakerlink;
-				}
-				if($speakerlink == 'http://')
-				{
-					$speakerlink = "";
-				}
-			}
-			else if($span = $speakerel->find('span', 0))
-			{
-				$speaker = tidySpeaker($span->innertext);
-			}
-		}
-	}
-	return array(
-		'venue' => str_replace(array("\n", "\r"), " ", $venue),
-		'venuelink' => str_replace(array("\n", "\r"), " ", $venuelink),
-		'speaker' => str_replace(array("\n", "\r"), " ", $speaker),
-		'speakerlink' => str_replace(array("\n", "\r"), " ", $speakerlink),
-		'sourceDocuments' => $sourcedocuments,
-	);
-}
-
-/**
- * Tidy a speaker's name.
- *
- * @param	string	$text	The text to tidy.
- */
-function tidySpeaker($text)
-{
-	// Remove everything beyond the first comma then space or double space.
-	return preg_replace('/[, ] .*/', '', trim($text));
 }
 

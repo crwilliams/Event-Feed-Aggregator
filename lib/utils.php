@@ -39,22 +39,6 @@ $ns['type']		= 'http://example.org/type#';
 $ns['error']	= 'http://example.org/error#';
 
 /**
- * Try to get a venue link from the venue details.
- *
- * @param	string	$venue	The venue details.
- */
-function getVenueLink(&$venue)
-{
-	global $diary_config;
-	if( $diary_config["fn_getVenueLink"] )
-	{
-		$fn = $diary_config["fn_getVenueLink"];
-		return $fn(&$venue);
-	}
-	return "";
-}
-
-/**
  * Set a fixed error level.
  *
  * @param	int	$errno
