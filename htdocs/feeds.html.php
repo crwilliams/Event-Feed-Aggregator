@@ -285,13 +285,19 @@ function renderProvenance($prog, $maps, $errors, $prefix)
 		echo $prefix."\t<ul class='issues'>\n";
 		foreach($errors[(string)$prog] as $e)
 		{
-			if($e == 'No events found')
+			$str = $e['message']." File: ".$e['file']." Line: ".$e['line'];
+			switch($e['level'])
 			{
-				echo $prefix."\t\t<li class='warning'>".$e."</li>\n";
-			}
-			else
-			{
-				echo $prefix."\t\t<li class='error'>".$e."</li>\n";
+				case 2:
+					echo $prefix."\t\t<li class='error'>".$str."</li>\n";
+					break;
+				case 1:
+					echo $prefix."\t\t<li class='warning'>".$str."</li>\n";
+					break;
+				case 0:
+				default:
+					echo $prefix."\t\t<li class='notice'>".$str."</li>\n";
+					break;
 			}
 		}
 		echo $prefix."\t</ul>\n";
@@ -343,12 +349,14 @@ function processErrors($source, &$errors, &$errorstate)
 			{
 				foreach($dest->all(ns('error', 'hasIssueLine')) as $line)
 				{
+					$file = $line->get(ns('error', 'hasFilename'));
+					$linenumber = $line->get(ns('error', 'hasLineNumber'));
 					foreach(array('hasError' => 2, 'hasWarning' => 1, 'hasNotice' => 0) as $pred => $state)
 					{
 						foreach($line->all(ns('error', $pred)) as $issue)
 						{
-							$issue = trim($issue->get(ns));
-							@$errors[(string)$source][] = $issue;
+							$issue = trim($issue);
+							@$errors[(string)$source][] = array('level' => $state, 'message' => $issue, 'file' => $file, 'line' => $linenumber);
 							$errorstate = max($errorstate, $state);
 						}
 					}
