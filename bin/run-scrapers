@@ -300,12 +300,12 @@ function runChild($script, $options) {
 			tripleU($feeduri, ns('prog', 'has_event'), $eventuri);
 			tripleU($diary_config["master_feed_uri"], ns('prog', 'has_event'), $eventuri);
 
-			$eventerrors = array();
-			if(isset($event->errors))
+			$eventissues = array();
+			if(isset($event->issues))
 			{
-				foreach($event->errors->item as $eventerror)
+				foreach($event->issues->item as $eventissue)
 				{
-					$eventerrors[] = (string)$eventerror;
+					$eventissues[] = $eventissue;
 				}
 			}
 	
@@ -332,28 +332,38 @@ function runChild($script, $options) {
 					}
 					// Output provenance information.
 					provenanceEvent($sda['dst'], $sda['src'], $sda['start'], $sda['end'], $sda['type']);
-					if(count($eventerrors) > 0 && $sda['dst'] == $eventuri)
+					if(count($eventissues) > 0 && $sda['dst'] == $eventuri)
 					{
-						provenanceEvent($eventuri.'#errors', $eventuri, $sda['start'], $sda['end'], $sda['type']);
+						provenanceEvent($eventuri.'#issues', $eventuri, $sda['start'], $sda['end'], $sda['type']);
 					}
 				}
 			}
-			if(count($eventerrors) > 0)
+			if(count($eventissues) > 0)
 			{
-				tripleA($eventuri.'#errors', ns('error', 'ErrorDocument'));
-				foreach($eventerrors as $error)
+				tripleA($eventuri.'#issues', ns('error', 'IssueDocument'));
+				$issueindex = 0;
+				foreach($eventissues as $issue)
 				{
-					tripleL($eventuri.'#errors', ns('error', 'hasError'), (string)$error);
+					$pred = getIssuePredicate($issue->level);
+					if(!is_null($pred))
+					{
+						$issueindex++;
+						tripleA($eventuri.'#issue-'.$issueindex, ns('error', 'IssueLine'));
+						tripleU($eventuri.'#issues', ns('error', 'hasIssueLine'), $eventuri.'#issue-'.$issueindex);
+						tripleL($eventuri.'#issue-'.$issueindex, $pred, (string)$issue->message);
+						tripleL($eventuri.'#issue-'.$issueindex, ns('error', 'hasFilename'), (string)$issue->file);
+						tripleL($eventuri.'#issue-'.$issueindex, ns('error', 'hasLineNumber'), (int)$issue->line);
+					}
 				}
 			}
 		}
 	}
 	
 	global $procstarttime;
-	global $errors;
-	foreach($xml->errors->item as $error)
+	global $issues;
+	foreach($xml->issues->item as $issue)
 	{
-		$errors[] = (string)$error;
+		$issues[] = $issue;
 	}
 
 	foreach($xml->sourceDocuments->item as $sd) {
@@ -377,20 +387,30 @@ function runChild($script, $options) {
 		}
 		// Output provenance information.
 		provenanceEvent($sda['dst'], $sda['src'], $sda['start'], $sda['end'], $sda['type']);
-		if(count($errors) > 0 && $sda['dst'] == $feeduri)
+		if(count($issues) > 0 && $sda['dst'] == $feeduri)
 		{
-			provenanceEvent($feeduri.'#errors', $feeduri, $sda['start'], $sda['end'], $sda['type']);
+			provenanceEvent($feeduri.'#issues', $feeduri, $sda['start'], $sda['end'], $sda['type']);
 		}
 	}
 	
-	if(count($errors) > 0)
+	if(count($issues) > 0)
 	{
-		tripleA($feeduri.'#errors', ns('error', 'ErrorDocument'));
-		foreach($errors as $error)
-		{
-			tripleL($feeduri.'#errors', ns('error', 'hasError'), (string)$error);
-print $error."\n";
-			logErrorToFile( (string)$error, $options['FeedID'] );
+		tripleA($feeduri.'#issues', ns('error', 'IssueDocument'));
+		$issueindex = 0;
+		foreach($issues as $issue)
+		{	
+			$pred = getIssuePredicate($issue->level);
+			if(!is_null($pred))
+			{
+				$issueindex++;
+				tripleA($feeduri.'#issue-'.$issueindex, ns('error', 'IssueLine'));
+				tripleU($feeduri.'#issues', ns('error', 'hasIssueLine'), $feeduri.'#issue-'.$issueindex);
+				tripleL($feeduri.'#issue-'.$issueindex, $pred, (string)$issue->message);
+				tripleL($feeduri.'#issue-'.$issueindex, ns('error', 'hasFilename'), (string)$issue->file);
+				tripleL($feeduri.'#issue-'.$issueindex, ns('error', 'hasLineNumber'), (int)$issue->line);
+			}
+			print $issue->message."\n";
+			logErrorToFile( (string)$issue->message, $options['FeedID'] );
 		}
 	}
 
@@ -398,6 +418,39 @@ print $error."\n";
 	fclose($fh);
 
 	return 0;
+}
+
+/**
+ * Get the predicate to use for an issue with the given level.
+ *
+ * @param	int	$level	The level of the issue.
+ */
+function getIssuePredicate($level)
+{	
+	switch($level)
+	{
+		case E_ERROR:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
+		case E_RECOVERABLE_ERROR:
+			return ns('error', 'hasError');
+		case E_WARNING:
+		case E_CORE_WARNING:
+		case E_COMPILE_WARNING:
+		case E_USER_WARNING:
+			return ns('error', 'hasWarning');
+		case E_NOTICE:
+		case E_USER_NOTICE:
+			return ns('error', 'hasNotice');
+		case E_PARSE:
+		case E_STRICT:
+		case E_DEPRECATED:
+		case E_USER_DEPRECATED:
+		case E_ALL:
+		default:
+			return null;
+	}
 }
 
 /**

@@ -88,7 +88,7 @@ function process($item, $options, $sourcedocuments)
 		$res['sourceDocuments'][] = $sd;
 	}
 	global $errors;
-	$res['errors'] = $errors;
+	$res['issues'] = $errors;
 	return $res;
 }
 
