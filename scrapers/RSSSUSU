@@ -68,16 +68,16 @@ function process($item, $options, $sourcedocuments)
 	$desc = trim($item->description);
 
 	$res = array(
-		'title'		=> $title,
-		'link'		=> (string)$item->guid,
-		'date'		=> $pdate,
-		'desc'		=> $desc,
-		'feedName'	=> (string)$options->FeedName,
-		'type'		=> (string)$options->Type,
-		'feedID'	=> (string)$options->FeedID,
-		'host'		=> (string)$options->FacultyUnitGroup,
-		'tags'		=> explode(" ", $options->Tags),
-		'sourceDocuments' => $sourcedocuments,
+		'title'				=> $title,
+		'link'				=> (string)$item->guid,
+		'date'				=> $pdate,
+		'desc'				=> $desc,
+		'feedName'			=> (string)$options->FeedName,
+		'type'				=> (string)$options->Type,
+		'feedID'			=> (string)$options->FeedID,
+		'host'				=> (string)$options->FacultyUnitGroup,
+		'tags'				=> explode(" ", $options->Tags),
+		'sourceDocuments'	=> $sourcedocuments,
 	);
 	if(isset($location))
 	{
@@ -93,4 +93,3 @@ function process($item, $options, $sourcedocuments)
 	}
 	return $res;
 }
-

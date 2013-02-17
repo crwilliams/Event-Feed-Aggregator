@@ -54,7 +54,6 @@ function process($item, $options, $sourcedocuments)
 	$title = trim($item->title);
 	$link = (string)str_replace(' ', '%20', trim($item->link));
 	$extrainfo = getExtraInfo($link);
-
 	
 	$desc = explode("\n", $item->description);
 	$pdate = array();
@@ -78,7 +77,9 @@ function process($item, $options, $sourcedocuments)
 	foreach($extrainfo as $k => $v)
 	{
 		if(is_array($v) || trim($v) != "")
+		{
 			$res[$k] = $v;
+		}
 	}
 	foreach($sourcedocuments as $sd)
 	{
@@ -86,4 +87,3 @@ function process($item, $options, $sourcedocuments)
 	}
 	return $res;
 }
-

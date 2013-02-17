@@ -60,8 +60,6 @@ echo generateEventXML($data, $sourcedocuments, $issues);
 function process($in_data, $options, $sourcedocuments)
 {
 	$title = trim($in_data["Title"]);
-	#$link = (string)str_replace(' ', '%20', trim($item->link));
-	#$extrainfo = getExtraInfo($link);
 	$desc = $in_data["Description"];
 	$config = HTMLPurifier_Config::createDefault();
 	$config->set('HTML.Doctype', 'XHTML 1.1');
@@ -140,7 +138,7 @@ function addTimezone( $sp_date )
 
 
 /*
-	   [All Day Event] => 0
+    [All Day Event] => 0
     [Approval Status] => 0
     [Attachments] => 0
     [Created] => 2012-03-28 11:40:09
@@ -158,8 +156,5 @@ function addTimezone( $sp_date )
     [URL Path] => sites/communications/Lists/Events/6_.000
     [Unique Id] => {D5D994A5-0198-4952-BEF6-B9451C857F87}
     [Workspace] => 0
-    [owshiddenversion
-] => 1
-
+    [owshiddenversion] => 1
 */
-

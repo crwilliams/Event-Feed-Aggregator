@@ -129,17 +129,17 @@ function process($item, $options, $sourcedocuments)
 	}
 	
 	$data = array(
-		'title'		=> $title,
-		'link'		=> $link,
-		'date'		=> $pdate,
-		'desc'		=> $desc,
-		'venue'		=> $location,
-		'feedName'	=> (string)$options->FeedName,
-		'type'		=> (string)$options->Type,
-		'feedID'	=> (string)$options->FeedID,
-		'host'		=> (string)$options->FacultyUnitGroup,
-		'tags'		=> explode(" ", $options->Tags),
-		'sourceDocuments' => $sourcedocuments,
+		'title'				=> $title,
+		'link'				=> $link,
+		'date'				=> $pdate,
+		'desc'				=> $desc,
+		'venue'				=> $location,
+		'feedName'			=> (string)$options->FeedName,
+		'type'				=> (string)$options->Type,
+		'feedID'			=> (string)$options->FeedID,
+		'host'				=> (string)$options->FacultyUnitGroup,
+		'tags'				=> explode(" ", $options->Tags),
+		'sourceDocuments'	=> $sourcedocuments,
 	);
 	if(!is_null($locationuri))
 	{
@@ -148,4 +148,3 @@ function process($item, $options, $sourcedocuments)
 	return $data;
 }
 
-?>

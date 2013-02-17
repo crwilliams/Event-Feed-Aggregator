@@ -23,25 +23,18 @@ $diary_config["path"] = dirname(dirname(__FILE__));
 require($diary_config["path"].'/etc/config.php');
 include $diary_config["path"].'/lib/scraper-utils.php';
 
-
-// Get the RSS data from the Feed URL.
-$url = (string)$options->FeedURL;
-#fwrite( STDERR, print_r( $url, true ));
 initialiseScraper();
 
 $graph = new Graphite();
-$graph->load( $url );
-#fwrite( STDERR, print_r( $graph->dumpText(), true ));
+$graph->load( $options->FeedURL );
 
 list($rss, $sourcedocuments) = getRSS($options->FeedURL);
-
 
 foreach( $graph->allOfType( "http://purl.org/rss/1.0/item" ) as $item )
 {
 	// Process the event.
 	$data[] = processItem($item, $options, $sourcedocuments);
 }
-
 
 // Output the data as XML.
 echo generateEventXML($data, $sourcedocuments, $issues);
@@ -63,27 +56,25 @@ function process($item, $options, $sourcedocuments)
 	$pdate = array();
 
 	$date = substr( $item->getString( "dc:date" ),0,10); # date part only for now.
-# could add times here if it made sense to...
+	# could add times here if it made sense to...
 	$pdate = makeDateArray( new DateTime( $date ), new DateTime( $date ) );
 
 	$res = array(
-		'title'		=> $title,
-		'link'		=> $link,
-		'date'		=> $pdate,
-		'htmldesc'	=> $desc,
-		'feedName'	=> (string)$options->FeedName,
-		'type'		=> (string)$options->Type,
-		'feedID'	=> (string)$options->FeedID,
-		'host'		=> (string)$options->FacultyUnitGroup,
-		'tags'		=> explode(" ", $options->Tags),
-		'sourceDocuments' => $sourcedocuments,
+		'title'				=> $title,
+		'link'				=> $link,
+		'date'				=> $pdate,
+		'htmldesc'			=> $desc,
+		'feedName'			=> (string)$options->FeedName,
+		'type'				=> (string)$options->Type,
+		'feedID'			=> (string)$options->FeedID,
+		'host'				=> (string)$options->FacultyUnitGroup,
+		'tags'				=> explode(" ", $options->Tags),
+		'sourceDocuments'	=> $sourcedocuments,
 	);
 	foreach($extrainfo as $k => $v)
 	{
 		if(is_array($v) || trim($v) != "")
 			$res[$k] = $v;
 	}
-#fwrite( STDERR, print_r( $res, true ));
 	return $res;
 }
-

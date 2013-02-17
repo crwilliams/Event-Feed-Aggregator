@@ -57,6 +57,7 @@ function process($item, $options, $sourcedocuments)
 	$graph->cacheDir($diary_config["path"]."/diary.soton.ac.uk/cache");
 	$graph->load($rdflink);
 	$graph->ns("ecs", "http://rdf.ecs.soton.ac.uk/ontology/ecs#");
+	$graph->ns("te", "http://www.isi.edu/~pan/damltime/time-entry.owl#");
 	$p = $graph->resource($id);
 	$title = (string)$p->get("ecs:hasName");
 	$desc = (string)$p->get("ecs:hasDescription");
@@ -65,7 +66,7 @@ function process($item, $options, $sourcedocuments)
 	$venuelink = "";
 	foreach($p->all("http://purl.org/NET/c4dm/event.owl#place") as $place)
 	{
-		if($place->isType("http://vocab.deri.ie/rooms#Room"))
+		if($place->isType(ns('deri', 'Room'))
 		{
 			$venuelink = (string)$place;
 		}
@@ -83,21 +84,21 @@ function process($item, $options, $sourcedocuments)
 		$speaker = (string)$graph->resource($speakerlink)->get("foaf:name");
 	}
 
-	$from = (string)$p->get("http://www.isi.edu/~pan/damltime/time-entry.owl#begins")->get("http://www.isi.edu/~pan/damltime/time-entry.owl#inCalendarClockDataType");
-	$to = (string)$p->get("http://www.isi.edu/~pan/damltime/time-entry.owl#ends")->get("http://www.isi.edu/~pan/damltime/time-entry.owl#inCalendarClockDataType");
+	$from = (string)$p->get("te:begins")->get("te:inCalendarClockDataType");
+	$to = (string)$p->get("te:ends")->get("te:inCalendarClockDataType");
 	$pdate = array(array('from' => $from, 'to' => $to));
 	$res = array(
-		'title'		=> $title,
-		'link'		=> $link,
-		'date'		=> $pdate,
-		'desc'		=> str_replace("\t", ' ', mb_convert_encoding($desc, 'ASCII')),
-		'feedName'	=> (string)$options->FeedName,
-		'type'		=> (string)$options->Type,
-		'feedID'	=> (string)$options->FeedID,
-		'host'		=> $group,
-		'tags'		=> explode(" ", $options->Tags),
-		'venuelink'	=> $venuelink,
-		'sourceDocuments' => array(makeProvenanceInfo('getRDF', $rdflink, null, $starttime, microtime())),
+		'title'				=> $title,
+		'link'				=> $link,
+		'date'				=> $pdate,
+		'desc'				=> str_replace("\t", ' ', mb_convert_encoding($desc, 'ASCII')),
+		'feedName'			=> (string)$options->FeedName,
+		'type'				=> (string)$options->Type,
+		'feedID'			=> (string)$options->FeedID,
+		'host'				=> $group,
+		'tags'				=> explode(" ", $options->Tags),
+		'venuelink'			=> $venuelink,
+		'sourceDocuments'	=> array(makeProvenanceInfo('getRDF', $rdflink, null, $starttime, microtime())),
 	);
 	if(isset($speakerlink))
 	{
@@ -134,4 +135,3 @@ function getGroupURI($seriesURI)
 			return "http://id.southampton.ac.uk/org/FP";
 	}
 }
-
