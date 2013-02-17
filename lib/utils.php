@@ -63,7 +63,7 @@ function getVenueLink(&$venue)
  * @param	int		$errline
  * @param	array	$errcontext
  */
-function log_error($errno, $errstr, $errfile, $errline, $errcontext) {
+function log_error($errno, $errstr, $errfile, $errline, $errcontext = null) {
 	global $errors;
 	$errors[] = array(
 		'level' => $errno,
