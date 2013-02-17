@@ -223,26 +223,35 @@ exit;############################################################
 
 function renderProcess($p)
 {
-	$p[0] = substr($p[0], 0, -7);
-	$p[1] = substr($p[1], 0, -7);
-	if($p[0] == $p[1])
+	$date = formatDate($p[0], $p[1]);
 	$str = getProcessString($p[3], $date);
+	if(substr($p[2], 0, 6) != 'cache:')
 	{
-		$date = "at ".$p[0];
+		$str .= "<a class='document' href='".$p[2]."'>".$p[2]."</a>";
 	}
-	elseif($p[0].$p[1] == $p[0])
+	return $str;
+}
+
+function formatDate($start, $end)
+{
+	$start = substr($start, 0, -7);
+	$end = substr($end, 0, -7);
+	if($start == $end)
 	{
-		$date = "after ".$p[0];
+		return "at ".$start;
 	}
-	elseif($p[0].$p[1] == $p[1])
+	elseif($start.$end == $start)
 	{
-		$date = "by ".$p[1];
+		return "after ".$start;
+	}
+	elseif($start.$end == $end)
+	{
+		return "by ".$end;
 	}
 	else
 	{
-		$date = "between ".$p[0]." and ".$p[1];
+		return "between ".$start." and ".$end;
 	}
-	switch($p[3])
 }
 
 function getProcessString($pred, $date)
@@ -265,13 +274,8 @@ function getProcessString($pred, $date)
 			$proc = "From document cached ".$date;
 			return "<img src='/img/silk/icons/disk_multiple.png' alt='$proc' title='$proc' />";
 		default:
-	}
-	if(substr($p[2], 0, 6) != 'cache:')
-	{
-		$str .= "<a class='document' href='".$p[2]."'>".$p[2]."</a>";
 			return "<span class='process'>".$pred." ".$date."</span>";
 	}
-	return $str;
 }
 
 function renderProvenance($prog, $maps, $errors, $prefix)
