@@ -21,6 +21,23 @@ date_default_timezone_set('Europe/London');
 require_once $diary_config["path"].'/lib/xml.php';
 require_once $diary_config["path"].'/lib/simple_html_dom.php';
 
+// Setup namespace prefixes.
+$ns = $diary_config["ns"];
+
+$ns['event']	= 'http://purl.org/NET/c4dm/event.owl#';
+$ns['rdfs']		= 'http://www.w3.org/2000/01/rdf-schema#';
+$ns['rdf']		= 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+$ns['tl']		= 'http://purl.org/NET/c4dm/timeline.owl#';
+$ns['geo']		= 'http://www.w3.org/2003/01/geo/wgs84_pos#';
+$ns['foaf']		= 'http://xmlns.com/foaf/0.1/';
+$ns['dcterms']	= 'http://purl.org/dc/terms/';
+$ns['deri']		= 'http://vocab.deri.ie/rooms#';
+$ns['prog']		= 'http://purl.org/prog/';
+$ns['prov']		= 'http://purl.org/void/provenance/ns/';
+$ns['to']		= 'http://www.w3.org/2006/time#';
+$ns['type']		= 'http://example.org/type#';
+$ns['error']	= 'http://example.org/error#';
+
 /**
  * Try to get a venue link from the venue details.
  *
@@ -248,4 +265,19 @@ function makeProvenanceInfo($type, $src, $dst, $start, $end) {
 		$pi['end'] = $end;
 	}
 	return $pi;
+}
+
+/**
+ * Expand a URI given using a prefix.
+ *
+ * @param	string	$prefix		The prefix identifier.
+ * @param	string	$e		The entity name.
+ */
+function ns($prefix, $e) {
+	global $ns;
+	if(isset($ns[$prefix])) {
+		return $ns[$prefix].$e;
+	} else {
+		return $prefix.":".$e;
+	}
 }

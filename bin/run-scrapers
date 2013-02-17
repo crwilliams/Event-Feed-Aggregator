@@ -37,23 +37,6 @@ declare(ticks = 1);
 // Setup alarm function that is called when SIGALRM is raised.
 pcntl_signal(SIGALRM, "alarm", false);
 
-// Setup namespace prefixes.
-$ns = $diary_config["ns"];
-
-$ns['event']	= 'http://purl.org/NET/c4dm/event.owl#';
-$ns['rdfs']		= 'http://www.w3.org/2000/01/rdf-schema#';
-$ns['rdf']		= 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
-$ns['tl']		= 'http://purl.org/NET/c4dm/timeline.owl#';
-$ns['geo']		= 'http://www.w3.org/2003/01/geo/wgs84_pos#';
-$ns['foaf']		= 'http://xmlns.com/foaf/0.1/';
-$ns['dcterms']	= 'http://purl.org/dc/terms/';
-$ns['deri']		= 'http://vocab.deri.ie/rooms#';
-$ns['prog']		= 'http://purl.org/prog/';
-$ns['prov']		= 'http://purl.org/void/provenance/ns/';
-$ns['to']		= 'http://www.w3.org/2006/time#';
-$ns['type']		= 'http://example.org/type#';
-$ns['error']	= 'http://example.org/error#';
-
 $feeds = 0;
 // Try opening the config file.
 if (($handle = fopen($diary_config["path"]."/etc/feeds.csv", "r")) !== FALSE) {
@@ -566,21 +549,6 @@ function tripleL($subject, $predicate, $object, $object_type = null ) {
  */
 function tripleA($subject, $type) {
 	tripleU($subject, ns("rdf", "type"), $type);
-}
-
-/**
- * Expand a URI given using a prefix.
- *
- * @param	string	$prefix		The prefix identifier.
- * @param	string	$e		The entity name.
- */
-function ns($prefix, $e) {
-	global $ns;
-	if(isset($ns[$prefix])) {
-		return $ns[$prefix].$e;
-	} else {
-		return $prefix.":".$e;
-	}
 }
 
 /**
