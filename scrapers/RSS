@@ -23,13 +23,11 @@ $diary_config["path"] = dirname(dirname(__FILE__));
 require($diary_config["path"].'/etc/config.php');
 include $diary_config["path"].'/lib/scraper-utils.php';
 
-$errors = array();
-set_error_handler('log_error');
+initialiseScraper();
 
 // Get the RSS data from the Feed URL.
 list($rss, $sourcedocuments) = getRSS($options->FeedURL);
 
-$data = array();
 if($rss != null && $rss->channel != null && $rss->channel->item != null)
 {
 	foreach($rss->channel->item as $item)
@@ -43,7 +41,7 @@ if($rss != null && $rss->channel != null && $rss->channel->item != null)
 }
 
 // Output the data as XML.
-echo generateEventXML($data, $sourcedocuments, $errors);
+echo generateEventXML($data, $sourcedocuments, $issues);
 
 /**
  * Process a single event.

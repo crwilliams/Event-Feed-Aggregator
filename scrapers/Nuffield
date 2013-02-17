@@ -23,10 +23,7 @@ $diary_config["path"] = dirname(dirname(__FILE__));
 require($diary_config["path"].'/etc/config.php');
 include $diary_config["path"].'/lib/scraper-utils.php';
 
-$errors = array();
-set_error_handler('log_error');
-
-$data = array();
+initialiseScraper();
 
 // Initialise the Feed URL.
 $url = $options->FeedURL;
@@ -46,7 +43,6 @@ while(true)
 	foreach($dom->find('div#main_content/div.listing') as $item)
 	{
 		$feederrors = $errors;
-		$errors = array();
 		// Process the event.
 		$data[] = process($item, $options, $thissourcedocuments);
 		$errors = $feederrors;
@@ -72,7 +68,7 @@ while(true)
 	if(!$hasnext) { break; }
 }
 // Output the data as XML.
-echo generateEventXML($data, $sourcedocuments, $errors);
+echo generateEventXML($data, $sourcedocuments, $issues);
 
 /**
  * Process a single event.

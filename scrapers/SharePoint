@@ -24,8 +24,7 @@ require($diary_config["path"].'/etc/config.php');
 include $diary_config["path"].'/lib/scraper-utils.php';
 require_once $diary_config["path"].'/lib/htmlpurifier/library/HTMLPurifier.auto.php';
 
-$errors = array();
-set_error_handler('log_error');
+initialiseScraper();
 
 // Get the RSS data from the Feed URL.
 $starttime = microtime(true);
@@ -34,7 +33,6 @@ $rows = file($options->FeedURL);
 set_error_level();
 $sourcedocuments = array(makeProvenanceInfo('getFromSharePoint', (string)$options->FeedURL, null, $starttime, microtime(true)));
 
-$data = array();
 if($rows != null )
 {
 	$headings = preg_split( '/\t/', array_shift( $rows ) );
@@ -54,7 +52,7 @@ if($rows != null )
 	}
 }
 // Output the data as XML.
-echo generateEventXML($data, $sourcedocuments, $errors);
+echo generateEventXML($data, $sourcedocuments, $issues);
 
 /**
  * Process a single event.

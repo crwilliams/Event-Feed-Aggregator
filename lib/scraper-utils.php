@@ -237,3 +237,12 @@ function getVenueLink(&$venue)
 	}
 	return "";
 }
+
+function initialiseScraper()
+{
+	global $issues;
+	global $data;
+	$issues = array();
+	$data = array();
+	set_error_handler('log_error');
+}
