@@ -30,7 +30,9 @@ set_error_handler('log_error');
 
 // Get the RSS data from the Feed URL.
 $starttime = microtime(true);
+set_error_level(E_ERROR);
 $rows = file($options->FeedURL);
+set_error_level();
 $sourcedocuments = array(makeProvenanceInfo('getFromSharePoint', (string)$options->FeedURL, null, $starttime, microtime(true)));
 
 $data = array();
