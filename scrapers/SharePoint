@@ -38,17 +38,14 @@ if($rows != null )
 	$headings = preg_split( '/\t/', array_shift( $rows ) );
 	foreach($rows as $row )
 	{
-		$indata = array();
+		$item = array();
 		$inrow = preg_split( '/\t/', $row );
 		for( $i=0; $i<sizeof($inrow); ++$i )
 		{
-			$indata[$headings[$i]] = $inrow[$i];
+			$item[$headings[$i]] = $inrow[$i];
 		}
-		$feederrors = $errors;
-		$errors = array();
 		// Process the event.
-		$data[] = process($indata, $options);
-		$errors = $feederrors;
+		$data[] = processItem($item, $options, $sourcedocuments);
 	}
 }
 // Output the data as XML.
@@ -60,7 +57,7 @@ echo generateEventXML($data, $sourcedocuments, $issues);
  * @param	object	$row		The item to process.
  * @param	array	$options	The options passed to this script.
  */
-function process($in_data, $options)
+function process($in_data, $options, $sourcedocuments)
 {
 	$title = trim($in_data["Title"]);
 	#$link = (string)str_replace(' ', '%20', trim($item->link));

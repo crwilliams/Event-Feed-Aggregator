@@ -38,11 +38,8 @@ list($rss, $sourcedocuments) = getRSS($options->FeedURL);
 
 foreach( $graph->allOfType( "http://purl.org/rss/1.0/item" ) as $item )
 {
-	$feederrors = $errors;
-	$errors = array();
 	// Process the event.
-	$data[] = process($item, $options, $sourcedocuments);
-	$errors = $feederrors;
+	$data[] = processItem($item, $options, $sourcedocuments);
 }
 
 

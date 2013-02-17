@@ -32,10 +32,8 @@ if($dom->find('table/tbody/tr') != null)
 {
 	foreach($dom->find('table/tbody/tr') as $item)
 	{
-		$feederrors = $errors;
 		// Process the event.
-		$data[] = process($item, $options, $sourcedocuments);
-		$errors = $feederrors;
+		$data[] = processItem($item, $options, $sourcedocuments);
 	}
 }
 // Output the data as XML.

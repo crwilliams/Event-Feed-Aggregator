@@ -246,3 +246,14 @@ function initialiseScraper()
 	$data = array();
 	set_error_handler('log_error');
 }
+
+function processItem()
+{
+	global $issues;
+	$feedissues = $issues;
+	$issues = array();
+	$res = process($item, $options, $sourcedocuments);
+	$res['issues'] = $errors;
+	$issues = $feedissues;
+	return $res;
+}

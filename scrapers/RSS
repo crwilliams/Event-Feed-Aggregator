@@ -32,11 +32,11 @@ if($rss != null && $rss->channel != null && $rss->channel->item != null)
 {
 	foreach($rss->channel->item as $item)
 	{
-		$feederrors = $errors;
+		$feedissues = $issues;
 		$errors = array();
 		// Process the event.
-		$data[] = process($item, $options, $sourcedocuments);
-		$errors = $feederrors;
+		$data[] = processItem($item, $options, $sourcedocuments);
+		$issues = $feedissues;
 	}
 }
 
@@ -84,8 +84,6 @@ function process($item, $options, $sourcedocuments)
 	{
 		$res['sourceDocuments'][] = $sd;
 	}
-	global $errors;
-	$res['issues'] = $errors;
 	return $res;
 }
 

@@ -42,10 +42,8 @@ while(true)
 	
 	foreach($dom->find('div#main_content/div.listing') as $item)
 	{
-		$feederrors = $errors;
 		// Process the event.
-		$data[] = process($item, $options, $thissourcedocuments);
-		$errors = $feederrors;
+		$data[] = processItem($item, $options, $thissourcedocuments);
 	}
 
 	// Try to find a 'next page' link.
