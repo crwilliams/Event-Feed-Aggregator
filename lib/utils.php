@@ -48,7 +48,12 @@ function getVenueLink(&$venue)
  */
 function log_error($errno, $errstr, $errfile, $errline, $errcontext) {
 	global $errors;
-	$errors[] = "$errstr ($errfile line $errline)";
+	$errors[] = array(
+		'level' => $errno,
+		'message' => $errstr,
+		'file' => $errfile,
+		'line' => $errline,
+	);
 }
 
 /**

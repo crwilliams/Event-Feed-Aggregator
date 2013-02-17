@@ -319,55 +319,38 @@ function getProvenance($doc, &$maps, &$errors)
 			{
 				@$maps[(string)$doc][] = $entry;
 			}
-			foreach($s->all('-'.ns('prov', 'sourceDataset')) as $pe2)
-			{
-				foreach($pe2->all(ns('prov', 'resultingDataset')) as $dst)
-				{
-					if($dst->isType(ns('error', 'ErrorDocument')))
-					{
-						foreach($dst->all(ns('error', 'hasError')) as $e)
-						{
-							$e = trim($e);
-							@$errors[(string)$s][] = $e;
-							if($e == 'No events found')
-							{
-								$errorstate = max($errorstate, 1);
-							}
-							else
-							{
-								$errorstate = max($errorstate, 2);
-							}
-						}
-					}
-				}
-			}
+			processErrors($s, $errors, $errorstate);
 			$errorstate = max($errorstate, getProvenance($s, $maps, $errors));
 		}
 	}
 	@asort($maps[(string)$doc]);
-	foreach($doc->all('-'.ns('prov', 'sourceDataset')) as $pe)
+	processErrors($doc, $errors, $errorstate);
+	return $errorstate;
+}
+
+function processErrors($source, &$errors, &$errorstate)
+{
+	foreach($source->all('-'.ns('prov', 'sourceDataset')) as $provenanceEvent)
 	{
-		foreach($pe->all(ns('prov', 'resultingDataset')) as $dst)
+		foreach($provenanceEvent->all(ns('prov', 'resultingDataset')) as $dest)
 		{
-			if($dst->isType(ns('error', 'ErrorDocument')))
+			if($dest->isType(ns('error', 'IssueDocument')))
 			{
-				foreach($dst->all(ns('error', 'hasError')) as $e)
+				foreach($dest->all(ns('error', 'hasIssueLine')) as $line)
 				{
-					$e = trim($e);
-						@$errors[(string)$doc][] = $e;
-						if($e == 'No events found')
+					foreach(array('hasError' => 2, 'hasWarning' => 1, 'hasNotice' => 0) as $pred => $state)
+					{
+						foreach($line->all(ns('error', $pred)) as $issue)
 						{
-							$errorstate = max($errorstate, 1);
+							$issue = trim($issue->get(ns));
+							@$errors[(string)$source][] = $issue;
+							$errorstate = max($errorstate, $state);
 						}
-						else
-						{
-							$errorstate = max($errorstate, 2);
-						}
+					}
 				}
 			}
 		}
 	}
-	return $errorstate;
 }
 
 function processProgramme($prog, &$progprovdata, &$allprogerrors, &$progstates)
