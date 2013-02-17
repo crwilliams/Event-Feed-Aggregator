@@ -79,14 +79,14 @@ function process($in_data, $options)
 		'uri'		=> "http://sharepoint.soton.ac.uk/".$in_data["URL Path"],
 		'htmldesc'	=> $desc,
 		'feedName'	=> (string)$options->FeedName,
-		'type'          => (string)$in_data["Event type"],
+		'type'		=> (string)$in_data["Event type"],
 		'feedID'	=> (string)$options->FeedID,
 		'tags'		=> explode(" ", @$in_data["Tags"] )
 	);
 
 	if( $in_data["Event webpage"] != "" )
 	{
-	        $res["link"] = trim($in_data["Event webpage"]);
+		$res["link"] = trim($in_data["Event webpage"]);
 	}
 
 	$div_code = $in_data["University division"];
@@ -95,25 +95,25 @@ function process($in_data, $options)
 
 	if( preg_match( '/- ([A-Z0-9]+)$/', $div_code, $matches ))
 	{
-	        $res["host"] = "http://id.southampton.ac.uk/org/".$matches[1];
+		$res["host"] = "http://id.southampton.ac.uk/org/".$matches[1];
 	}
 	if( preg_match( '/- B:(.*)$/', $loc_code, $matches ))
 	{
-	        $res["venuelink"] = "http://id.southampton.ac.uk/building/".$matches[1];
-	        $building = $matches[1];
-	        if( preg_match( '/(\d\d\d\d)$/', $room_code, $matches ))
-	        {
-	                $res["venuelink"] = "http://id.southampton.ac.uk/room/$building-".$matches[1];
-	        }
+		$res["venuelink"] = "http://id.southampton.ac.uk/building/".$matches[1];
+		$building = $matches[1];
+		if( preg_match( '/(\d\d\d\d)$/', $room_code, $matches ))
+		{
+			$res["venuelink"] = "http://id.southampton.ac.uk/room/$building-".$matches[1];
+		}
 	}
 	if( preg_match( '/- S:(.*)$/', $loc_code, $matches ))
 	{
-	        $res["venuelink"] = "http://id.southampton.ac.uk/site/".$matches[1];
+		$res["venuelink"] = "http://id.southampton.ac.uk/site/".$matches[1];
 	}
 
 	if( trim($in_data["Location"]) != "" )
 	{
-	        $res['venue'] = trim($in_data["Location"]);
+		$res['venue'] = trim($in_data["Location"]);
 	}
 
 	if( $in_data["All Day Event"] == 1 )
