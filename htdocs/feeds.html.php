@@ -422,6 +422,7 @@ function printFeeds($progstates)
 	global $diary_config;
 	list($eventcount, $eventinstancecount, $eventfutureinstancecount) = getCounts();
 	$i = 0;
+	asort($feeds);
 	foreach( $feeds as $feed )
 	{
 		if( $feed["Script"] == "" ) { continue; }
