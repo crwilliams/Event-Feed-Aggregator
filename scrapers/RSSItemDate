@@ -26,7 +26,7 @@ include $diary_config["path"].'/lib/scraper-utils.php';
 initialiseScraper();
 
 $graph = new Graphite();
-$graph->load( $options->FeedURL );
+$graph->load( (string)$options->FeedURL );
 
 list($rss, $sourcedocuments) = getRSS($options->FeedURL);
 
