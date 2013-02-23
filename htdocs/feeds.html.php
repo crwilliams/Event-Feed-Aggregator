@@ -215,6 +215,7 @@ if( $render_mode == "single" ) {
 
 
 ?>
+<p>Icons licensed as CC-by 2.5 from <a href='http://www.famfamfam.com/lab/icons/silk/'>http://www.famfamfam.com/lab/icons/silk/</a></p>
 </body>
 </html>
 <?
