@@ -31,6 +31,10 @@ require($diary_config["path"].'/etc/config.php');
 	<body>
 <?php
 	printDefaultHomepage();
+	if( file_exists( "analytics.php" ) )
+	{
+		include( "analytics.php" );
+	}
 ?>
 </body>
 </html>
