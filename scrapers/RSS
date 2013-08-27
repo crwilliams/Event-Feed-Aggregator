@@ -58,7 +58,7 @@ function process($item, $options, $sourcedocuments)
 	{
 		array_shift($desc);
 	}
-	$pdate = getDates($desc);
+	$pdate = getDates($desc, $item);
 	$desc = trim(implode("\n", $desc));
 	$res = array(
 		'title'		=> $title,
