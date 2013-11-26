@@ -33,7 +33,7 @@ if($rss->item != null)
 	foreach($rss->item as $item)
 	{
 		// Process the event.
-		$data[] = processItem($item, $options, $sourcedocuments);;
+		$data[] = process($item, $options, $sourcedocuments);;
 	}
 }
 
@@ -54,7 +54,7 @@ function process($item, $options, $sourcedocuments)
 	$id = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://id.ecs.soton.ac.uk/presentation/', $link);
 	$starttime = microtime();
 	$graph = new Graphite();
-	$graph->cacheDir($diary_config["path"]."/diary.soton.ac.uk/cache");
+	$graph->cacheDir($diary_config["path"]."/var/cache");
 	$graph->load($rdflink);
 	$graph->ns("ecs", "http://rdf.ecs.soton.ac.uk/ontology/ecs#");
 	$graph->ns("te", "http://www.isi.edu/~pan/damltime/time-entry.owl#");
