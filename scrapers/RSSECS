@@ -86,6 +86,19 @@ function process($item, $options, $sourcedocuments)
 
 	$from = (string)$p->get("te:begins")->get("te:inCalendarClockDataType");
 	$to = (string)$p->get("te:ends")->get("te:inCalendarClockDataType");
+
+	// Check for DST - Ash 2014-02-02
+	$dt = strtotime($from);
+	if(strcmp(date("H:i", $dt), gmdate("H:i", $dt)) != 0)
+	{
+		$from = gmdate("Y-m-d", $dt) . "T" . gmdate("H:i:s", $dt) . "+01:00";
+	}
+	$dt = strtotime($to);
+	if(strcmp(date("H:i", $dt), gmdate("H:i", $dt)) != 0)
+	{
+		$to = gmdate("Y-m-d", $dt) . "T" . gmdate("H:i:s", $dt) . "+01:00";
+	}
+
 	$pdate = array(array('from' => $from, 'to' => $to));
 	$res = array(
 		'title'				=> $title,
