@@ -32,6 +32,9 @@ exec_command( "cat ".$diary_config["path"]."/var/output/* | ".$diary_config["rap
 # Legacy ntriples output.  
 exec_command( "cat ".$diary_config["path"]."/var/output/* | ".$diary_config["rapper"]." -e -q -i turtle - -I null > ".$diary_config["path"]."/htdocs/diary.nt" );
 
+# Run the deduplication script.
+//exec_command( $diary_config["path"]."/bin/dedup" );
+
 # Freeze the graph.
 
 $graph = new Graphite();

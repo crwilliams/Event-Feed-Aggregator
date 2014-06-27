@@ -240,7 +240,7 @@ function runChild($script, $options) {
 	if($eventcount == 0)
 	{
 		printInfo("No events found while processing ".$options['FeedID']);
-		trigger_error("No events found");
+		#trigger_error("No events found");
 	}
 	else if($eventcount == 1)
 	{
