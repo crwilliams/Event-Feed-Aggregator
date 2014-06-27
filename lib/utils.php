@@ -204,7 +204,7 @@ function getFromURL(&$url, $timeout, $getfromfile, $getfromstring, $errorfunctio
 		{
 			if(!is_null($errorfunction))
 			{
-				retriggerErrors($errorfunction());
+				retriggerErrors($errorfunction(), "?", "?");
 			}
 			return;
 		}
