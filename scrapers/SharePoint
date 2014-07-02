@@ -121,6 +121,12 @@ function process($in_data, $options, $sourcedocuments)
 		
 		$res["date"] = array(array( 'from' => $from, 'to' => $to));
 	}
+
+	if((strcmp($from, $to) == 0) & (preg_match("/^1970-01-01/", $from) > 0))
+	{
+		$res = false;
+	}
+
 	return $res;
 }
 
