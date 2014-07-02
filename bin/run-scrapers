@@ -597,7 +597,7 @@ function processEvent($event, $feedid)
 	}
 	if(trim($event->link) != "" )
 	{
-		tripleU($uri, ns("foaf", "homepage"), $event->link);
+		tripleU($uri, ns("foaf", "homepage"), str_replace(" ", "%20", $event->link));
 	}
 
 	// Process event type.
