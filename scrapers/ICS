@@ -1,0 +1,138 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2014 Ashley Smith / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+global $diary_config;
+$diary_config["path"] = dirname(dirname(__FILE__));
+require($diary_config["path"].'/etc/config.php');
+include $diary_config["path"].'/lib/scraper-utils.php';
+require_once($diary_config["path"].'/lib/ics-parser/class.iCalReader.php');
+
+initialiseScraper();
+
+// Get the ICS data from the Feed URL.
+list($ics, $sourcedocuments) = getICS($options->FeedURL);
+
+if($ics != null)
+{
+	foreach($ics->events() as $item)
+	{
+		// Process the event.
+		$data[] = processItem($item, $options, $sourcedocuments);
+	}
+}
+
+// Output the data as XML.
+echo generateEventXML($data, $sourcedocuments, $issues);
+
+/**
+ * Get an ICS feed.
+ *
+ * @param       string  $url    The URL of the ICS feed.
+ * @param       int             $timeout        The cache timeout in hours.
+ */
+function getICS(&$url, $timeout=1)
+{
+	$starttime = microtime(true);
+	$prev_error_state = libxml_use_internal_errors(true);
+	list($ics, $sourcedocuments, $src) = getFromURL($url, $timeout, 'ics_load_file', 'ics_load_string', 'libxml_get_errors');
+	libxml_use_internal_errors($prev_error_state);
+	$sourcedocuments[] = makeProvenanceInfo('getICS', (string)$src, null, $starttime, microtime(true));
+	return array($ics, $sourcedocuments);
+}
+function ics_load_file($path)
+{
+	if(strlen(stristr(":/", $path)) > 0)
+	{
+		$filename = tempnam( ".", "" ) ;
+		$f = fopen($filename,"w") ;
+		fwrite( $f, file_get_contents($path) );
+		fclose($f);
+	}
+	else
+	{
+		$filename = $path;
+	}
+
+	$cal = new ICal($filename);
+	return($cal);
+}
+function ics_load_string($text)
+{
+	$filename = tempnam(sys_get_temp_dir(), "ics_") ;
+	$f = fopen($filename,"w") ;
+	fwrite( $f, $text );
+	fclose($f);
+
+	$cal = new ICal($filename);
+	return($cal);
+}
+
+/**
+ * Process a single event.
+ *
+ * @param	object	$item		The item to process.
+ * @param	array	$options	The options passed to this script.
+ */
+function process($item, $options, $sourcedocuments)
+{
+	$title = trim($item['SUMMARY']);
+	$link = (string)str_replace(' ', '%20', trim($item['URL']));
+	$extrainfo = getExtraInfo($link);
+	
+	$desc = explode("\n", $item['DESCRIPTION']);
+	$idate = array();
+
+	$ds = $item['DTSTART'];
+	$dt = strtotime($ds);
+	$ds = date("c", $dt);
+	$idate['from'] = $ds;
+
+	$ds = $item['DTEND'];
+	$dt = strtotime($ds);
+	$ds = date("Y-m-d", $dt) . "T" . date("H:i:sP", $dt);
+	$idate['to'] = $ds;
+
+	$pdate = array($idate);
+
+	$desc = trim(implode("\n", $desc));
+	$res = array(
+		'title'		=> $title,
+		'link'		=> $link,
+		'date'		=> $pdate,
+		'desc'		=> $desc,
+		'feedName'	=> (string)$options->FeedName,
+		'type'		=> (string)$options->Type,
+		'feedID'	=> (string)$options->FeedID,
+		'host'		=> (string)$options->FacultyUnitGroup,
+		'tags'		=> explode(" ", $options->Tags),
+	);
+	foreach($extrainfo as $k => $v)
+	{
+		if(is_array($v) || trim($v) != "")
+		{
+			$res[$k] = $v;
+		}
+	}
+	foreach($sourcedocuments as $sd)
+	{
+		$res['sourceDocuments'][] = $sd;
+	}
+	return $res;
+}
