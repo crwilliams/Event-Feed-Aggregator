@@ -104,10 +104,13 @@ function process($item, $options, $sourcedocuments)
 	$ds = date("c", $dt);
 	$idate['from'] = $ds;
 
-	$ds = $item['DTEND'];
-	$dt = strtotime($ds);
-	$ds = date("Y-m-d", $dt) . "T" . date("H:i:sP", $dt);
-	$idate['to'] = $ds;
+	if(array_key_exists("DTEND", $item))
+	{
+		$ds = $item['DTEND'];
+		$dt = strtotime($ds);
+		$ds = date("Y-m-d", $dt) . "T" . date("H:i:sP", $dt);
+		$idate['to'] = $ds;
+	}
 
 	$pdate = array($idate);
 
