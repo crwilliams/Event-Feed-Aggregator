@@ -597,10 +597,10 @@ function processEvent($event, $feedid)
 	}
 	if(trim($event->link) != "" )
 	{
-		$uri = str_replace(" ", "%20", "" . $event->link);
-		if(preg_match("|(.+):/(.+)|", $uri) > 0)
+		$url = str_replace(" ", "%20", "" . $event->link);
+		if(preg_match("|(.+):/(.+)|", $url) > 0)
 		{
-			tripleU($uri, ns("foaf", "homepage"), $uri);
+			tripleU($uri, ns("foaf", "homepage"), $url);
 		}
 	}
 
