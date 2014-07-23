@@ -65,13 +65,19 @@ function process($in_data, $options, $sourcedocuments)
 	$config->set('HTML.Doctype', 'XHTML 1.1');
 	$purifier = new HTMLPurifier($config);
 	$desc = $purifier->purify($desc);
-	
+	$type = (string)$in_data['Event type'];
+
+	if(preg_match("/[^0-9a-zA-Z ]/", $type) > 0)
+	{
+		$type = "";
+	}
+
 	$res = array(
 		'title'		=> $title,
 		'uri'		=> "http://sharepoint.soton.ac.uk/".$in_data["URL Path"],
 		'htmldesc'	=> $desc,
 		'feedName'	=> (string)$options->FeedName,
-		'type'		=> (string)$in_data["Event type"],
+		'type'		=> $type,
 		'feedID'	=> (string)$options->FeedID,
 		'tags'		=> explode(" ", @$in_data["Tags"] )
 	);
