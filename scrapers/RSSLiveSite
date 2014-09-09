@@ -1,0 +1,116 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+global $diary_config;
+$diary_config["path"] = dirname(dirname(__FILE__));
+require($diary_config["path"].'/etc/config.php');
+include $diary_config["path"].'/lib/scraper-utils.php';
+
+initialiseScraper();
+
+// Get the RSS data from the Feed URL.
+list($rss, $sourcedocuments) = getRSS($options->FeedURL);
+
+if($rss != null && $rss->channel != null && $rss->channel->item != null)
+{
+	foreach($rss->channel->item as $item)
+	{
+		// Process the event.
+		$data[] = processItem($item, $options, $sourcedocuments);
+	}
+}
+
+// Output the data as XML.
+echo generateEventXML($data, $sourcedocuments, $issues);
+
+/**
+ * Process a single event.
+ *
+ * @param	object	$item		The item to process.
+ * @param	array	$options	The options passed to this script.
+ */
+function process($item, $options, $sourcedocuments)
+{
+	$title = trim($item->title);
+	$link = (string)str_replace(' ', '%20', trim($item->link));
+	$extrainfo = getExtraInfo($link);
+	
+	$m = array();
+	$datecontainer = "";
+	preg_match("|\\[([0-9/:]+)\\]|", $item->description, $m);
+	if(count($m) > 1)
+	{
+		$datecontainer = $m[1];
+	}
+
+	if(strlen($datecontainer > 0))
+	{
+		$desc = explode("\n", str_replace("[" . $datecontainer . "]", "", $item->description));
+	}
+	else
+	{
+		$desc = explode("\n", $item->description);
+	}
+	$pdate = array();
+	while(count($desc) > 0 && trim($desc[0]) == "")
+	{
+		array_shift($desc);
+	}
+
+	$m = array();
+	if(preg_match("|([0-9]+)/([0-9]+)/([0-9]+):([0-9]+)/([0-9]+)/([0-9]+):([0-9]+)|", $datecontainer, $m) > 0)
+	{
+		$dss = $m[1] . "-" . $m[2] . "-" . substr($m[3], 0, 2) . " " . substr($m[3], 2) . ":" . substr($m[4], 0, 2) . ":00 " . date_default_timezone_get();
+		$dts = strtotime($dss);
+		$dss = date("c", $dts);
+
+		$dse = substr($m[4], 2) . "-" . $m[5] . "-" . substr($m[6], 0, 2) . " " . substr($m[6], 2) . ":" . $m[7] . ":00 " . date_default_timezone_get();
+		$dte = strtotime($dse);
+		$dse = date("c", $dte);
+
+		$pdate = array(array("from"=>$dss, "to"=>$dse));
+	}
+
+	$desc = trim(implode("\n", $desc));
+	$res = array(
+		'title'		=> $title,
+		'link'		=> $link,
+		'date'		=> $pdate,
+		'desc'		=> $desc,
+		'feedName'	=> (string)$options->FeedName,
+		'type'		=> (string)$options->Type,
+		'feedID'	=> (string)$options->FeedID,
+		'host'		=> (string)$options->FacultyUnitGroup,
+		'tags'		=> explode(" ", $options->Tags),
+	);
+	foreach($extrainfo as $k => $v)
+	{
+		if(is_array($v) || trim($v) != "")
+		{
+			$res[$k] = $v;
+		}
+	}
+	foreach($sourcedocuments as $sd)
+	{
+		$res['sourceDocuments'][] = $sd;
+	}
+
+	return $res;
+}
