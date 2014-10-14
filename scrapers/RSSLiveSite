@@ -87,6 +87,30 @@ function process($item, $options, $sourcedocuments)
 
 		$pdate = array(array("from"=>$dss, "to"=>$dse));
 	}
+	if(preg_match("|([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)|", $datecontainer, $m) > 0)
+	{
+		$dss = $m[1] . "-" . $m[2] . "-" . substr($m[3], 0, 2) . " 00:00:00 " . date_default_timezone_get();
+		$dts = strtotime($dss);
+		$dss = date("Y-m-d", $dts);
+
+		$dse = substr($m[3], 2) . "-" . $m[4] . "-" . $m[5] . " 23:59:59 " . date_default_timezone_get();
+		$dte = strtotime($dse);
+		$dse = date("Y-m-d", $dte);
+
+		$pdate = array(array("from"=>$dss, "to"=>$dse));
+	}
+	if(preg_match("|([0-9]+)/([0-9]+)/([0-9]+):([0-9]+):([0-9]+)|", $datecontainer, $m) > 0)
+	{
+		$dss = $m[1] . "-" . $m[2] . "-" . substr($m[3], 0, 2) . " " . substr($m[3], 2) .":" . substr($m[4], 0, 2) . ":00 " . date_default_timezone_get();
+		$dts = strtotime($dss);
+		$dss = date("c", $dts);
+
+		$dse = $m[1] . "-" . $m[2] . "-" . substr($m[3], 0, 2) . " " . substr($m[4], 2) .":" . $m[5] . ":00 " . date_default_timezone_get();
+		$dte = strtotime($dse);
+		$dse = date("c", $dte);
+
+		$pdate = array(array("from"=>$dss, "to"=>$dse));
+	}
 
 	$desc = trim(implode("\n", $desc));
 	$res = array(

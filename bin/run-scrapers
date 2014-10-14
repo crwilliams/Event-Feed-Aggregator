@@ -686,7 +686,7 @@ function processEvent($event, $feedid)
 		tripleL("$uri#speaker", ns("foaf", "name"), $event->speaker);
 		if(isset($event->speakerlink))
 		{
-			tripleU("$uri#speaker", ns("foaf", "homepage"), $event->speakerlink);
+			tripleU("$uri#speaker", ns("foaf", "homepage"), trim("" . $event->speakerlink));
 		}
 	}
 
