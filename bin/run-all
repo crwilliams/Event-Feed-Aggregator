@@ -46,6 +46,11 @@ if( $diary_config["fn_loadExtraTriples"] )
 }
 
 $fn = $diary_config["path"]."/htdocs/diary.rdf";
+$failsafe_fn = $diary_config["path"]."/var/volatile.ttl";
+if(file_exists($failsafe_fn))
+{
+	$graph->load($failsafe_fn);
+}
 $n = $graph->load( $fn );
 
 $frozen_fn = $diary_config["path"]."/var/frozen-graph";
