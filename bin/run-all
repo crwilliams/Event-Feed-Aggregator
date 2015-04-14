@@ -22,6 +22,17 @@ global $diary_config;
 $diary_config["path"] = dirname(dirname(__FILE__));
 require($diary_config["path"].'/etc/config.php');
 
+
+$graph = new Graphite();
+if( $diary_config["fn_loadExtraTriples"] )
+{
+	$fn = $diary_config["fn_loadExtraTriples"];
+	$fn( $graph );
+	# save the extra triples so that the scrapers can use them
+	$frozen_fn = $diary_config["path"]."/var/frozen-extraTriples";
+	$graph->freeze( "$frozen_fn" );
+}
+
 # Run all of the scrapers.
 exec_command( $diary_config["path"]."/bin/run-scrapers" ); # not passing $1 anymore
 
@@ -37,13 +48,6 @@ exec_command( "cat ".$diary_config["path"]."/var/output/* | ".$diary_config["rap
 
 # Freeze the graph.
 
-$graph = new Graphite();
-
-if( $diary_config["fn_loadExtraTriples"] )
-{
-	$fn = $diary_config["fn_loadExtraTriples"];
-	$fn( $graph );
-}
 
 $fn = $diary_config["path"]."/htdocs/diary.rdf";
 $failsafe_fn = $diary_config["path"]."/var/volatile.ttl";

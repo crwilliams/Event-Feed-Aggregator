@@ -1,4 +1,5 @@
 "Feed ID",Site,"Feed Name","Feed URL",Faculty/Unit/Group,Script,Type,Notes,Tags,"Time Limit"
+enabling-services,Enabling Services,"Events from Enabling Services",http://www.southampton.ac.uk/edusupport/news/feeds/eventsfeed.page,http://id.southampton.ac.uk/org/PKEW190000,RSSLiveSite,Event,,,
 staffbook,StaffBook,"Events from PDU StaffBook",https://www.staffbook.soton.ac.uk/events_feed.php,http://id.southampton.ac.uk/org/P1GRDD0850,StaffBookJSON,Event,,,
 ageing-events,Ageing,"Events from Ageing/Gerontology",http://www.soton.ac.uk/ageing/news/feeds/gerontology_events.page,http://id.southampton.ac.uk/org/F8CC060000,RSSLiveSite,Event,,,
 ageing-seminars,Ageing,"Seminars from Ageing/Gerontology",http://www.soton.ac.uk/ageing/news/feeds/gerontology_seminars.page,http://id.southampton.ac.uk/org/F8CC060000,RSSLiveSite,Seminar,,,
@@ -89,3 +90,5 @@ cite,CITE,"Centre for Innovation in Technology and Education",https://www.cite.s
 multidisciplinary-events,Multidisciplinary,"Multidisciplinary Events",http://www.southampton.ac.uk/multidisciplinary/news/feeds/multidisciplinary_events.page,,RSSLiveSite,Event,,,
 sustainability-science,"Sustainability Science","Sustainability Science Events",http://www.southampton.ac.uk/sustainability_science/news/feeds/events_from_sustainability_at_southampton.page,,RSSLiveSite,Event,,,
 unionfilms,"Union Films","Union Films",http://www.unionfilms.org/feeds/Union_Films.ics,http://id.southampton.ac.uk/org/SU,ICS,Event,,,
+wsi,WSI,,http://www.southampton.ac.uk/wsi/news/feeds/wsi_events.page,,RSSLiveSite,Event,,,
+per,"Public Engagement with Research","Public Engagement with Research",http://www.southampton.ac.uk/per/news/feeds/eventsfeed.page,,RSSLiveSite,Event,,,
