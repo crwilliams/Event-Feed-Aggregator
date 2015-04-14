@@ -138,15 +138,15 @@ function runParent($pid, $limit = 30, $options) {
 	if($cid > 0) {
 		if(pcntl_wifexited($status) && pcntl_wexitstatus($status) > 0)
 		{
-			printInfo("Script for $gfeedid exited with status ".pcntl_wexitstatus($status), true);
+			printInfo("Script for $gfeedid exited with status ".pcntl_wexitstatus($status), false);
 		}
 		if(pcntl_wifsignaled($status))
 		{
-			printInfo("Script for $gfeedid signalled with signal ".pcntl_wtermsig($status), true);
+			printInfo("Script for $gfeedid signalled with signal ".pcntl_wtermsig($status), false);
 		}
 		if(pcntl_wifstopped($status))
 		{
-			printInfo("Script for $gfeedid stopped with signal ".pcntl_wstopsig($status), true);
+			printInfo("Script for $gfeedid stopped with signal ".pcntl_wstopsig($status), false);
 		}
 	}
 }
@@ -222,7 +222,7 @@ function runChild($script, $options) {
 
 	if(count($error) > 0)
 	{
-		trigger_error("Errors encountered whilst processing ".$options['FeedID'].": ".implode("\n", $error));
+		logError("Errors encountered whilst processing ".$options['FeedID'].": ".implode("\n", $error));
 	}
 
 	// Convert the response XML into an object.
@@ -231,7 +231,7 @@ function runChild($script, $options) {
 	// Check that the response is valid.
 	if($xml == null)
 	{
-		trigger_error("Bad response from ".$options['FeedID']." script: ".implode("", $output));
+		logError("Bad response from ".$options['FeedID']." script: ".implode("", $output));
 		return 1;
 	}
 
@@ -240,7 +240,7 @@ function runChild($script, $options) {
 	if($eventcount == 0)
 	{
 		printInfo("No events found while processing ".$options['FeedID']);
-		#trigger_error("No events found");
+		#logError("No events found");
 	}
 	else if($eventcount == 1)
 	{
@@ -392,7 +392,7 @@ function runChild($script, $options) {
 				tripleL($feeduri.'#issue-'.$issueindex, ns('error', 'hasFilename'), (string)$issue['file']);
 				tripleL($feeduri.'#issue-'.$issueindex, ns('error', 'hasLineNumber'), (int)$issue['line']);
 			}
-			print $issue['message']." ".$issue['file']." ".$issue['line']."\n";
+			printInfo( $issue['message']." ".$issue['file']." ".$issue['line'] );
 			logErrorToFile( (string)$issue['message'], $options['FeedID'] );
 		}
 	}
@@ -481,6 +481,11 @@ function printInfo($string="", $force=false) {
 		echo $string."\n";
 	}
 }
+function logError($string)
+{
+	printInfo($string);
+	exit(1);
+}
 
 /**
  * Alarm function.
@@ -492,14 +497,14 @@ function alarm($signo) {
 	global $gfeedid;
 	if($gpid > 0)
 	{
-		printInfo("Going to terminate script for $gfeedid", true);
+		printInfo("Going to terminate script for $gfeedid", false);
 		if(posix_kill($gpid, SIGKILL))
 		{
-			printInfo("Script for $gfeedid killed successfully", true);
+			printInfo("Script for $gfeedid killed successfully", false);
 		}
 		else
 		{
-			printInfo("Failed to kill script for $gfeedid", true);
+			printInfo("Failed to kill script for $gfeedid", false);
 			die();
 		}
 	}
@@ -580,7 +585,7 @@ function processEvent($event, $feedid)
 	else
 	{
 		printInfo("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
-		trigger_error("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
+		logError("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
 		return;
 	}
 

@@ -31,10 +31,14 @@ list($ics, $sourcedocuments) = getICS($options->FeedURL);
 
 if($ics != null)
 {
-	foreach($ics->events() as $item)
+	$events = $ics->events();
+	if( $events )
 	{
-		// Process the event.
-		$data[] = processItem($item, $options, $sourcedocuments);
+		foreach($ics->events() as $item)
+		{
+			// Process the event.
+			$data[] = processItem($item, $options, $sourcedocuments);
+		}
 	}
 }
 
