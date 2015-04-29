@@ -321,6 +321,7 @@ function runChild($script, $options) {
 					}
 				}
 			}
+
 			if(count($eventissues) > 0)
 			{
 				tripleA($eventuri.'#issues', ns('error', 'IssueDocument'));
@@ -585,7 +586,7 @@ function processEvent($event, $feedid)
 	else
 	{
 		printInfo("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
-		logError("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
+		// logError("Event with name ".str_replace("\n", "", $event->title)." has no link or uri.");
 		return;
 	}
 
