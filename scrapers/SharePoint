@@ -50,6 +50,7 @@ if($rows != null )
 }
 // Output the data as XML.
 echo generateEventXML($data, $sourcedocuments, $issues);
+exit(0);
 
 /**
  * Process a single event.

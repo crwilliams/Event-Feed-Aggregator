@@ -1,0 +1,83 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2012-2013 Colin Williams / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+global $diary_config;
+$diary_config["path"] = dirname(dirname(__FILE__));
+require($diary_config["path"].'/etc/config.php');
+include $diary_config["path"].'/lib/scraper-utils.php';
+
+initialiseScraper();
+
+$graph = new Graphite();
+$graph->load( (string)$options->FeedURL );
+
+list($rss, $sourcedocuments) = getRSS($options->FeedURL);
+
+foreach($rss->channel->item as $item)
+{
+	// Process the event.
+	$data[] = processItem($item, $options, $sourcedocuments);
+}
+
+// Output the data as XML.
+echo generateEventXML($data, $sourcedocuments, $issues);
+
+/**
+ * Process a single event.
+ *
+ * @param	object	$item		The item to process.( graphite node)
+ * @param	array	$options	The options passed to this script.
+ */
+function process($item, $options, $sourcedocuments)
+{
+
+	$title = str_replace("–", "-", str_replace("&#8211;", "-", trim("" . $item->title)));
+	$link = (string)str_replace(' ', '%20', trim("" . $item->link));
+
+	$extrainfo = getExtraInfo($link);
+
+	
+	$desc = trim("" . $item->description);
+	$pdate = array();
+
+	$dt = strtotime(trim("" . $item->pubDate));
+	$date = date("Y-m-d", $dt); # date part only for now.
+	# could add times here if it made sense to...
+	$pdate = makeDateArray( new DateTime( $date ), new DateTime( $date ) );
+
+	$res = array(
+		'title'				=> $title,
+		'link'				=> $link,
+		'date'				=> $pdate,
+		'htmldesc'			=> $desc,
+		'feedName'			=> (string)$options->FeedName,
+		'type'				=> (string)$options->Type,
+		'feedID'			=> (string)$options->FeedID,
+		'host'				=> (string)$options->FacultyUnitGroup,
+		'tags'				=> explode(" ", $options->Tags),
+		'sourceDocuments'	=> $sourcedocuments,
+	);
+	foreach($extrainfo as $k => $v)
+	{
+		if(is_array($v) || trim($v) != "")
+			$res[$k] = $v;
+	}
+	return $res;
+}

@@ -1,0 +1,150 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2014 Ash Smith / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+global $diary_config;
+$diary_config["path"] = dirname(dirname(__FILE__));
+require($diary_config["path"].'/etc/config.php');
+include $diary_config["path"].'/lib/scraper-utils.php';
+
+initialiseScraper();
+
+// Get the RSS data from the Feed URL.
+list($rss, $sourcedocuments) = getRSS($options->FeedURL);
+
+if($rss->item != null)
+{
+	foreach($rss->item as $item)
+	{
+		// Process the event.
+		$data[] = process($item, $options, $sourcedocuments);;
+	}
+}
+
+// Output the data as XML.
+echo generateEventXML($data, $sourcedocuments, $issues);
+
+/**
+ * Process a single event.
+ *
+ * @param	object	$item		The item to process.
+ * @param	array	$options	The options passed to this script.
+ */
+function process($item, $options, $sourcedocuments)
+{
+	global $diary_config;
+	$link = trim($item->link);
+	$rdflink = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://rdf.ecs.soton.ac.uk/presentation/', $link);
+	$id = str_replace('http://www.ecs.soton.ac.uk/seminars/', 'http://id.ecs.soton.ac.uk/presentation/', $link);
+	$starttime = microtime();
+	$graph = new Graphite();
+	$graph->cacheDir($diary_config["path"]."/var/cache");
+	$graph->load($rdflink);
+	$graph->ns("ecs", "http://rdf.ecs.soton.ac.uk/ontology/ecs#");
+	$graph->ns("te", "http://www.isi.edu/~pan/damltime/time-entry.owl#");
+	$p = $graph->resource($id);
+	$title = (string)$p->get("ecs:hasName");
+	$desc = (string)$p->get("ecs:hasDescription");
+	$group = getGroupURI((string)$p->get("ecs:from-group"));
+
+	$venuelink = "";
+	foreach($p->all("http://purl.org/NET/c4dm/event.owl#place") as $place)
+	{
+		if($place->isType(ns('deri', 'Room')))
+		{
+			$venuelink = (string)$place;
+		}
+	}
+
+	$speakers = $p->get("ecs:hasPresenters");
+	$s = 1;
+	foreach($p->all("ecs:hasPresenters") as $pres)
+	{
+		$speakerlink = (string)$pres->get("http://www.w3.org/1999/02/22-rdf-syntax-ns#_".$s);
+		if($speakerlink != "")
+		{
+			$graph->load($speakerlink);
+		}
+		$speaker = (string)$graph->resource($speakerlink)->get("foaf:name");
+	}
+
+	$from = (string)$p->get("te:begins")->get("te:inCalendarClockDataType");
+	$to = (string)$p->get("te:ends")->get("te:inCalendarClockDataType");
+
+	// Check for DST - Ash 2014-02-02
+	$dt = strtotime($from);
+	if(strcmp(date("H:i", $dt), gmdate("H:i", $dt)) != 0)
+	{
+		$from = gmdate("Y-m-d", $dt) . "T" . gmdate("H:i:s", $dt) . "+01:00";
+	}
+	$dt = strtotime($to);
+	if(strcmp(date("H:i", $dt), gmdate("H:i", $dt)) != 0)
+	{
+		$to = gmdate("Y-m-d", $dt) . "T" . gmdate("H:i:s", $dt) . "+01:00";
+	}
+
+	$pdate = array(array('from' => $from, 'to' => $to));
+	$res = array(
+		'title'				=> $title,
+		'link'				=> $link,
+		'date'				=> $pdate,
+		'desc'				=> str_replace("\t", ' ', mb_convert_encoding($desc, 'ASCII')),
+		'feedName'			=> (string)$options->FeedName,
+		'type'				=> (string)$options->Type,
+		'feedID'			=> (string)$options->FeedID,
+		'host'				=> $group,
+		'tags'				=> explode(" ", $options->Tags),
+		'venuelink'			=> $venuelink,
+		'sourceDocuments'	=> array(makeProvenanceInfo('getRDF', $rdflink, null, $starttime, microtime())),
+	);
+	if(isset($speakerlink))
+	{
+		$res['speakerlink'] = $speakerlink;
+	}
+	if(isset($speaker))
+	{
+		$res['speaker'] = $speaker;
+	}
+	foreach($sourcedocuments as $sd)
+	{
+		$res['sourceDocuments'][] = $sd;
+	}
+	return $res;
+}
+
+/**
+ * Get the University of Southampton group URI from the ECS presentation series URI.
+ *
+ * @param	string	$seriesURI	The URI of the presentation series.
+ */
+function getGroupURI($seriesURI)
+{
+	switch($seriesURI) {
+		case "http://rdf.ecs.soton.ac.uk/presentation/grouphvlab":
+			return "http://id.southampton.ac.uk/org/F7FP050000";
+		case "http://rdf.ecs.soton.ac.uk/presentation/groupess":
+			return "http://id.southampton.ac.uk/org/F7FP070000";
+		case "http://rdf.ecs.soton.ac.uk/presentation/groupaic":
+			return "http://id.southampton.ac.uk/org/F7FP080000";
+		case "http://rdf.ecs.soton.ac.uk/presentation/groupwais":
+			return "http://id.southampton.ac.uk/org/F7FP090000";
+		default:
+			return "http://id.southampton.ac.uk/org/FP";
+	}
+}

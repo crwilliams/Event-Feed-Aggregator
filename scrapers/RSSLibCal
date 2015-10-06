@@ -1,0 +1,95 @@
+#!/usr/bin/php
+<?php
+# Copyright (c) 2015 Ash Smith / University of Southampton
+# License: GPL
+
+# This file is part of Event Feed Aggregator.
+
+# Event Feed Aggregator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Event Feed Aggregator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Event Feed Aggregator.  If not, see <http://www.gnu.org/licenses/>.
+
+global $diary_config;
+$diary_config["path"] = dirname(dirname(__FILE__));
+require($diary_config["path"].'/etc/config.php');
+include $diary_config["path"].'/lib/scraper-utils.php';
+
+initialiseScraper();
+
+// Get the RSS data from the Feed URL.
+list($rss, $sourcedocuments) = getRSS($options->FeedURL);
+
+if($rss != null && $rss->channel != null && $rss->channel->item != null)
+{
+	foreach($rss->channel->item as $item)
+	{
+		// Process the event.
+		$data[] = processItem($item, $options, $sourcedocuments);
+	}
+}
+
+// Output the data as XML.
+echo generateEventXML($data, $sourcedocuments, $issues);
+
+/**
+ * Process a single event.
+ *
+ * @param	object	$item		The item to process.
+ * @param	array	$options	The options passed to this script.
+ */
+function process($item, $options, $sourcedocuments)
+{
+	$ns_libcal = $item->children('http://libcal.com/rss_xmlns.php');
+	$ds = $ns_libcal->date . " " . $ns_libcal->start;
+	$dts = strtotime($ds);
+	$ds = $ns_libcal->date . " " . $ns_libcal->end;
+	$dte = strtotime($ds);
+	$dss = date("c", $dts);
+	$dse = date("c", $dte);
+
+	$title = trim($item->title);
+	$desc = trim("" . $ns_libcal->description);
+	$link = (string)str_replace(' ', '%20', trim($item->link));
+	$extrainfo = getExtraInfo($link);
+	$pdate = array(array("from"=>$dss, "to"=>$dse));
+	$venue = trim("" . $ns_libcal->location);
+	$venuelink = trim("" . getVenueLink($venue));
+	
+	$res = array(
+		'title'		=> $title,
+		'link'		=> $link,
+		'date'		=> $pdate,
+		'desc'		=> $desc,
+		'venue'		=> $venue,
+		'feedName'	=> (string)$options->FeedName,
+		'type'		=> (string)$options->Type,
+		'feedID'	=> (string)$options->FeedID,
+		'host'		=> (string)$options->FacultyUnitGroup,
+		'tags'		=> explode(" ", $options->Tags),
+	);
+	if(strlen($venuelink) > 0) {
+		$res['venuelink'] = $venuelink;
+	}
+	foreach($extrainfo as $k => $v)
+	{
+		if(is_array($v) || trim($v) != "")
+		{
+			$res[$k] = $v;
+		}
+	}
+	foreach($sourcedocuments as $sd)
+	{
+		$res['sourceDocuments'][] = $sd;
+	}
+
+	return $res;
+}
