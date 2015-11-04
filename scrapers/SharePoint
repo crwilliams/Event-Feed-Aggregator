@@ -85,7 +85,8 @@ function process($in_data, $options, $sourcedocuments)
 
 	if( $in_data["Event webpage"] != "" )
 	{
-		$res["link"] = trim($in_data["Event webpage"]);
+		# trim data and fix shakey data from shareperltopus
+		$res["link"] = preg_replace( '/">.*$/', '' ,trim($in_data["Event webpage"]) );
 	}
 
 	$div_code = $in_data["University division"];
