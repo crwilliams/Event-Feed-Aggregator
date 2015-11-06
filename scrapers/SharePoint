@@ -79,9 +79,12 @@ function process($in_data, $options, $sourcedocuments)
 		'htmldesc'	=> $desc,
 		'feedName'	=> (string)$options->FeedName,
 		'type'		=> $type,
-		'feedID'	=> (string)$options->FeedID,
-		'tags'		=> explode(" ", @$in_data["Tags"] )
+		'feedID'	=> (string)$options->FeedID
 	);
+	if(array_key_exists("Tags", $in_data))
+	{
+		$res['tags'] = explode(" ", $in_data["Tags"] );
+	}
 
 	if( $in_data["Event webpage"] != "" )
 	{
@@ -93,9 +96,20 @@ function process($in_data, $options, $sourcedocuments)
 	$loc_code = $in_data["University location - Open data link"];
 	$room_code = $in_data["Room number - Open data link"];
 
+	if(preg_match("|^http://|", $room_code) > 0)
+	{
+		$room_code = rtrim($room_code, "?");
+	}
+
 	if( preg_match( '/- ([A-Z0-9]+)$/', $div_code, $matches ))
 	{
-		$res["host"] = "http://id.southampton.ac.uk/org/".$matches[1];
+		$div_id = trim($matches[1]);
+
+		// The next bit is necessary. Comms refer to themselves as DK and Finance as DD. We have no such data, so we need to fudge it.
+
+		if(strcmp($div_id, "DD") == 0) { $div_id = "P1GRDD0000"; }
+		if(strcmp($div_id, "DK") == 0) { $div_id = "PKGRDK0000"; }
+		$res["host"] = "http://id.southampton.ac.uk/org/" . $div_id;
 	}
 	if( preg_match( '/- B:(.*)$/', $loc_code, $matches ))
 	{
