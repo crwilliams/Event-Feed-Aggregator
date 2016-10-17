@@ -625,7 +625,7 @@ function processEvent($event, $feedid)
 	// Process tags.
 	if(isset($event->tags))
 	{
-		foreach($event->tags->event as $tag)
+		foreach($event->tags->item as $tag)
 		{
 			tripleU($uri, ns("diaryterms", "tag"), ns("diaryvalues", $tag));
 		}
