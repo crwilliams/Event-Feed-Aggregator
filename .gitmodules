@@ -4,3 +4,6 @@
 [submodule "lib/htmlpurifier"]
 	path = lib/htmlpurifier
 	url = git://repo.or.cz/htmlpurifier.git
+[submodule "lib/ics-parser"]
+	path = lib/ics-parser
+	url = git@github.com:johngrogg/ics-parser.git
